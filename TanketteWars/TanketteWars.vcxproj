@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{B39D4299-D29E-41EF-8BAC-C85A27618C50}</ProjectGuid>
+    <RootNamespace>GameLab3</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <ProjectName>TanketteWars</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\build\</OutDir>
+    <IntDir>..\build\_intermediate\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName).$(PlatformShortName).$(Configuration.toLower())</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\build\</OutDir>
+    <IntDir>..\build\_intermediate\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName).$(PlatformShortName).$(Configuration.toLower())</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\External\SFML\include\;Include\;</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DisableSpecificWarnings>4100;4189;</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>..\External\SFML\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-window-d.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-main-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>robocopy ..\External\SFML\bin\ ..\Build\ *.dll &gt;nul 2&gt;nul
+IF %ERRORLEVEL% LEQ 1 exit 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\External\SFML\include\;Include\;</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DisableSpecificWarnings>4100;4189;</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\External\SFML\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-window.lib;sfml-system.lib;sfml-graphics.lib;sfml-audio.lib;sfml-main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>robocopy ..\External\SFML\bin\ ..\Build\ *.dll &gt;nul 2&gt;nul
+IF %ERRORLEVEL% LEQ 1 exit 0</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Actors\Bullet.cpp" />
+    <ClCompile Include="Source\Actors\Tank.cpp" />
+    <ClCompile Include="Source\Actors\Obstacle.cpp" />
+    <ClCompile Include="Source\Collisions\PhysicsEngine.cpp" />
+    <ClCompile Include="Source\Actors\SceneGraph.cpp" />
+    <ClCompile Include="Source\States\CreditState.cpp" />
+    <ClCompile Include="Source\States\GameState.cpp" />
+    <ClCompile Include="Source\States\MenuState.cpp" />
+    <ClCompile Include="Source\States\PauseState.cpp" />
+    <ClCompile Include="Source\Controllers\PlayerController.cpp" />
+    <ClCompile Include="Source\Debug\FPSMeter.cpp" />
+    <ClCompile Include="Source\Input\Input.cpp" />
+    <ClCompile Include="Source\Rendering\Renderer.cpp" />
+    <ClCompile Include="Source\Actors\CameraActor.cpp" />
+    <ClCompile Include="Source\Game.cpp" />
+    <ClCompile Include="Source\Actors\AvatarActor.cpp" />
+    <ClCompile Include="Source\Actors\Actor.cpp" />
+    <ClCompile Include="Source\Actors\MovableActor.cpp" />
+    <ClCompile Include="Source\main.cc" />
+    <ClCompile Include="Source\Actors\SpriteActor.cpp" />
+    <ClCompile Include="Source\States\SettingState.cpp" />
+    <ClCompile Include="Source\States\State.cpp" />
+    <ClCompile Include="Source\States\StateStack.cpp" />
+    <ClCompile Include="Source\Worlds\World.cpp" />
+    <ClCompile Include="Source\States\TitleState.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Actors\Bullet.h" />
+    <ClInclude Include="Source\Actors\Tank.h" />
+    <ClInclude Include="Source\Actors\Obstacle.h" />
+    <ClInclude Include="Source\Collisions\PhysicsEngine.h" />
+    <ClInclude Include="Source\Actors\SceneGraph.h" />
+    <ClInclude Include="Source\Actors\Pawn.h" />
+    <ClInclude Include="Source\Collisions\Collider.h" />
+    <ClInclude Include="Source\Collisions\CollisionIdentifiers.h" />
+    <ClInclude Include="Source\Helpers\VectorHelper.h" />
+    <ClInclude Include="Source\States\Context.h" />
+    <ClInclude Include="Source\States\CreditState.h" />
+    <ClInclude Include="Source\Input\InputCollections.h" />
+    <ClInclude Include="Source\Helpers\EnumHelper.h" />
+    <ClInclude Include="Source\Helpers\GraphicsHelper.h" />
+    <ClInclude Include="Source\States\GameState.h" />
+    <ClInclude Include="Source\States\MenuState.h" />
+    <ClInclude Include="Source\States\MenuTemplate.h" />
+    <ClInclude Include="Source\States\PauseState.h" />
+    <ClInclude Include="Source\Controllers\PlayerController.h" />
+    <ClInclude Include="Source\Debug\FPSMeter.h" />
+    <ClInclude Include="Source\Commands\CommandQueue.h" />
+    <ClInclude Include="Source\Commands\CommandCategory.h" />
+    <ClInclude Include="Source\Commands\Command.h" />
+    <ClInclude Include="Source\Commands\Flags.h" />
+    <ClInclude Include="Source\Input\Input.h" />
+    <ClInclude Include="Source\Rendering\Renderer.h" />
+    <ClInclude Include="Source\Actors\CameraActor.h" />
+    <ClInclude Include="Source\Game.h" />
+    <ClInclude Include="Source\Actors\AvatarActor.h" />
+    <ClInclude Include="Source\Rendering\RenderInfo.h" />
+    <ClInclude Include="Source\ResourceManagers\ResourceIdentifiers.h" />
+    <ClInclude Include="Source\Actors\Actor.h" />
+    <ClInclude Include="Source\Actors\MovableActor.h" />
+    <ClInclude Include="Source\ResourceManagers\ResourceManager.h" />
+    <ClInclude Include="Source\States\SettingState.h" />
+    <ClInclude Include="Source\States\State.h" />
+    <ClInclude Include="Source\States\StateIdentifiers.h" />
+    <ClInclude Include="Source\Actors\SpriteActor.h" />
+    <ClInclude Include="Source\States\StateStack.h" />
+    <ClInclude Include="Source\Units\Units.h" />
+    <ClInclude Include="Source\Worlds\World.h" />
+    <ClInclude Include="Source\States\TitleState.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\ResourceManagers\ResourceManager.inl" />
+    <None Include="Source\States\MenuTemplate.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,4 @@
+*.vs/
+*build/
+External/SFML/doc
+External/SFML/examples
