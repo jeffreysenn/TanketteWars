@@ -1,6 +1,6 @@
 #include "TitleState.h"
 
-#include "Helpers/GraphicsHelper.h"
+#include "Helpers/Helper.h"
 #include "StateIdentifiers.h"
 #include "ClientContext.h"
 #include "ClientStateStack.h"
@@ -50,7 +50,7 @@ void TitleState::setupContinueText()
 	mContinueText.setString("Press any key to Continue");
 	mContinueText.setFont(*getContext().fontManager->get(Font::MineCraft));
 	mContinueText.setFillColor(sf::Color::White);
-	GraphicsHelper::centreOrigin(mContinueText);
+	helper::Graphics::centreOrigin(mContinueText);
 	sf::Vector2u windowSize(getRenderWindow().getSize());
 	mContinueText.setPosition((float)windowSize.x / 2,
 		(float)windowSize.y - 100);
@@ -62,7 +62,7 @@ void TitleState::setupTitleText()
 	mTitleText.setCharacterSize(50);
 	mTitleText.setFont(*getContext().fontManager->get(Font::MineCraft));
 	mTitleText.setFillColor(sf::Color::Cyan);
-	GraphicsHelper::centreOrigin(mTitleText);
+	helper::Graphics::centreOrigin(mTitleText);
 	sf::Vector2u windowSize(getRenderWindow().getSize());
 	mTitleText.setPosition((float)windowSize.x / 2,
 		(float)windowSize.y / 2);

@@ -6,7 +6,7 @@
 
 using namespace tankett;
 
-class TanketteWarServer : public Game
+class TanketteWarServer : public mw::Game
 {
 public:
 	TanketteWarServer();

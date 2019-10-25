@@ -3,7 +3,7 @@
 #include "ServerState.h"
 #include "ServerContext.h"
 
-class ServerStateStack : public StateStack<ServerState>
+class ServerStateStack : public mw::StateStack<ServerState>
 {
 public:
 	ServerStateStack();

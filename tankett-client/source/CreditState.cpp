@@ -1,5 +1,5 @@
 #include "CreditState.h"
-#include "Helpers/GraphicsHelper.h"
+#include "Helpers/Helper.h"
 #include "ClientContext.h"
 #include "ClientStateStack.h"
 #include "ResourceManagers/ResourceIdentifiers.h"
@@ -14,7 +14,7 @@ CreditState::CreditState()
 	mCreditText.setString("Designer and Programmer \n\nXiaoyue Chen");
 	mCreditText.setFillColor(sf::Color::Blue);
 	mCreditText.setCharacterSize(50);
-	GraphicsHelper::centreOrigin(mCreditText);
+	helper::Graphics::centreOrigin(mCreditText);
 	sf::Vector2u windowSize(getRenderWindow().getSize());
 	mCreditText.setPosition((float)windowSize.x / 2,
 		(float)windowSize.y / 2);

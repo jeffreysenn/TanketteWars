@@ -1,15 +1,13 @@
 #include "World.h"
-
 #include "ClientContext.h"
-
+#include "Units/Units.h"
+#include "Actors/Actor.h"
 #include "Actors/CameraActor.h"
 #include "Actors/Tank.h"
 #include "Actors/Obstacle.h"
-#include "ResourceManagers/Map.h"
-
-#include "Units/Units.h"
 
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 
 #include <iostream>
 
@@ -88,11 +86,8 @@ void World::buildScene()
 	//mCamera->setPosition(cameraSize.x / 2, cameraSize.y / 2);
 
 
-
 	// Create a background node and attach to the scene graph
 	std::unique_ptr<Actor> backgroundNode(std::make_unique<Actor>());
-	mBackgroundNode = backgroundNode.get();
-	mSceneGraph.attachChild(std::move(backgroundNode));
 
 	sf::Texture* backgroundTexture = mTextureManager.get(Texture::Back);
 	backgroundTexture->setRepeated(true);
@@ -102,7 +97,9 @@ void World::buildScene()
 	backgroundSprite->getSprite()->setOrigin(0, 0);
 	sf::IntRect backgroundRect(0, 0, (int)cameraSize.x, (int)cameraSize.y);
 	backgroundSprite->getSprite()->setTextureRect(backgroundRect);
-	mBackgroundNode->attachChild(std::move(backgroundSprite));
+	backgroundNode->attachChild(std::move(backgroundSprite));
+
+	mSceneGraph.attachChild(std::move(backgroundNode));
 }
 
 void World::update(float deltaSeconds)

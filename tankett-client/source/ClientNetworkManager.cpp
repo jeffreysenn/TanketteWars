@@ -1,11 +1,10 @@
 #include "ClientNetworkManager.h"
 #include "..\include\ClientNetworkManager.h"
 #include "tankett_debug.h"
-
-
+#include "Helpers/Helper.h"
 
 ClientNetworkManager::ClientNetworkManager()
-	: mClientKey(Helper::getRandom<uint64>())
+	: mClientKey(::mw::helper::Number::getRandom<uint64>())
 	, mServerKey(0u)
 	, mState(ConnectionState::None)
 	, mClientSequence(0u)

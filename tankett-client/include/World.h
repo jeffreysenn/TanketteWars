@@ -2,7 +2,7 @@
 #include <SFML/System/NonCopyable.hpp>
 
 #include "ResourceManagers/ResourceIdentifiers.h"
-#include "Actors/Actor.h"
+#include "ResourceManagers/Map.h"
 #include "Actors/SceneGraph.h"
 #include "Rendering/Renderer.h"
 #include "Commands/CommandQueue.h"
@@ -10,8 +10,19 @@
 
 #include <array>
 #include <memory>
-#include <SFML/Graphics/RenderWindow.hpp>
 
+using namespace mw;
+
+namespace mw
+{
+	class CameraActor;
+	class Tank;
+}
+
+namespace sf
+{
+	class RenderWindow;
+}
 
 class World : private sf::NonCopyable
 {
@@ -34,12 +45,13 @@ private:
 private:
 	sf::RenderWindow &mWindow;
 	Renderer mRenderer;
-	class CameraActor* mCamera;
-	class Actor* mBackgroundNode;
-	TextureManager &mTextureManager;
+	CameraActor* mCamera;
+	Tank* mAvatar;
+
+	TextureManager& mTextureManager;
 	MapManager& mMapManager;
+
 	SceneGraph mSceneGraph;
-	class Tank* mAvatar;
 	sf::Vector2f mSpawnPosition = sf::Vector2f(0, -20);
 	CommandQueue mCommandQueue;
 	PhysicsEngine mPhysicsEngine;

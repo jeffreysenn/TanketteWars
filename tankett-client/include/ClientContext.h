@@ -1,6 +1,7 @@
 #pragma once
 #include "ResourceManagers/ResourceIdentifiers.h"
 
+using namespace mw;
 struct ClientContext
 {
 public:

@@ -5,9 +5,12 @@
 #include "EndState.h"
 #include <SFML/System/Clock.hpp>
 
-Game* Game::create()
+namespace mw
 {
-	return new TanketteWarServer();
+	Game* Game::create()
+	{
+		return new TanketteWarServer();
+	}
 }
 
 TanketteWarServer::TanketteWarServer()

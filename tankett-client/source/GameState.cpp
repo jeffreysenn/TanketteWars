@@ -1,9 +1,9 @@
 #include "GameState.h"
-#include "Controllers/PlayerController.h"
 #include "StateIdentifiers.h"
 #include "ClientContext.h"
 #include "ClientStateStack.h"
 #include <SFML/Window/Event.hpp>
+
 
 GameState::GameState()
 try : mWorld()

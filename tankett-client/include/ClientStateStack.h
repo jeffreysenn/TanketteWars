@@ -2,11 +2,11 @@
 #include "States/StateStack.h"
 #include "ClientState.h"
 
+using namespace mw;
+
 namespace sf
 {
 	class Event;
-	class RenderWindow;
-	class Time;
 }
 
 class ClientStateStack : public StateStack<ClientState>

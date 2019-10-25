@@ -3,9 +3,12 @@
 #include "World.h"
 #include "Rendering/Renderer.h"
 #include "Input/Input.h"
+#include "Controllers/PlayerController.h"
 
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
+
+using namespace mw;
 
 class GameState : public ClientState
 {
@@ -19,7 +22,7 @@ public:
 
 private:
 	World mWorld;
-	class PlayerController& mPlayerController;
+	PlayerController& mPlayerController;
 	Renderer mRenderer;
 	Input::InputCollection mPauseInputs{
 		{ Input::Type::Keyboard, sf::Keyboard::Escape },

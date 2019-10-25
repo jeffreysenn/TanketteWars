@@ -15,7 +15,7 @@ ConnectState::ConnectState()
 	mConnectText.setString("Connecting");
 	mConnectText.setFillColor(sf::Color::Blue);
 	mConnectText.setCharacterSize(50);
-	GraphicsHelper::centreOrigin(mConnectText);
+	helper::Graphics::centreOrigin(mConnectText);
 	sf::Vector2u windowSize(getRenderWindow().getSize());
 	mConnectText.setPosition((float)windowSize.x / 2,
 		(float)windowSize.y / 2);

@@ -1,8 +1,7 @@
 #pragma once
 #include "ClientState.h"
 #include "Input/InputCollections.h"
-#include "Helpers/GraphicsHelper.h"
-#include "Helpers/EnumHelper.h"
+#include "Helpers/Helper.h"
 #include "StateIdentifiers.h"
 
 #include <SFML/Graphics/RenderWindow.hpp>

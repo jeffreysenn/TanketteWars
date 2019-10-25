@@ -4,8 +4,8 @@
 #include <vector>
 #include <memory>
 
-using namespace tankett;
 using namespace alpha;
+using namespace tankett;
 
 class ClientNetworkManager
 {

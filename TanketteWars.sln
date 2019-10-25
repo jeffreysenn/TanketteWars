@@ -30,7 +30,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tankett-shared", "tankett-s
 		{815578B9-1E4E-4ADD-8C94-DD790E3E69AD} = {815578B9-1E4E-4ADD-8C94-DD790E3E69AD}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TanketteWars", "TanketteWars\TanketteWars.vcxproj", "{B39D4299-D29E-41EF-8BAC-C85A27618C50}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MeowEngine", "MeowEngine\MeowEngine.vcxproj", "{B39D4299-D29E-41EF-8BAC-C85A27618C50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,8 +78,8 @@ Global
 		{B39D4299-D29E-41EF-8BAC-C85A27618C50}.Debug|x64.ActiveCfg = Debug|x64
 		{B39D4299-D29E-41EF-8BAC-C85A27618C50}.Debug|x64.Build.0 = Debug|x64
 		{B39D4299-D29E-41EF-8BAC-C85A27618C50}.Debug|x86.ActiveCfg = Debug|x64
-		{B39D4299-D29E-41EF-8BAC-C85A27618C50}.Release|x64.ActiveCfg = Debug|x64
-		{B39D4299-D29E-41EF-8BAC-C85A27618C50}.Release|x64.Build.0 = Debug|x64
+		{B39D4299-D29E-41EF-8BAC-C85A27618C50}.Release|x64.ActiveCfg = Release|x64
+		{B39D4299-D29E-41EF-8BAC-C85A27618C50}.Release|x64.Build.0 = Release|x64
 		{B39D4299-D29E-41EF-8BAC-C85A27618C50}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution

@@ -2,6 +2,7 @@
 
 #include "tankett_debug.h"
 #include "ServerNetworkManager.h"
+#include "Helpers/helper.h"
 
 ServerNetworkManager::ServerNetworkManager()
 {
@@ -60,7 +61,7 @@ void ServerNetworkManager::receive()
 				break;
 
 			challenge challenge;
-			challenge.serverKey = Helper::getRandom<uint64>();
+			challenge.serverKey = mw::helper::Number::getRandom<uint64>();
 			challenge.clientKey = request.client_key_;
 			challenge.timestamp = time::now();
 

@@ -12,7 +12,7 @@ SettingState::SettingState()
 	mCreditText.setString("WIP");
 	mCreditText.setFillColor(sf::Color::Blue);
 	mCreditText.setCharacterSize(50);
-	GraphicsHelper::centreOrigin(mCreditText);
+	helper::Graphics::centreOrigin(mCreditText);
 	sf::Vector2u windowSize(getRenderWindow().getSize());
 	mCreditText.setPosition((float)windowSize.x / 2,
 		(float)windowSize.y / 2);

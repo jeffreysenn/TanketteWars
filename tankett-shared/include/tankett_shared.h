@@ -4,22 +4,8 @@
 #define TANKETT_SHARED_H_INCLUDED
 
 #include <alpha.h>
-#include <random>
-#include <limits>
 
 using namespace alpha;
-
-namespace Helper
-{
-	template<typename T>
-	T getRandom(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
-	{
-		std::random_device dev;
-		std::mt19937 rng(dev());
-		std::uniform_int_distribution<T> dist(min, max);
-		return dist(rng);
-	}
-}
 
 namespace tankett
 {

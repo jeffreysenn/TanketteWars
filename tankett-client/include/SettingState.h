@@ -3,6 +3,8 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 
+using namespace mw;
+
 namespace Setting
 {
 	enum class Option

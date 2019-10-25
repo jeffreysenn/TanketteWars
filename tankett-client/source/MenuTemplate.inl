@@ -26,10 +26,10 @@ bool MenuTemplate<EnumClass>::handleEvent(const sf::Event & event)
 	}
 
 	if (Input::eventInputCollectionPressed(event, Input::Collections::upInputs))
-		EnumHelper::increment(mCurrentOption, mOptionCount, -1);
+		helper::Enum::increment(mCurrentOption, mOptionCount, -1);
 
 	if (Input::eventInputCollectionPressed(event, Input::Collections::downInputs))
-		EnumHelper::increment(mCurrentOption, mOptionCount, 1);
+		helper::Enum::increment(mCurrentOption, mOptionCount, 1);
 
 	updateOptions();
 	return false;
@@ -71,10 +71,10 @@ void MenuTemplate<EnumClass>::setupOptions()
 template<typename EnumClass>
 void MenuTemplate<EnumClass>::setupOptionsText(sf::Text& text, const EnumClass &option)
 {
-	text.setString(EnumHelper::getText(option, mOptionNames));
+	text.setString(helper::Enum::getText(option, mOptionNames));
 	text.setFont(*getContext().fontManager->get(Font::MineCraft));
 	text.setCharacterSize(40);
-	GraphicsHelper::centreOrigin(text);
+	helper::Graphics::centreOrigin(text);
 	text.setFillColor(sf::Color::Black);
 }
 

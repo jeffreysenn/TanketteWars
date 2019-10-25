@@ -17,10 +17,12 @@
 #include <tankett_shared.h>
 #include <cstdlib>
 
-
-Game* Game::create()
+namespace mw
 {
-	return new TanketteWarClient();
+	Game* Game::create()
+	{
+		return new TanketteWarClient();
+	}
 }
 
 TanketteWarClient::TanketteWarClient()

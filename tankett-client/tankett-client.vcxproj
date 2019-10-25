@@ -61,12 +61,12 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4100;4189;4505;26812;</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>..\External\SFML\include\;../TanketteWars/source/;include\;..\alpha-core\include\;..\tankett-shared\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../External/SFML/include/;../MeowEngine/include/;include/;../alpha-core/include/;../tankett-shared/include/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>..\External\SFML\lib;..\build\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-window-d.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-main-d.lib;TanketteWars.$(PlatformShortName).$(Configuration.toLower()).lib;alpha-core.$(PlatformShortName).$(Configuration.toLower()).lib;tankett-shared.$(PlatformShortName).$(Configuration.toLower()).lib;alpha-main.$(PlatformShortName).$(Configuration.toLower()).lib;kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;dsound.lib;dxguid.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-window-d.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-main-d.lib;MeowEngine.$(PlatformShortName).$(Configuration.toLower()).lib;alpha-core.$(PlatformShortName).$(Configuration.toLower()).lib;tankett-shared.$(PlatformShortName).$(Configuration.toLower()).lib;kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;dsound.lib;dxguid.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -80,14 +80,14 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4100;4189;4505;26812;</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>..\External\SFML\include\;../TanketteWars/source/;include\;..\alpha-core\include\;..\tankett-shared\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../External/SFML/include/;../MeowEngine/include/;include/;../alpha-core/include/;../tankett-shared/include/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\External\SFML\lib;..\build\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-window.lib;sfml-system.lib;sfml-graphics.lib;sfml-audio.lib;sfml-main.lib;alpha-core.$(PlatformShortName).$(Configuration.toLower()).lib;tankett-shared.$(PlatformShortName).$(Configuration.toLower()).lib;alpha-main.$(PlatformShortName).$(Configuration.toLower()).lib;kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;dsound.lib;dxguid.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-window.lib;sfml-system.lib;sfml-graphics.lib;sfml-audio.lib;sfml-main.lib;MeowEngine.$(PlatformShortName).$(Configuration.toLower()).lib;alpha-core.$(PlatformShortName).$(Configuration.toLower()).lib;tankett-shared.$(PlatformShortName).$(Configuration.toLower()).lib;kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;dsound.lib;dxguid.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
