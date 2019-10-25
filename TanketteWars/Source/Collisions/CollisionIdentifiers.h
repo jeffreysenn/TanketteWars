@@ -29,9 +29,10 @@ namespace Collision
 
 	enum class ObjectResponsePreset
 	{
+		NoCollision,
 		CollideAll,
 		OverlapAll,
-		NoCollision,
+		CollideDynamic,
 	};
 
 	struct ObjectResponse
@@ -48,6 +49,12 @@ namespace Collision
 
 			switch (preset)
 			{
+			case ObjectResponsePreset::NoCollision:
+				for (auto &response : responseMap)
+				{
+					response.second = ResponseType::Ignore;
+				}
+				break;
 			case ObjectResponsePreset::CollideAll:
 				for (auto &response : responseMap)
 				{
@@ -60,11 +67,8 @@ namespace Collision
 					response.second = ResponseType::Overlap;
 				}
 				break;
-			case ObjectResponsePreset::NoCollision:
-				for (auto &response : responseMap)
-				{
-					response.second = ResponseType::Ignore;
-				}
+			case ObjectResponsePreset::CollideDynamic:
+				responseMap[ObjectType::Dynamic] = ResponseType::Collision;
 				break;
 			}
 		}

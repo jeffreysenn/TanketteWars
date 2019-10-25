@@ -422,6 +422,8 @@ namespace alpha {
 
       bool operator==(const ip_address &rhs) const;
       bool operator!=(const ip_address &rhs) const;
+	  bool operator >(const ip_address& rhs) const;
+	  bool operator <(const ip_address& rhs) const;
 
       void set_host(uint8 a, uint8 b, uint8 c, uint8 d);
       void set_port(uint16 port);

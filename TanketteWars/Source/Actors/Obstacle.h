@@ -1,3 +1,4 @@
+#pragma once
 #include "SpriteActor.h"
 #include "../Collisions/Collider.h"
 
@@ -8,7 +9,6 @@ public:
 
 	virtual Collider* getCollider() override { return &mCollider; }
 
-	virtual void onCollisionEnter(Actor& other) override { printf("WallCollision!\n"); }
 private:
 	Collider mCollider;
 };

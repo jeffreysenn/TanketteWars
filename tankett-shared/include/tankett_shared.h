@@ -1,187 +1,436 @@
-// tankett_shared.h
+﻿// tankett_shared.h
 
 #ifndef TANKETT_SHARED_H_INCLUDED
 #define TANKETT_SHARED_H_INCLUDED
 
 #include <alpha.h>
+#include <random>
+#include <limits>
 
 using namespace alpha;
 
-namespace tankett {
-   struct allocator {
-      virtual ~allocator() = default;
-      virtual void *allocate(uint64 size, uint64 align) = 0;
-      virtual void deallocate(void *pointer) = 0;
-   };
+namespace Helper
+{
+	template<typename T>
+	T getRandom(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
+	{
+		std::random_device dev;
+		std::mt19937 rng(dev());
+		std::uniform_int_distribution<T> dist(min, max);
+		return dist(rng);
+	}
+}
 
-   constexpr uint32 PROTOCOL_ID        = 0x11223344u;
-   constexpr uint32 PROTOCOL_VERSION   = 0x01000001u;
-   constexpr uint16 PROTOCOL_PORT      = 32100ui16;
+namespace tankett
+{
+	ip_address getLocalAddr();
 
-   enum packet_type {
-      PACKET_TYPE_CONNECTION_REQUEST,
-      PACKET_TYPE_CONNECTION_DENIED,
-      PACKET_TYPE_CONNECTION_CHALLENGE,
-      PACKET_TYPE_CHALLENGE_RESPONSE,
-      PACKET_TYPE_KEEP_ALIVE,
-      PACKET_TYPE_PAYLOAD,
-      PACKET_TYPE_DISCONNECT,
-   };
+	template<typename PackageType>
+	bool sendPackage(udp_socket& socket, const ip_address& address, PackageType& package)
+	{
+		uint8 sendArr[2048];
+		byte_stream stream(sizeof(sendArr), sendArr);
+		byte_stream_writer writer(stream);
+		if (!package.write(writer))
+		{
+			printf("[err] could not serialize message!");
+			return false;
+		}
+		if (!socket.send_to(address, stream))
+		{
+			printf("[err] could not send message!");
+			return false;
+		}
+		return true;
+	}
 
-   enum denied_reason_type {
-      DENIED_REASON_TYPE_UNKNOWN,
-      DENIED_REASON_TYPE_INVALID_CHALLENGE,
-      DENIED_REASON_TYPE_WRONG_PROTOCOL,
-      DENIED_REASON_TYPE_WRONG_VERSION,
-      DENIED_REASON_TYPE_SERVER_FULL,
-   };
+	struct allocator
+	{
+		virtual ~allocator() = default;
+		virtual void* allocate(uint64 size, uint64 align) = 0;
+		virtual void deallocate(void* pointer) = 0;
+	};
 
-   struct protocol_packet_header {
-      protocol_packet_header();
-      explicit protocol_packet_header(packet_type type);
-     
-      uint8 type_;
-   };
+	constexpr uint32 PROTOCOL_ID = 0x11223344u;
+	constexpr uint32 PROTOCOL_VERSION = 0x01000001u;
+	constexpr uint16 PROTOCOL_PORT = 32100ui16;
+	constexpr uint8 PROTOCOL_SEND_PER_SEC = 30ui8;
 
-   struct protocol_connection_request : protocol_packet_header {
-      protocol_connection_request();
-      explicit protocol_connection_request(uint64 client_key);
+	enum packet_type
+	{
+		PACKET_TYPE_CONNECTION_REQUEST,
+		PACKET_TYPE_CONNECTION_DENIED,
+		PACKET_TYPE_CONNECTION_CHALLENGE,
+		PACKET_TYPE_CHALLENGE_RESPONSE,
+		PACKET_TYPE_KEEP_ALIVE,
+		PACKET_TYPE_PAYLOAD,
+		PACKET_TYPE_DISCONNECT,
+	};
 
-      template <typename T>
-      bool serialize(T &stream) {
-         bool result = true;
-         result &= stream.serialize(type_);
-         result &= stream.serialize(protocol_);
-         result &= stream.serialize(version_);
-         result &= stream.serialize(client_key_);
-         result &= stream.serialize(sizeof(padding_), padding_);
-         return result;
-      }
+	enum denied_reason_type
+	{
+		DENIED_REASON_TYPE_UNKNOWN,
+		DENIED_REASON_TYPE_INVALID_CHALLENGE,
+		DENIED_REASON_TYPE_WRONG_PROTOCOL,
+		DENIED_REASON_TYPE_WRONG_VERSION,
+		DENIED_REASON_TYPE_SERVER_FULL,
+	};
 
-      uint32 protocol_;
-      uint32 version_;
-      uint64 client_key_;
-      uint8 padding_[1024];
-   };
+	struct protocol_packet_header
+	{
+		protocol_packet_header();
+		explicit protocol_packet_header(packet_type type);
 
-   struct protocol_connection_denied : protocol_packet_header {
-      protocol_connection_denied();
-      explicit protocol_connection_denied(denied_reason_type reason);
+		virtual bool write(byte_stream_writer& writer) = 0;
+		virtual bool write(byte_stream_evaluator& evaluator) = 0;
+		virtual bool read(byte_stream_reader& reader) = 0;
 
-      template <typename T>
-      bool serialize(T &stream) {
-         bool result = true;
-         result &= stream.serialize(type_);
-         result &= stream.serialize(reason_);
-         return result;
-      }
+		uint8 type_;
+	};
 
-      uint8 reason_;
-   };
 
-   struct protocol_connection_challenge : protocol_packet_header {
-      protocol_connection_challenge();
-      explicit protocol_connection_challenge(uint64 server_key);
+	struct protocol_connection_request : protocol_packet_header
+	{
+		protocol_connection_request();
+		explicit protocol_connection_request(uint64 client_key);
 
-      template <typename T>
-      bool serialize(T &stream) {
-         bool result = true;
-         result &= stream.serialize(type_);
-         result &= stream.serialize(server_key_);
-         return result;
-      }
+		bool write(byte_stream_writer& writer) override final { return serialize(writer); }
+		bool write(byte_stream_evaluator& evaluator) override final { return serialize(evaluator); }
+		bool read(byte_stream_reader& reader) override final { return serialize(reader); }
 
-      uint64 server_key_;
-   };
+		template <typename T>
+		bool serialize(T& stream)
+		{
+			bool result = true;
+			result &= stream.serialize(type_);
+			result &= stream.serialize(protocol_);
+			result &= stream.serialize(version_);
+			result &= stream.serialize(client_key_);
+			result &= stream.serialize(sizeof(padding_), padding_);
+			return result;
+		}
 
-   struct protocol_challenge_response : protocol_packet_header {
-      protocol_challenge_response();
-      explicit protocol_challenge_response(uint64 combined_key);
+		uint32 protocol_;
+		uint32 version_;
+		uint64 client_key_;
+		uint8 padding_[1024];
+	};
 
-      template <typename T>
-      bool serialize(T &stream) {
-         bool result = true;
-         result &= stream.serialize(type_);
-         result &= stream.serialize(combined_key_);
-         result &= stream.serialize(sizeof(padding_), padding_);
-         return result;
-      }
+	struct protocol_connection_denied : protocol_packet_header
+	{
+		protocol_connection_denied();
+		explicit protocol_connection_denied(denied_reason_type reason);
 
-      // note: combined_key client_key ^ server_key
-      uint64 combined_key_;
-      uint8 padding_[1024];
-   };
+		bool write(byte_stream_writer& writer) override final { return serialize(writer); }
+		bool write(byte_stream_evaluator& evaluator) override final { return serialize(evaluator); }
+		bool read(byte_stream_reader& reader) override final { return serialize(reader); }
 
-   struct protocol_keep_alive : protocol_packet_header {
-      protocol_keep_alive();
+		template <typename T>
+		bool serialize(T& stream)
+		{
+			bool result = true;
+			result &= stream.serialize(type_);
+			result &= stream.serialize(reason_);
+			return result;
+		}
 
-      template <typename S>
-      bool serialize(S &stream) {
-         bool result = true;
-         result &= stream.serialze(type_);
-         return result;
-      }
-   };
+		uint8 reason_;
+	};
 
-   struct protocol_payload : protocol_packet_header {
-      protocol_payload();
-      explicit protocol_payload(uint32 sequence);
+	struct protocol_connection_challenge : protocol_packet_header
+	{
+		protocol_connection_challenge();
+		explicit protocol_connection_challenge(uint64 server_key);
 
-      bool is_newer(const uint32 sequence);
+		bool write(byte_stream_writer& writer) override final { return serialize(writer); }
+		bool write(byte_stream_evaluator& evaluator) override final { return serialize(evaluator); }
+		bool read(byte_stream_reader& reader) override final { return serialize(reader); }
 
-      template <typename T>
-      bool serialize(T &stream) {
-         bool result = true;
-         result &= stream.serialize(type_);
-         result &= stream.serialize(sequence_);
-         result &= stream.serialize(length_);
-         assert(length_ < sizeof(payload_));
-         result &= stream.serialize(length_, payload_);
-         return result;
-      }
+		template <typename T>
+		bool serialize(T& stream)
+		{
+			bool result = true;
+			result &= stream.serialize(type_);
+			result &= stream.serialize(server_key_);
+			return result;
+		}
 
-      uint32 sequence_;
-      uint16 length_;
-      uint8 payload_[1200];
-   };
+		uint64 server_key_;
+	};
 
-   struct protocol_disconnect : protocol_packet_header {
-      protocol_disconnect();
-      explicit protocol_disconnect(uint64 combined_key);
+	struct protocol_challenge_response : protocol_packet_header
+	{
+		protocol_challenge_response();
+		explicit protocol_challenge_response(uint64 combined_key);
 
-      template <typename T>
-      bool serialize(T &stream) {
-         bool result = true;
-         result &= stream.serialize(type_);
-         result &= stream.serialize(client_key_);
-         return result;
-      }
+		bool write(byte_stream_writer& writer) override final { return serialize(writer); }
+		bool write(byte_stream_evaluator& evaluator) override final { return serialize(evaluator); }
+		bool read(byte_stream_reader& reader) override final { return serialize(reader); }
 
-      uint64 client_key_;
-   };
+		template <typename T>
+		bool serialize(T& stream)
+		{
+			bool result = true;
+			result &= stream.serialize(type_);
+			result &= stream.serialize(combined_key_);
+			result &= stream.serialize(sizeof(padding_), padding_);
+			return result;
+		}
 
-   enum network_message_type {
-      NETWORK_MESSAGE_PING,
-      NETWORK_MESSAGE_COUNT,
-   };
+		// note: combined_key client_key ^ server_key
+		uint64 combined_key_;
+		uint8 padding_[1024];
+	};
 
-   struct network_message_header {
-      network_message_header();
-      explicit network_message_header(network_message_type type);
+	struct protocol_keep_alive : protocol_packet_header
+	{
+		protocol_keep_alive();
 
-      uint8 type_;
-   };
+		bool write(byte_stream_writer& writer) override final { return serialize(writer); }
+		bool write(byte_stream_evaluator& evaluator) override final { return serialize(evaluator); }
+		bool read(byte_stream_reader& reader) override final { return serialize(reader); }
 
-   struct network_message_ping : network_message_header {
-      network_message_ping();
+		template <typename S>
+		bool serialize(S& stream)
+		{
+			bool result = true;
+			result &= stream.serialize(type_);
+			return result;
+		}
+	};
 
-      template <typename T>
-      bool serialize(T &stream) {
-         bool result = true;
-         result &= stream.serialize(type_);
-         return result;
-      }
-   };
+	struct protocol_payload : protocol_packet_header
+	{
+		protocol_payload();
+		explicit protocol_payload(uint32 sequence);
+
+		bool is_newer(const uint32 sequence);
+
+		bool write(byte_stream_writer& writer) override final { return serialize(writer); }
+		bool write(byte_stream_evaluator& evaluator) override final { return serialize(evaluator); }
+		bool read(byte_stream_reader& reader) override final { return serialize(reader); }
+
+		template <typename T>
+		bool serialize(T& stream)
+		{
+			bool result = true;
+			result &= stream.serialize(type_);
+			result &= stream.serialize(sequence_);
+			result &= stream.serialize(length_);
+			assert(length_ < sizeof(payload_));
+			result &= stream.serialize(length_, payload_);
+			return result;
+		}
+
+		uint32 sequence_;
+		uint16 length_;
+		uint8 payload_[1200];
+	};
+
+	struct protocol_disconnect : protocol_packet_header
+	{
+		protocol_disconnect();
+		explicit protocol_disconnect(uint64 combined_key);
+
+		bool write(byte_stream_writer& writer) override final { return serialize(writer); }
+		bool write(byte_stream_evaluator& evaluator) override final { return serialize(evaluator); }
+		bool read(byte_stream_reader& reader) override final { return serialize(reader); }
+
+		template <typename T>
+		bool serialize(T& stream)
+		{
+			bool result = true;
+			result &= stream.serialize(type_);
+			result &= stream.serialize(client_key_);
+			return result;
+		}
+
+		uint64 client_key_;
+	};
+
+	enum network_message_type
+	{
+		NETWORK_MESSAGE_PING,
+		NETWORK_MESSAGE_CLIENT_TO_SERVER,
+		NETWORK_MESSAGE_SERVER_TO_CLIENT,
+		NETWORK_MESSAGE_COUNT,
+	};
+
+	struct network_message_header
+	{
+		network_message_header();
+		explicit network_message_header(network_message_type type);
+
+		virtual bool write(byte_stream_writer& writer) = 0;
+		virtual bool write(byte_stream_evaluator& evaluator) = 0;
+		virtual bool read(byte_stream_reader& reader) = 0;
+
+		uint8 type_;
+	};
+
+	struct network_message_ping : network_message_header
+	{
+		network_message_ping();
+
+		bool write(byte_stream_writer& writer) override final { return serialize(writer); }
+		bool write(byte_stream_evaluator& evaluator) override final { return serialize(evaluator); }
+		bool read(byte_stream_reader& reader) override final { return serialize(reader); }
+
+		template <typename T>
+		bool serialize(T& stream)
+		{
+			bool result = true;
+			result &= stream.serialize(type_);
+			return result;
+		}
+	};
+
+	constexpr uint32 PROTOCOL_PAYLOAD_SIZE = 1200;
+
+	struct message_client_to_server : network_message_header
+	{
+		message_client_to_server() : network_message_header(NETWORK_MESSAGE_CLIENT_TO_SERVER)
+		{
+		}
+
+		uint16 input_field = 0;
+		float turret_angle = .0f;
+		uint32 input_number = 0;
+
+		template<typename S>
+		bool serialize(S& stream)
+		{
+			bool result = true;
+			result &= stream.serialize(type_);
+			result &= stream.serialize(input_field);
+			result &= stream.serialize(turret_angle);
+			result &= stream.serialize(input_number);
+			return result;
+		}
+
+		virtual bool write(byte_stream_writer& writer) final
+		{
+			return serialize(writer);
+		}
+		virtual bool write(byte_stream_evaluator& evaluator) final
+		{
+			return serialize(evaluator);
+		}
+
+		virtual bool read(byte_stream_reader& reader) final
+		{
+			return serialize(reader);
+		}
+	};
+
+	struct server_to_client_data
+	{
+		bool alive = true;
+		bool connected = true;
+		vector2 position = { 0,0 };
+		float angle = 0.0f;
+		uint8 eliminations = 0;
+		uint8 client_id = 0;
+		uint32 ping = ~0U;
+		uint8 bullet_count = 0;
+		vector2 bullets[10];
+	};
+
+	enum class GAME_STATE : uint8
+	{
+		ROUND_RUNNING,
+		WAITING_FOR_PLAYER,
+		ROUND_END,
+	};
+
+	struct message_server_to_client : network_message_header
+	{
+		message_server_to_client() : network_message_header(NETWORK_MESSAGE_SERVER_TO_CLIENT)
+		{
+		}
+
+		uint8 receiver_id = 0;
+		uint32 input_number = 0;
+		uint8 client_count = 0;
+		server_to_client_data client_data[4];
+		float timestamp = .0f; //time::now().as_milliseconds();
+		float round_time = .0f; //time remaining
+		GAME_STATE game_state = GAME_STATE::WAITING_FOR_PLAYER;
+
+		template<typename S>
+		bool serialize(S& stream)
+		{
+			bool result = true;
+
+			result &= stream.serialize(type_);
+
+			result &= stream.serialize(receiver_id);
+
+			result &= stream.serialize(input_number);
+
+			result &= stream.serialize(client_count);
+
+			assert(client_count > 0 && client_count <= 4);
+
+			//serialize client array
+			for (int i = 0; i < client_count; i++)
+			{
+				server_to_client_data& currentData = client_data[i];
+
+				uint8 alive = (uint8)currentData.alive;
+				result &= stream.serialize(alive);
+				currentData.alive = (bool)alive;
+
+				uint8 connected = (uint8)currentData.connected;
+				result &= stream.serialize(connected);
+				currentData.connected = (bool)connected;
+				result &= stream.serialize(currentData.position.x_);
+				result &= stream.serialize(currentData.position.y_);
+
+				result &= stream.serialize(currentData.angle);
+
+				result &= stream.serialize(currentData.eliminations);
+
+				result &= stream.serialize(currentData.client_id);
+
+				result &= stream.serialize(currentData.ping);
+
+				result &= stream.serialize(currentData.bullet_count);
+
+				assert(currentData.bullet_count <= 10);
+
+				for (int j = 0; j < currentData.bullet_count; j++)
+				{
+					result &= stream.serialize(currentData.bullets[j].x_);
+					result &= stream.serialize(currentData.bullets[j].y_);
+				}
+			}
+
+			result &= stream.serialize(timestamp);
+			result &= stream.serialize(round_time);
+
+			uint8 s = (uint8)game_state;
+			result &= stream.serialize(s);
+			game_state = (GAME_STATE)s;
+
+			return result;
+		}
+
+		virtual bool write(byte_stream_writer& writer) final
+		{
+			return serialize(writer);
+		}
+		virtual bool write(byte_stream_evaluator& evaluator) final
+		{
+			return serialize(evaluator);
+		}
+
+		virtual bool read(byte_stream_reader& reader) final
+		{
+			return serialize(reader);
+		}
+	};
+
 } // !tankett
 
 #endif // !TANKETT_SHARED_H_INCLUDED

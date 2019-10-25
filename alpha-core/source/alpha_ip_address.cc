@@ -114,6 +114,20 @@ namespace alpha {
       return host_ != rhs.host_ || port_ != rhs.port_;
    }
 
+   bool ip_address::operator>(const ip_address& rhs) const
+   {
+	   if (host_ == rhs.host_)
+		   return port_ > rhs.port_;
+	   return host_ > rhs.host_;
+   }
+
+   bool ip_address::operator<(const ip_address& rhs) const
+   {
+	   if(host_ == rhs.host_)
+		   return port_ < rhs.port_;
+	   return host_ < rhs.host_;
+   }
+
    void ip_address::set_host(uint8 a, uint8 b, uint8 c, uint8 d) {
       host_ = 0;
       host_ |= ((uint32)a << 24);

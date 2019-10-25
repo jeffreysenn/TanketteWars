@@ -6,7 +6,7 @@ namespace alpha {
    namespace {
       template <typename T>
       bool calculate(const uint64 capacity, uint64 &size, uint64 count = 1) {
-         if ((size + sizeof(T) * count) < capacity) {
+         if ((size + sizeof(T) * count) > capacity) {
             return false;
          }
          size += sizeof(T) * count;

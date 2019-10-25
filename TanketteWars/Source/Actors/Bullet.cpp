@@ -27,6 +27,10 @@ void Bullet::onCollisionEnter(Actor& other)
 	if (&other == mOwner)
 		return;
 
+	Bullet* bullet = dynamic_cast<Bullet*>(&other);
+	if (bullet)
+		return;
+
 	destroy(this);
 }
 

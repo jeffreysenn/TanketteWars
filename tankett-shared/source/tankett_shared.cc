@@ -1,6 +1,7 @@
 // tankett_shared.cc
 
 #include "tankett_shared.h"
+#include "tankett_debug.h"
 
 namespace tankett {
    protocol_packet_header::protocol_packet_header()
@@ -123,4 +124,24 @@ namespace tankett {
       : network_message_header(NETWORK_MESSAGE_PING)
    {
    }
+   ip_address getLocalAddr()
+   {
+	   dynamic_array<ip_address> addressess;
+	   if (!ip_address::local_addresses(addressess))
+	   {
+		   debugf("[err] could not retreive local ip addressess!");
+		   return ip_address();
+	   }
+
+	   debugf("[nfo] found %d ip addressess", (int)addressess.size());
+
+	   for (int index = 0; index < (int)addressess.size(); index++)
+	   {
+		   debugf("[nfo]   #%d - %s", index, addressess[index].as_string());
+	   }
+
+	   return addressess[0];
+   }
 } // !alpha
+
+

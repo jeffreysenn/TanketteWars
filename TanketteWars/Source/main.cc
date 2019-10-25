@@ -4,9 +4,10 @@
 
 int main(int argc, char **argv)
 {
-	Game game;
+	Game* game = Game::create();
 
-	game.run();
+	game->run();
 
+	delete game;
 	return 0;
 }

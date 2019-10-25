@@ -1,5 +1,5 @@
 #include "SceneGraph.h"
-
+#include "CameraActor.h"
 
 
 SceneGraph::SceneGraph()
@@ -13,7 +13,9 @@ void SceneGraph::enforceDestruction(Actor& actor)
 	for (int i = 0; i < children.size(); ++i)
 	{
 		if (children[i]->isPendingDestroy())
-			children[i]->getParent()->detachChild(*children[i]);
+		{
+			auto pendingDestroy = children[i]->getParent()->detachChild(*children[i]);
+		}
 		else
 			enforceDestruction(*children[i]);
 	}

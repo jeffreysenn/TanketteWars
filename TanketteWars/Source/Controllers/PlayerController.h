@@ -2,6 +2,7 @@
 
 #include "../Commands/Command.h"
 #include "../Input/Input.h"
+#include "tankett_shared.h"
 
 #include <map>
 #include <vector>
@@ -12,15 +13,23 @@ namespace sf
 	class RenderWindow;
 }
 
+namespace tankett
+{
+	struct serverToClientData;
+}
+
 class PlayerController
 {
 public:
-	PlayerController(const sf::RenderWindow& window);
+	PlayerController();
+	PlayerController(sf::RenderWindow& window);
 
-	void handleEvent(const sf::Event& event, class CommandQueue& commandQueue);
-	void handleRealtimeInput(class CommandQueue& commandQueue);
+	void handleEvent(const sf::Event& event, class CommandQueue& commandQueue, uint32_t frameNum);
+	void handleRealtimeInput(class CommandQueue& commandQueue, uint32_t frameNum);
 
 	sf::Vector2f getMousePosition() const;
+
+	void validateInputPrediction(const tankett::serverToClientData& state, uint32_t frameNum);
 
 private:
 	enum class Action
@@ -35,7 +44,7 @@ private:
 	struct GameInput
 	{
 		Input::InputCollection inputCollection;
-		bool bIsRealTime;
+		bool bIsRealTime{};
 	};
 
 private:
@@ -43,12 +52,11 @@ private:
 	void bindActions();
 
 private:
-	Command mCommand;
+	Command mMousePosCommand;
 
 	std::map<Action, GameInput> mInputBinding;
 	std::map<Action, Command> mActionBinding;
-	Command mMousePosCommand;
-
-	const sf::RenderWindow& mWindow;
+	std::map<uint32_t, std::vector<Command>> mCommandBuffer;
+	sf::RenderWindow* mWindow;
 };
 

@@ -1,30 +1,23 @@
 #pragma once
 
-#include "Worlds/World.h"
-#include "Debug/FPSMeter.h"
-#include "States/StateStack.h"
-#include "Controllers/PlayerController.h"
-#include "ResourceManagers/ResourceIdentifiers.h"
-
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/Text.hpp>
-
 class Game
 {
 public:
+	static Game* create();
+	virtual void run() = 0;
+#if 0
 	Game();
 	~Game();
 
-	void run();
 
 private:
-	void registerStates();
+	virtual void registerStates();
 
-	void handleInputs();
+	virtual void handleInputs();
 
-	void update(float deltaSeconds);
+	virtual void update(float deltaSeconds);
 
-	void render();
+	virtual void render();
 
 private:
 	sf::RenderWindow mWindow;
@@ -34,11 +27,13 @@ private:
 
 	TextureManager mTextureManager;
 	FontManager mFontManager;
+	MapManager mMapManager;
 
 
 	sf::Text mStatsText;
 	FPSMeter mFPSMeter;
 
 	bool mbPaused;
+#endif
 };
 

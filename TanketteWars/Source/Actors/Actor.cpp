@@ -14,6 +14,7 @@ Actor::Actor()
 {
 }
 
+
 void Actor::attachChild(std::unique_ptr<Actor> node)
 {
 	node->setParent(this);
@@ -55,7 +56,6 @@ void Actor::update(float deltaSeconds)
 	updateSelf(deltaSeconds);
 	updateChildren(deltaSeconds);
 
-	updateCollision(mCollisionPair, std::bind(&Actor::onCollisionExit, this));
 	updateCollision(mOverlapPair, std::bind(&Actor::onOverlapExit, this));
 }
 
@@ -118,21 +118,10 @@ void Actor::updateCollision(std::pair<bool, bool> &collisionPair, std::function<
 
 void Actor::onCollision(Actor & other)
 {
-	onCollisionStay(other);
-	mCollisionPair.second = true;
-	if (!mCollisionPair.first)
-		onCollisionEnter(other);
+	onCollisionEnter(other);
 }
 
 void Actor::onCollisionEnter(Actor & other)
-{
-}
-
-void Actor::onCollisionExit()
-{
-}
-
-void Actor::onCollisionStay(Actor & other)
 {
 }
 
@@ -163,10 +152,6 @@ void Actor::onCommand(const Command & command, float deltaSeconds)
 
 	for(int i = 0; i < mChildren.size(); ++i)
 		mChildren[i]->onCommand(command, deltaSeconds);
-
-	// bug code below:
-	//for (auto &child : mChildren)
-	//	child->onCommand(command, deltaSeconds);
 }
 
 sf::Transform Actor::getWorldTransform() const

@@ -35,32 +35,51 @@ void fireAction(Tank& tank, float)
 	tank.fire();
 }
 
-PlayerController::PlayerController(const sf::RenderWindow& window)
-	: mWindow(window)
+PlayerController::PlayerController()
+	: mWindow(nullptr)
 {
 	bindInputs();
 	bindActions();
 }
 
-void PlayerController::handleEvent(const sf::Event & event, CommandQueue & commandQueue)
+PlayerController::PlayerController(sf::RenderWindow& window)
+	: mWindow(&window)
+{
+	bindInputs();
+	bindActions();
+}
+
+void PlayerController::handleEvent(const sf::Event & event, CommandQueue & commandQueue, uint32_t frameNum)
 {
 	for (auto &pair : mActionBinding)
 	{
 		const auto & gameInput = mInputBinding[pair.first];
 		if ((!gameInput.bIsRealTime) &&
 			Input::eventInputCollectionPressed(event, gameInput.inputCollection))
+		{
 			commandQueue.push(pair.second);
+			mCommandBuffer[frameNum].push_back(pair.second);
+		}
 	}
 }
 
-void PlayerController::handleRealtimeInput(CommandQueue &commandQueue)
+constexpr size_t bufferSize = 60;
+void PlayerController::handleRealtimeInput(CommandQueue &commandQueue, uint32_t frameNum)
 {
 	for (auto &pair : mActionBinding)
 	{
 		const auto & gameInput = mInputBinding[pair.first];
 		if (gameInput.bIsRealTime &&
 			Input::inputCollectionPressed(gameInput.inputCollection))
+		{
 			commandQueue.push(pair.second);
+			mCommandBuffer[frameNum].push_back(pair.second);
+
+			// discard the old buffers
+			auto it = mCommandBuffer.find(frameNum - bufferSize);
+			if (it != mCommandBuffer.end())
+				mCommandBuffer.erase(mCommandBuffer.begin(), it);
+		}
 	}
 
 	mousePos = getMousePosition();
@@ -69,7 +88,14 @@ void PlayerController::handleRealtimeInput(CommandQueue &commandQueue)
 
 sf::Vector2f PlayerController::getMousePosition() const
 {
-	return mWindow.mapPixelToCoords(sf::Mouse::getPosition(mWindow));
+	if(mWindow)
+		return mWindow->mapPixelToCoords(sf::Mouse::getPosition(*mWindow));
+
+	return sf::Vector2f();
+}
+
+void PlayerController::validateInputPrediction(const tankett::serverToClientData& state, uint32_t frameNum)
+{
 }
 
 void PlayerController::bindInputs()

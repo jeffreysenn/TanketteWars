@@ -1,24 +1,17 @@
 #pragma once
 #include <SFML/System/NonCopyable.hpp>
 
-#include "State.h"
-#include "StateIdentifiers.h"
-
 #include <vector>
 #include <memory>
 #include <functional>
 #include <map>
 
-namespace sf
-{
-	class Event;
-	class RenderWindow;
-	class Time;
-}
-
-class StateStack : sf::NonCopyable
+template<typename BaseState>
+class StateStack
 {
 public:
+	typedef std::unique_ptr<BaseState> StatePtr;
+
 	enum class Action
 	{
 		Push,
@@ -27,53 +20,88 @@ public:
 	};
 
 public:
-	explicit StateStack(const Context &context);
+	StateStack(){}
 
-	template <typename T>
-	void registerState(StateID stateID);
+	template <typename StateType, typename StateIDType>
+	void registerState(StateIDType stateID)
+	{
+		mFactories[(int)stateID] = []()
+		{
+			return StatePtr(std::make_unique<StateType>());
+		};
+	}
 
-	void update(float deltaSeconds);
-	void draw();
-	void handleEvent(const sf::Event& event);
+	template <typename StateIDTyoe>
+	void pushState(StateIDTyoe stateID)
+	{
+		mPendingList.push_back(PendingChange(Action::Push, (int)stateID));
+	}
 
-	void pushState(StateID stateID);
-	void popState();
-	void clearStates();
+	void popState()
+	{
+		mPendingList.push_back(PendingChange(Action::Pop));
+	}
 
-	bool isEmpty() const;
+	void clearStates()
+	{
+		mPendingList.push_back(PendingChange(Action::Clear));
+	}
+
+	bool isEmpty() const
+	{
+		return mStack.empty();
+	}
+
+protected:
+	void applyPendingChanges();
 
 private:
-	State::Ptr createState(StateID stateID);
-	void applyPendingChanges();
+	StatePtr createState(int stateID)
+	{
+		return mFactories[stateID]();
+	}
 
 private:
 	struct PendingChange
 	{
-		explicit PendingChange(const Action &action, 
-							   const StateID &stateID = StateID::None)
+		explicit PendingChange(const Action& action,
+							   const int& stateID = -1)
 			: action(action)
 			, stateID(stateID)
 		{
 		}
 
 		Action action;
-		StateID stateID;
+		int stateID;
 	};
 
-private:
-	std::vector<State::Ptr> mStack;
+protected:
+	std::vector<StatePtr> mStack;
 	std::vector<PendingChange> mPendingList;
 
-	Context mContext;
-	std::map<StateID,
-		std::function<State::Ptr()>> mFactories;
+	std::map<int, std::function<StatePtr()>> mFactories;
 };
 
-template <typename T>
-void StateStack::registerState(StateID stateID)
+
+template<typename BaseState>
+void StateStack<BaseState>::applyPendingChanges()
 {
-	mFactories[stateID] = [this]()
+	for (auto const& change : mPendingList)
 	{
-		return State::Ptr(std::make_unique<T>(*this, mContext));
-	};
+		switch (change.action)
+		{
+		case Action::Push:
+			mStack.push_back(createState(change.stateID));
+			break;
+
+		case Action::Pop:
+			mStack.pop_back();
+			break;
+
+		case Action::Clear:
+			mStack.clear();
+			break;
+		}
+	}
+	mPendingList.clear();
 }

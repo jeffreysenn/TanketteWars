@@ -62,11 +62,9 @@ protected:
 	virtual void reportCollisionInfoSelf(class PhysicsEngine &physicsEngine);
 
 	virtual void onCollisionEnter(Actor &other);
-	// TODO: implement "other"
-	virtual void onCollisionExit();
-	virtual void onCollisionStay(Actor &other);
 
 	virtual void onOverlapEnter(Actor &other);
+	// TODO: implement "other"
 	virtual void onOverlapExit();
 	virtual void onOverlapStay(Actor &other);
 
@@ -87,7 +85,6 @@ protected:
 	Actor* mParent;
 
 private:
-	std::pair<bool, bool> mCollisionPair;
 	std::pair<bool, bool> mOverlapPair;
 
 	bool mPendingDestroy;

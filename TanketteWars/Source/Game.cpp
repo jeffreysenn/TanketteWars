@@ -1,17 +1,23 @@
 ﻿#include "Game.h"
-#include "States/State.h"
+
+#if 0
+
+#include "States/ClientState.h"
 #include "States/TitleState.h"
 #include "States/MenuState.h"
 #include "States/GameState.h"
 #include "States/PauseState.h"
 #include "States/CreditState.h"
 #include "States/SettingState.h"
+#include "States/ConnectState.h"
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <string>  
+#include <alpha.h>
 
 const sf::Time updateInterval = sf::seconds(1.f / 60.f);
+const sf::Time networkInterval = sf::seconds(1.f / 30.f);
 
 Game::Game()
 try : mWindow(
@@ -19,7 +25,7 @@ try : mWindow(
 	"Tankket Wars",
 	sf::Style::Titlebar | sf::Style::Close)
 	, mPlayerController(mWindow)
-	, mStateStack(Context(mWindow, mTextureManager, mFontManager, mPlayerController))
+	, mStateStack(Context(mWindow, mTextureManager, mFontManager, mMapManager, mPlayerController))
 	, mFPSMeter(mStatsText)
 	, mbPaused(false)
 {
@@ -40,7 +46,6 @@ try : mWindow(
 catch (const std::runtime_error& e)
 {
 	std::cout << "Exception: " << e.what() << std::endl;
-	// making sure the world is constructed successfully
 	std::terminate();
 }
 
@@ -52,6 +57,7 @@ void Game::run()
 {
 	sf::Clock clock;
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
+	sf::Time timeSinceLastNetwork = sf::Time::Zero;
 
 	while (mWindow.isOpen())
 	{
@@ -70,6 +76,12 @@ void Game::run()
 				mWindow.close();
 		}
 
+		timeSinceLastNetwork += lastLoopDuration;
+		while (timeSinceLastNetwork > networkInterval)
+		{
+			timeSinceLastNetwork -= networkInterval;
+		}
+
 		mFPSMeter.update(lastLoopDuration);
 
 		render();
@@ -84,6 +96,8 @@ void Game::registerStates()
 	mStateStack.registerState<PauseState>(StateID::Pause);
 	mStateStack.registerState<CreditState>(StateID::Credit);
 	mStateStack.registerState<SettingState>(StateID::Setting);
+	mStateStack.registerState<ConnectState>(StateID::Connect);
+
 }
 
 void Game::handleInputs()
@@ -125,3 +139,5 @@ void Game::render()
 
 	mWindow.display();
 }
+
+#endif

@@ -5,6 +5,7 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
+#include "Map.h"
 
 namespace Texture
 {
@@ -42,4 +43,13 @@ namespace Sound
 
 	};
 }
+typedef ResourceManager<sf::SoundBuffer, Sound::ID> SoundManager;
 
+namespace Map
+{
+	enum ID
+	{
+		DefaultMap,
+	};
+}
+typedef ResourceManager<rs::Map, Map::ID> MapManager;

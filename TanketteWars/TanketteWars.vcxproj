@@ -19,13 +19,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -59,7 +59,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\External\SFML\include\;Include\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External\SFML\include\;..\tankett-shared\include\;../tankett-client/include/;../alpha-core/include/</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4100;4189;</DisableSpecificWarnings>
     </ClCompile>
@@ -80,7 +80,7 @@ IF %ERRORLEVEL% LEQ 1 exit 0</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\External\SFML\include\;Include\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External\SFML\include\;..\tankett-shared\include\;../tankett-client/include/;../alpha-core/include/</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4100;4189;</DisableSpecificWarnings>
     </ClCompile>
@@ -101,26 +101,17 @@ IF %ERRORLEVEL% LEQ 1 exit 0</Command>
     <ClCompile Include="Source\Actors\Obstacle.cpp" />
     <ClCompile Include="Source\Collisions\PhysicsEngine.cpp" />
     <ClCompile Include="Source\Actors\SceneGraph.cpp" />
-    <ClCompile Include="Source\States\CreditState.cpp" />
-    <ClCompile Include="Source\States\GameState.cpp" />
-    <ClCompile Include="Source\States\MenuState.cpp" />
-    <ClCompile Include="Source\States\PauseState.cpp" />
+    <ClCompile Include="Source\ResourceManagers\Map.cpp" />
     <ClCompile Include="Source\Controllers\PlayerController.cpp" />
     <ClCompile Include="Source\Debug\FPSMeter.cpp" />
     <ClCompile Include="Source\Input\Input.cpp" />
     <ClCompile Include="Source\Rendering\Renderer.cpp" />
     <ClCompile Include="Source\Actors\CameraActor.cpp" />
     <ClCompile Include="Source\Game.cpp" />
-    <ClCompile Include="Source\Actors\AvatarActor.cpp" />
     <ClCompile Include="Source\Actors\Actor.cpp" />
     <ClCompile Include="Source\Actors\MovableActor.cpp" />
     <ClCompile Include="Source\main.cc" />
     <ClCompile Include="Source\Actors\SpriteActor.cpp" />
-    <ClCompile Include="Source\States\SettingState.cpp" />
-    <ClCompile Include="Source\States\State.cpp" />
-    <ClCompile Include="Source\States\StateStack.cpp" />
-    <ClCompile Include="Source\Worlds\World.cpp" />
-    <ClCompile Include="Source\States\TitleState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Actors\Bullet.h" />
@@ -132,15 +123,10 @@ IF %ERRORLEVEL% LEQ 1 exit 0</Command>
     <ClInclude Include="Source\Collisions\Collider.h" />
     <ClInclude Include="Source\Collisions\CollisionIdentifiers.h" />
     <ClInclude Include="Source\Helpers\VectorHelper.h" />
-    <ClInclude Include="Source\States\Context.h" />
-    <ClInclude Include="Source\States\CreditState.h" />
+    <ClInclude Include="Source\ResourceManagers\Map.h" />
     <ClInclude Include="Source\Input\InputCollections.h" />
     <ClInclude Include="Source\Helpers\EnumHelper.h" />
     <ClInclude Include="Source\Helpers\GraphicsHelper.h" />
-    <ClInclude Include="Source\States\GameState.h" />
-    <ClInclude Include="Source\States\MenuState.h" />
-    <ClInclude Include="Source\States\MenuTemplate.h" />
-    <ClInclude Include="Source\States\PauseState.h" />
     <ClInclude Include="Source\Controllers\PlayerController.h" />
     <ClInclude Include="Source\Debug\FPSMeter.h" />
     <ClInclude Include="Source\Commands\CommandQueue.h" />
@@ -151,24 +137,17 @@ IF %ERRORLEVEL% LEQ 1 exit 0</Command>
     <ClInclude Include="Source\Rendering\Renderer.h" />
     <ClInclude Include="Source\Actors\CameraActor.h" />
     <ClInclude Include="Source\Game.h" />
-    <ClInclude Include="Source\Actors\AvatarActor.h" />
     <ClInclude Include="Source\Rendering\RenderInfo.h" />
     <ClInclude Include="Source\ResourceManagers\ResourceIdentifiers.h" />
     <ClInclude Include="Source\Actors\Actor.h" />
     <ClInclude Include="Source\Actors\MovableActor.h" />
     <ClInclude Include="Source\ResourceManagers\ResourceManager.h" />
-    <ClInclude Include="Source\States\SettingState.h" />
-    <ClInclude Include="Source\States\State.h" />
-    <ClInclude Include="Source\States\StateIdentifiers.h" />
     <ClInclude Include="Source\Actors\SpriteActor.h" />
-    <ClInclude Include="Source\States\StateStack.h" />
+    <ClInclude Include="source\States\StateStack.h" />
     <ClInclude Include="Source\Units\Units.h" />
-    <ClInclude Include="Source\Worlds\World.h" />
-    <ClInclude Include="Source\States\TitleState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\ResourceManagers\ResourceManager.inl" />
-    <None Include="Source\States\MenuTemplate.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

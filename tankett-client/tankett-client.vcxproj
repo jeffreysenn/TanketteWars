@@ -58,15 +58,15 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DisableSpecificWarnings>4100;4189;4505;</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>include\;..\alpha-core\include\;..\alpha-main\include\;..\tankett-shared\include\;</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4100;4189;4505;26812;</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>..\External\SFML\include\;../TanketteWars/source/;include\;..\alpha-core\include\;..\tankett-shared\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>..\build\;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>alpha-core.$(PlatformShortName).$(Configuration.toLower()).lib;tankett-shared.$(PlatformShortName).$(Configuration.toLower()).lib;alpha-main.$(PlatformShortName).$(Configuration.toLower()).lib;kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;dsound.lib;dxguid.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>..\External\SFML\lib;..\build\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-window-d.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-main-d.lib;TanketteWars.$(PlatformShortName).$(Configuration.toLower()).lib;alpha-core.$(PlatformShortName).$(Configuration.toLower()).lib;tankett-shared.$(PlatformShortName).$(Configuration.toLower()).lib;alpha-main.$(PlatformShortName).$(Configuration.toLower()).lib;kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;dsound.lib;dxguid.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -77,24 +77,52 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DisableSpecificWarnings>4100;4189;4505;</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>include\;..\alpha-core\include\;..\alpha-main\include\;..\tankett-shared\include\;</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4100;4189;4505;26812;</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>..\External\SFML\include\;../TanketteWars/source/;include\;..\alpha-core\include\;..\tankett-shared\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\build\;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>alpha-core.$(PlatformShortName).$(Configuration.toLower()).lib;tankett-shared.$(PlatformShortName).$(Configuration.toLower()).lib;alpha-main.$(PlatformShortName).$(Configuration.toLower()).lib;kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;dsound.lib;dxguid.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\External\SFML\lib;..\build\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-window.lib;sfml-system.lib;sfml-graphics.lib;sfml-audio.lib;sfml-main.lib;alpha-core.$(PlatformShortName).$(Configuration.toLower()).lib;tankett-shared.$(PlatformShortName).$(Configuration.toLower()).lib;alpha-main.$(PlatformShortName).$(Configuration.toLower()).lib;kernel32.lib;user32.lib;gdi32.lib;opengl32.lib;dsound.lib;dxguid.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\tankett_client.cc" />
+    <ClCompile Include="source\ClientNetworkManager.cpp" />
+    <ClCompile Include="source\ClientState.cpp" />
+    <ClCompile Include="source\ClientStateStack.cpp" />
+    <ClCompile Include="source\ConnectState.cpp" />
+    <ClCompile Include="source\CreditState.cpp" />
+    <ClCompile Include="source\GameState.cpp" />
+    <ClCompile Include="source\MenuState.cpp" />
+    <ClCompile Include="source\PauseState.cpp" />
+    <ClCompile Include="source\SettingState.cpp" />
+    <ClCompile Include="source\TanketteWarClient.cpp" />
+    <ClCompile Include="source\TitleState.cpp" />
+    <ClCompile Include="source\World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\tankett_client.h" />
+    <ClInclude Include="include\ClientContext.h" />
+    <ClInclude Include="include\ClientState.h" />
+    <ClInclude Include="include\ClientStateStack.h" />
+    <ClInclude Include="include\ConnectState.h" />
+    <ClInclude Include="include\CreditState.h" />
+    <ClInclude Include="include\GameState.h" />
+    <ClInclude Include="include\MenuState.h" />
+    <ClInclude Include="include\MenuTemplate.h" />
+    <ClInclude Include="include\PauseState.h" />
+    <ClInclude Include="include\SettingState.h" />
+    <ClInclude Include="include\StateIdentifiers.h" />
+    <ClInclude Include="include\TanketteWarClient.h" />
+    <ClInclude Include="include\ClientNetworkManager.h" />
+    <ClInclude Include="include\TitleState.h" />
+    <ClInclude Include="include\World.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="source\MenuTemplate.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
