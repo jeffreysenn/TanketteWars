@@ -1,5 +1,7 @@
 #pragma once
 #include "ServerState.h"
+namespace server
+{
 
 class WaitingState : public ServerState
 {
@@ -8,3 +10,5 @@ public:
 
 	void processMessages() override;
 };
+
+}

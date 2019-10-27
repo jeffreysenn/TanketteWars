@@ -93,21 +93,23 @@
   <ItemGroup>
     <ClCompile Include="source\EndState.cpp" />
     <ClCompile Include="source\GameState.cpp" />
-    <ClCompile Include="source\ServerNetworkManager.cc" />
+    <ClCompile Include="source\NetworkManager.cc" />
     <ClCompile Include="source\ServerState.cpp" />
     <ClCompile Include="source\ServerStateStack.cpp" />
     <ClCompile Include="source\TanketteWarServer.cpp" />
     <ClCompile Include="source\WaitingState.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\EndState.h" />
     <ClInclude Include="include\GameState.h" />
-    <ClInclude Include="include\ServerContext.h" />
-    <ClInclude Include="include\ServerNetworkManager.h" />
+    <ClInclude Include="include\Context.h" />
+    <ClInclude Include="include\NetworkManager.h" />
     <ClInclude Include="include\ServerState.h" />
     <ClInclude Include="include\ServerStateStack.h" />
     <ClInclude Include="include\TanketteWarServer.h" />
     <ClInclude Include="include\WaitingState.h" />
+    <ClInclude Include="include\World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

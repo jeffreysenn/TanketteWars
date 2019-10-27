@@ -13,7 +13,10 @@
 using namespace alpha;
 using namespace tankett;
 
-class ServerNetworkManager
+namespace server
+{
+
+class NetworkManager
 {
 public:
 	struct challenge
@@ -38,7 +41,7 @@ public:
 	};
 
 public:
-	ServerNetworkManager();
+	NetworkManager();
 
 	bool init();
 	void shut();
@@ -64,3 +67,5 @@ private:
 };
 
 #endif // !TANKETT_SERVER_H_INCLUDED
+
+}

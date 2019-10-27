@@ -1,12 +1,14 @@
 #include "PauseState.h"
-#include "ClientContext.h"
+#include "Context.h"
 #include "ClientStateStack.h"
+namespace client
+{
 
 PauseState::PauseState()
 	: MenuTemplate(PauseOptionNames, static_cast<int>(PauseOption::COUNT))
 {
-	mBackgroundShape.setFillColor(sf::Color(0, 0, 0, 80));
-	mBackgroundShape.setSize(sf::Vector2f(getRenderWindow().getSize()));
+	mBackgroundShape.setFillColor(::sf::Color(0, 0, 0, 80));
+	mBackgroundShape.setSize(::sf::Vector2f(getRenderWindow().getSize()));
 }
 
 void PauseState::draw()
@@ -17,9 +19,14 @@ void PauseState::draw()
 	MenuTemplate<PauseOption>::draw();
 }
 
+bool PauseState::update(float deltaSeconds)
+{
+	return true;
+}
+
 void PauseState::handleConfirmInput()
 {
-	ClientStateStack& stack = *ClientContext::getInstance().stack;
+	ClientStateStack& stack = *Context::getInstance().stack;
 	switch (getCurrentOption())
 	{
 	case PauseOption::Resume:
@@ -32,4 +39,6 @@ void PauseState::handleConfirmInput()
 	default:
 		break;
 	}
+}
+
 }

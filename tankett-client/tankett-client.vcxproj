@@ -91,8 +91,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\ClientNetworkManager.cpp" />
-    <ClCompile Include="source\ClientState.cpp" />
+    <ClCompile Include="source\NetworkManager.cpp" />
+    <ClCompile Include="source\StateBase.cpp" />
     <ClCompile Include="source\ClientStateStack.cpp" />
     <ClCompile Include="source\ConnectState.cpp" />
     <ClCompile Include="source\CreditState.cpp" />
@@ -105,8 +105,8 @@
     <ClCompile Include="source\World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\ClientContext.h" />
-    <ClInclude Include="include\ClientState.h" />
+    <ClInclude Include="include\Context.h" />
+    <ClInclude Include="include\StateBase.h" />
     <ClInclude Include="include\ClientStateStack.h" />
     <ClInclude Include="include\ConnectState.h" />
     <ClInclude Include="include\CreditState.h" />
@@ -117,7 +117,7 @@
     <ClInclude Include="include\SettingState.h" />
     <ClInclude Include="include\StateIdentifiers.h" />
     <ClInclude Include="include\TanketteWarClient.h" />
-    <ClInclude Include="include\ClientNetworkManager.h" />
+    <ClInclude Include="include\NetworkManager.h" />
     <ClInclude Include="include\TitleState.h" />
     <ClInclude Include="include\World.h" />
   </ItemGroup>

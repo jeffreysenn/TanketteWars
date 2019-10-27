@@ -1,17 +1,17 @@
 #include "GameState.h"
 #include "StateIdentifiers.h"
-#include "ClientContext.h"
+#include "Context.h"
 #include "ClientStateStack.h"
 #include <SFML/Window/Event.hpp>
 
-
+namespace client
+{
 GameState::GameState()
 try : mWorld()
-	, mPlayerController(*ClientContext::getInstance().playerController)
-	, mFrameNum(0)
+, mFrameNum(0)
 {
 }
-catch (const std::runtime_error& e)
+catch (const std::runtime_error & e)
 {
 	std::cout << "Exception: " << e.what() << std::endl;
 	// making sure the world is constructed successfully
@@ -26,7 +26,14 @@ bool GameState::update(float deltaSeconds)
 {
 	++mFrameNum;
 	mWorld.update(deltaSeconds);
-	mPlayerController.handleRealtimeInput(mWorld.getCommandQueue(), mFrameNum);
+	if (Context::getInstance().isWindowFocused)
+	{
+		for (auto& playerController : mPlayerControllers)
+		{
+			playerController.handleRealtimeInput(mWorld.getCommandQueue(), mFrameNum);
+		}
+	}
+
 	return true;
 }
 
@@ -35,12 +42,16 @@ void GameState::draw()
 	mWorld.draw();
 }
 
-bool GameState::handleEvent(const sf::Event & event)
+bool GameState::handleEvent(const ::sf::Event& event)
 {
-	mPlayerController.handleEvent(event, mWorld.getCommandQueue(), mFrameNum);
+	for (auto& playerController : mPlayerControllers)
+	{
+		playerController.handleEvent(event, mWorld.getCommandQueue(), mFrameNum);
+	}
 
-	if(Input::eventInputCollectionPressed(event, mPauseInputs))
-		ClientContext::getInstance().stack->pushState(StateID::Pause);
+	if (Input::eventInputCollectionPressed(event, mPauseInputs))
+		Context::getInstance().stack->pushState(StateID::Pause);
 
 	return true;
+}
 }

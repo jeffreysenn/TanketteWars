@@ -2,6 +2,8 @@
 #include "MenuTemplate.h"
 
 #include <SFML/Graphics/RectangleShape.hpp>
+namespace client
+{
 
 enum class PauseOption
 {
@@ -23,11 +25,14 @@ public:
 	PauseState();
 
 	void draw() override;
+	bool update(float deltaSeconds) override;
 
 private:
 	void handleConfirmInput() override;
 
 private:
-	sf::RectangleShape mBackgroundShape;
+	::sf::RectangleShape mBackgroundShape;
 };
 
+
+}

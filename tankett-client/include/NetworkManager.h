@@ -6,8 +6,10 @@
 
 using namespace alpha;
 using namespace tankett;
+namespace client
+{
 
-class ClientNetworkManager
+class NetworkManager
 {
 public:
 	enum class ConnectionState
@@ -19,15 +21,15 @@ public:
 	};
 
 public:
-	ClientNetworkManager();
-	~ClientNetworkManager();
+	NetworkManager();
+	~NetworkManager();
 
 	void send();
 	void receive();
 
 	void setState(const ConnectionState& state) { mState = state; }
 	ConnectionState getState() { return mState; }
-	
+
 	std::vector<std::unique_ptr<network_message_header>>& getReceivedMessages() { return mReceivedMessages; }
 private:
 	void processMessages();
@@ -45,3 +47,5 @@ private:
 	uint32 mClientSequence;
 };
 
+
+}

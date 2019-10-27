@@ -1,4 +1,6 @@
 #include "ServerStateStack.h"
+namespace server
+{
 
 ServerStateStack::ServerStateStack()
 {
@@ -12,4 +14,6 @@ void ServerStateStack::processMessages()
 	}
 
 	applyPendingChanges();
+}
+
 }

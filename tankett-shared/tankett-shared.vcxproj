@@ -11,10 +11,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Bullet.h" />
+    <ClInclude Include="include\Map.h" />
+    <ClInclude Include="include\PlayerController.h" />
+    <ClInclude Include="include\Tank.h" />
     <ClInclude Include="include\tankett_debug.h" />
     <ClInclude Include="include\tankett_shared.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Bullet.cpp" />
+    <ClCompile Include="source\Map.cpp" />
+    <ClCompile Include="source\PlayerController.cpp" />
+    <ClCompile Include="source\Tank.cpp" />
     <ClCompile Include="source\tankett_debug.cc" />
     <ClCompile Include="source\tankett_shared.cc" />
   </ItemGroup>
@@ -70,7 +78,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <DisableSpecificWarnings>4100;4189;4505;</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>include\;..\alpha-core\include\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include\;..\alpha-core\include\;..\MeowEngine\include;..\External\SFML\include\;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -87,7 +95,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DisableSpecificWarnings>4100;4189;4505;</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>include\;..\alpha-core\include\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include\;..\alpha-core\include\;..\MeowEngine\include;..\External\SFML\include\;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

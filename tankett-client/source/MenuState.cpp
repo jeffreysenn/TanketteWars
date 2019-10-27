@@ -1,6 +1,8 @@
 #include "MenuState.h"
-#include "ClientContext.h"
+#include "Context.h"
 #include "ClientStateStack.h"
+namespace client
+{
 
 MenuState::MenuState()
 	: MenuTemplate(Menu::OptionNames, static_cast<int>(Menu::Option::COUNT))
@@ -17,7 +19,7 @@ void MenuState::draw()
 
 void MenuState::handleConfirmInput()
 {
-	ClientStateStack& stack = *ClientContext::getInstance().stack;
+	ClientStateStack& stack = *Context::getInstance().stack;
 
 	switch (getCurrentOption())
 	{
@@ -44,10 +46,11 @@ void MenuState::handleConfirmInput()
 
 void MenuState::setupBackgroundSprite()
 {
-	auto & backgroungTexture = *ClientContext::getInstance().textureManager->get(Texture::Back);
+	auto& backgroungTexture = *Context::getInstance().textureManager->get(Texture::Back);
 	backgroungTexture.setRepeated(true);
 	mBackgroundSprite.setTexture(backgroungTexture);
-	sf::IntRect rect(0, 0, getRenderWindow().getSize().x, getRenderWindow().getSize().y);
+	::sf::IntRect rect(0, 0, getRenderWindow().getSize().x, getRenderWindow().getSize().y);
 	// TODO: make scale adaptable to different resolutions
 	mBackgroundSprite.setScale(3, 3);
+}
 }

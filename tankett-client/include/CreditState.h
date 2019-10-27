@@ -4,19 +4,21 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 
 using namespace mw;
+namespace client
+{
 
 namespace Credit
 {
-	enum class Option
-	{
-		Back,
-		COUNT,
-	};
+enum class Option
+{
+	Back,
+	COUNT,
+};
 
-	static const char* OptionNames[static_cast<int>(Option::COUNT)] =
-	{
-		"Back",
-	};
+static const char* OptionNames[static_cast<int>(Option::COUNT)] =
+{
+	"Back",
+};
 }
 
 
@@ -30,7 +32,9 @@ public:
 private:
 	void handleConfirmInput() override;
 
-	sf::RectangleShape mBackgroundShape;
-	sf::Text mCreditText;
+	::sf::RectangleShape mBackgroundShape;
+	::sf::Text mCreditText;
 };
 
+
+}

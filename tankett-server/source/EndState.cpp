@@ -1,6 +1,10 @@
 #include "EndState.h"
-#include "ServerContext.h"
+#include "Context.h"
+namespace server
+{
 
 EndState::EndState()
 {
+}
+
 }

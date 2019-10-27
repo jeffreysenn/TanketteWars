@@ -7,16 +7,18 @@
 
 namespace mw
 {
-	Game* Game::create()
-	{
-		return new TanketteWarServer();
-	}
+Game* Game::create()
+{
+	return new ::server::TanketteWarServer();
+}
 }
 
+namespace server
+{
 TanketteWarServer::TanketteWarServer()
 {
 	init();
-	ServerContext& context = ServerContext::getInstance();
+	Context& context = Context::getInstance();
 	context.networkManager = &mNetworkManager;
 	context.stack = &mStateStack;
 }
@@ -46,8 +48,6 @@ void TanketteWarServer::run()
 		// network fixed send
 		timeSinceLastSend += lastLoopDuration;
 
-		mStateStack.processMessages();
-
 		while (timeSinceLastSend > networkInterval)
 		{
 			mNetworkManager.send();
@@ -55,6 +55,10 @@ void TanketteWarServer::run()
 		}
 
 		mNetworkManager.receive();
+
+		mStateStack.processMessages();
 	}
 }
 
+
+}

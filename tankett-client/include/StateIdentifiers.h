@@ -1,4 +1,6 @@
 #pragma once
+namespace client
+{
 
 enum class StateID
 {
@@ -13,3 +15,4 @@ enum class StateID
 	Connect,
 	WIP,
 };
+}

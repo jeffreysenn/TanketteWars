@@ -1,5 +1,5 @@
 #include "TanketteWarClient.h"
-#include "ClientState.h"
+#include "StateBase.h"
 #include "TitleState.h"
 #include "MenuState.h"
 #include "GameState.h"
@@ -7,7 +7,7 @@
 #include "CreditState.h"
 #include "SettingState.h"
 #include "ConnectState.h"
-#include "ClientContext.h"
+#include "Context.h"
 
 
 #include <SFML/Window/Event.hpp>
@@ -19,19 +19,20 @@
 
 namespace mw
 {
-	Game* Game::create()
-	{
-		return new TanketteWarClient();
-	}
+Game* Game::create()
+{
+	return new client::TanketteWarClient();
 }
+}
+namespace client
+{
 
 TanketteWarClient::TanketteWarClient()
-	try 
+try
 	: mWindow(
-	sf::VideoMode(960, 540),
+	::sf::VideoMode(960, 540),
 	"Tankket Wars",
-	sf::Style::Titlebar | sf::Style::Close)
-	, mPlayerController(mWindow)
+	::sf::Style::Titlebar | ::sf::Style::Close)
 	, mStateStack()
 	, mFPSMeter(mStatsText)
 {
@@ -44,15 +45,14 @@ TanketteWarClient::TanketteWarClient()
 	mStatsText.setFont(*mFontManager.get(Font::MineCraft));
 	mStatsText.setCharacterSize(20);
 	mStatsText.setPosition(10, 10);
-	mStatsText.setFillColor(sf::Color::Magenta);
+	mStatsText.setFillColor(::sf::Color::Magenta);
 
 	registerStates();
 	mStateStack.pushState(StateID::Title);
 
-	ClientContext& context = ClientContext::getInstance();
+	Context& context = Context::getInstance();
 	context.stack = &mStateStack;
 	context.window = &mWindow;
-	context.playerController = &mPlayerController;
 	context.fontManager = &mFontManager;
 	context.textureManager = &mTextureManager;
 	context.mapManager = &mMapManager;
@@ -65,17 +65,17 @@ catch (const std::runtime_error & e)
 	std::terminate();
 }
 
-const sf::Time updateInterval = sf::seconds(1.f / 60.f);
-const sf::Time networkInterval = sf::seconds(1.f / PROTOCOL_SEND_PER_SEC);
+const ::sf::Time updateInterval = ::sf::seconds(1.f / 60.f);
+const ::sf::Time networkInterval = ::sf::seconds(1.f / PROTOCOL_SEND_PER_SEC);
 void TanketteWarClient::run()
 {
-	sf::Clock clock;
-	sf::Time timeSinceLastUpdate = sf::Time::Zero;
-	sf::Time timeSinceLastNetwork = sf::Time::Zero;
+	::sf::Clock clock;
+	::sf::Time timeSinceLastUpdate = ::sf::Time::Zero;
+	::sf::Time timeSinceLastNetwork = ::sf::Time::Zero;
 
 	while (mWindow.isOpen())
 	{
-		sf::Time lastLoopDuration = clock.getElapsedTime();
+		::sf::Time lastLoopDuration = clock.getElapsedTime();
 		// network fixed send
 		timeSinceLastNetwork += lastLoopDuration;
 
@@ -119,14 +119,20 @@ void TanketteWarClient::registerStates()
 
 void TanketteWarClient::handleInputs()
 {
-	sf::Event event;
+	::sf::Event event;
 	while (mWindow.pollEvent(event))
 	{
 		mStateStack.handleEvent(event);
 
 		// Closing window events
-		if (event.type == sf::Event::Closed)
+		if (event.type == ::sf::Event::Closed)
 			mStateStack.clearStates();
+
+		bool& isWindowFocused = Context::getInstance().isWindowFocused;
+		if (event.type == ::sf::Event::GainedFocus)
+			isWindowFocused = true;
+		if (event.type == ::sf::Event::LostFocus)
+			isWindowFocused = false;
 	}
 }
 
@@ -147,4 +153,6 @@ void TanketteWarClient::render()
 	mWindow.draw(mStatsText);
 
 	mWindow.display();
+}
+
 }

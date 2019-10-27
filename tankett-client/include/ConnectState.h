@@ -2,20 +2,22 @@
 #include "MenuTemplate.h"
 #include <SFML/Graphics/RectangleShape.hpp>
 
+namespace client
+{
+
 namespace Connect
 {
-	enum class Option
-	{
-		Back,
-		COUNT,
-	};
+enum class Option
+{
+	Back,
+	COUNT,
+};
 
-	static const char* OptionNames[static_cast<int>(Option::COUNT)] =
-	{
-		"Back",
-	};
+static const char* OptionNames[static_cast<int>(Option::COUNT)] =
+{
+	"Back",
+};
 }
-
 
 class ConnectState : public MenuTemplate<Connect::Option>
 {
@@ -29,7 +31,8 @@ public:
 private:
 	void handleConfirmInput() override;
 
-	sf::RectangleShape mBackgroundShape;
-	sf::Text mConnectText;
-	class ClientNetworkManager& mNetworkManager;
+	::sf::RectangleShape mBackgroundShape;
+	::sf::Text mConnectText;
+	class NetworkManager& mNetworkManager;
 };
+}

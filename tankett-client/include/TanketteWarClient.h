@@ -1,16 +1,18 @@
 #pragma once
 #include "Game.h"
 #include "tankett_shared.h"
-#include "ClientNetworkManager.h"
+#include "NetworkManager.h"
 #include "World.h"
 #include "Debug/FPSMeter.h"
-#include "Controllers/PlayerController.h"
+#include "PlayerController.h"
 #include "ResourceManagers/ResourceIdentifiers.h"
 #include "ClientStateStack.h"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
 
+namespace client
+{
 
 class TanketteWarClient : public Game
 {
@@ -28,8 +30,7 @@ private:
 	void render();
 
 private:
-	sf::RenderWindow mWindow;
-	PlayerController mPlayerController;
+	::sf::RenderWindow mWindow;
 
 	TextureManager mTextureManager;
 	FontManager mFontManager;
@@ -37,9 +38,11 @@ private:
 
 	ClientStateStack mStateStack;
 
-	sf::Text mStatsText;
+	::sf::Text mStatsText;
 	FPSMeter mFPSMeter;
 
-	ClientNetworkManager mNetworkManager;
+	NetworkManager mNetworkManager;
 };
 
+
+}

@@ -12,14 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Actors\Actor.h" />
-    <ClInclude Include="include\Actors\Bullet.h" />
     <ClInclude Include="include\Actors\CameraActor.h" />
     <ClInclude Include="include\Actors\MovableActor.h" />
     <ClInclude Include="include\Actors\Obstacle.h" />
     <ClInclude Include="include\Actors\Pawn.h" />
     <ClInclude Include="include\Actors\SceneGraph.h" />
     <ClInclude Include="include\Actors\SpriteActor.h" />
-    <ClInclude Include="include\Actors\Tank.h" />
     <ClInclude Include="include\Collisions\Collider.h" />
     <ClInclude Include="include\Collisions\CollisionIdentifiers.h" />
     <ClInclude Include="include\Collisions\PhysicsEngine.h" />
@@ -27,7 +25,6 @@
     <ClInclude Include="include\Commands\CommandCategory.h" />
     <ClInclude Include="include\Commands\CommandQueue.h" />
     <ClInclude Include="include\Commands\Flags.h" />
-    <ClInclude Include="include\Controllers\PlayerController.h" />
     <ClInclude Include="include\Debug\FPSMeter.h" />
     <ClInclude Include="include\Game.h" />
     <ClInclude Include="include\Helpers\Helper.h" />
@@ -35,11 +32,10 @@
     <ClInclude Include="include\Input\InputCollections.h" />
     <ClInclude Include="include\Rendering\Renderer.h" />
     <ClInclude Include="include\Rendering\RenderInfo.h" />
-    <ClInclude Include="include\ResourceManagers\Map.h" />
     <ClInclude Include="include\ResourceManagers\ResourceIdentifiers.h" />
     <ClInclude Include="include\ResourceManagers\ResourceManager.h" />
     <ClInclude Include="include\States\StateStack.h" />
-    <ClInclude Include="include\Units\Units.h" />
+    <ClInclude Include="include\Units\unit.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\ResourceManagers\ResourceManager.inl" />
@@ -47,21 +43,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Actors\Actor.cpp" />
-    <ClCompile Include="source\Actors\Bullet.cpp" />
     <ClCompile Include="source\Actors\CameraActor.cpp" />
     <ClCompile Include="source\Actors\MovableActor.cpp" />
     <ClCompile Include="source\Actors\Obstacle.cpp" />
     <ClCompile Include="source\Actors\SceneGraph.cpp" />
     <ClCompile Include="source\Actors\SpriteActor.cpp" />
-    <ClCompile Include="source\Actors\Tank.cpp" />
     <ClCompile Include="source\Collisions\PhysicsEngine.cpp" />
-    <ClCompile Include="source\Controllers\PlayerController.cpp" />
     <ClCompile Include="source\Debug\FPSMeter.cpp" />
     <ClCompile Include="source\Game.cpp" />
     <ClCompile Include="source\Input\Input.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\Rendering\Renderer.cpp" />
-    <ClCompile Include="source\ResourceManagers\Map.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

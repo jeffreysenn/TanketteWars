@@ -32,7 +32,7 @@ try : mWindow(
 	mWindow.setKeyRepeatEnabled(true);
 
 	mTextureManager.load(Texture::Back,
-			 "../Assets/sunny-land-files/environment/back.png");
+						 "../Assets/sunny-land-files/environment/back.png");
 
 	mFontManager.load(Font::MineCraft, "../Assets/Fonts/Minecraft.ttf");
 	mStatsText.setFont(*mFontManager.get(Font::MineCraft));
@@ -43,7 +43,7 @@ try : mWindow(
 	registerStates();
 	mStateStack.pushState(StateID::Title);
 }
-catch (const ::std::runtime_error& e)
+catch (const ::std::runtime_error & e)
 {
 	::std::cout << "Exception: " << e.what() << ::std::endl;
 	::std::terminate();

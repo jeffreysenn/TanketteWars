@@ -1,5 +1,7 @@
 #include "ServerState.h"
-#include "ServerContext.h"
+#include "Context.h"
+namespace server
+{
 
 ServerState::ServerState()
 {
@@ -7,4 +9,6 @@ ServerState::ServerState()
 
 void ServerState::processMessages()
 {
+}
+
 }

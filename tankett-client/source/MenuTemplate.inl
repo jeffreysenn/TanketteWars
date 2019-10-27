@@ -15,9 +15,9 @@ bool MenuTemplate<EnumClass>::update(float deltaSeconds)
 }
 
 template<typename EnumClass>
-bool MenuTemplate<EnumClass>::handleEvent(const sf::Event & event)
+bool MenuTemplate<EnumClass>::handleEvent(const ::sf::Event& event)
 {
-	if (event.type != sf::Event::KeyPressed)
+	if (event.type != ::sf::Event::KeyPressed)
 		return false;
 
 	if (Input::eventInputCollectionPressed(event, Input::Collections::confirmInputs))
@@ -45,11 +45,11 @@ void MenuTemplate<EnumClass>::draw()
 template<typename EnumClass>
 void MenuTemplate<EnumClass>::updateOptions()
 {
-	for (auto &pair : mOptionMap)
+	for (auto& pair : mOptionMap)
 	{
-		pair.second->setFillColor(sf::Color::Black);
+		pair.second->setFillColor(::sf::Color::Black);
 	}
-	mOptionMap[mCurrentOption]->setFillColor(sf::Color::Green);
+	mOptionMap[mCurrentOption]->setFillColor(::sf::Color::Green);
 }
 
 template<typename EnumClass>
@@ -58,8 +58,8 @@ void MenuTemplate<EnumClass>::setupOptions()
 	for (int i = 0; i < mOptionCount; ++i)
 	{
 		EnumClass option = static_cast<EnumClass>(i);
-		mOptionMap[option] = std::make_unique<sf::Text>();
-		sf::Text &text = *mOptionMap[option];
+		mOptionMap[option] = std::make_unique<::sf::Text>();
+		::sf::Text& text = *mOptionMap[option];
 		setupOptionsText(text, option);
 		setupOptionsTextLocation(text, option);
 	}
@@ -69,29 +69,29 @@ void MenuTemplate<EnumClass>::setupOptions()
 
 
 template<typename EnumClass>
-void MenuTemplate<EnumClass>::setupOptionsText(sf::Text& text, const EnumClass &option)
+void MenuTemplate<EnumClass>::setupOptionsText(::sf::Text& text, const EnumClass& option)
 {
 	text.setString(helper::Enum::getText(option, mOptionNames));
 	text.setFont(*getContext().fontManager->get(Font::MineCraft));
 	text.setCharacterSize(40);
 	helper::Graphics::centreOrigin(text);
-	text.setFillColor(sf::Color::Black);
+	text.setFillColor(::sf::Color::Black);
 }
 
 template<typename EnumClass>
-void MenuTemplate<EnumClass>::setupOptionsTextLocation(sf::Text &text, const EnumClass & option)
+void MenuTemplate<EnumClass>::setupOptionsTextLocation(::sf::Text& text, const EnumClass& option)
 {
 	const auto windowSize = getRenderWindow().getSize();
 	int optionIndex = static_cast<int>(option);
 	text.setPosition((float)windowSize.x * 3 / 4,
 		(float)windowSize.y
-		- 80 * (mOptionCount - optionIndex));
+					 - 80 * (mOptionCount - optionIndex));
 }
 
 template<typename EnumClass>
 void MenuTemplate<EnumClass>::drawOptions()
 {
-	for (auto const &pair : mOptionMap)
+	for (auto const& pair : mOptionMap)
 	{
 		getRenderWindow().draw(*pair.second);
 	}

@@ -30,24 +30,21 @@
     <ClCompile Include="source\ServerStateStack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ServerNetworkManager.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\ServerState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\WaitingState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\NetworkManager.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\TanketteWarServer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ServerContext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ServerNetworkManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\EndState.h">
@@ -64,6 +61,15 @@
     </ClInclude>
     <ClInclude Include="include\WaitingState.h">
       <Filter>Header Files\States</Filter>
+    </ClInclude>
+    <ClInclude Include="include\World.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NetworkManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,9 +1,11 @@
-#include "ClientNetworkManager.h"
-#include "..\include\ClientNetworkManager.h"
+#include "NetworkManager.h"
+#include "..\include\NetworkManager.h"
 #include "tankett_debug.h"
 #include "Helpers/Helper.h"
+namespace client
+{
 
-ClientNetworkManager::ClientNetworkManager()
+NetworkManager::NetworkManager()
 	: mClientKey(::mw::helper::Number::getRandom<uint64>())
 	, mServerKey(0u)
 	, mState(ConnectionState::None)
@@ -21,17 +23,17 @@ ClientNetworkManager::ClientNetworkManager()
 	mLocalAddr = getLocalAddr();
 }
 
-ClientNetworkManager::~ClientNetworkManager()
+NetworkManager::~NetworkManager()
 {
 	mSocket.close();
 	network_shut();
 }
 
-void ClientNetworkManager::send()
+void NetworkManager::send()
 {
 	switch (mState)
 	{
-	case ClientNetworkManager::ConnectionState::Discovering:
+	case NetworkManager::ConnectionState::Discovering:
 	{
 		uint32 broadcastHost = mLocalAddr.host_ | 0x000000ffu;
 		mServerAddr = ip_address(broadcastHost, PROTOCOL_PORT);
@@ -46,7 +48,7 @@ void ClientNetworkManager::send()
 			debugf("[err] fail to send!");
 		}
 	} break;
-	case ClientNetworkManager::ConnectionState::Challenging:
+	case NetworkManager::ConnectionState::Challenging:
 	{
 		protocol_challenge_response challengeResponse(mClientKey ^ mServerKey);
 		if (!sendPackage(mSocket, mServerAddr, challengeResponse))
@@ -54,14 +56,14 @@ void ClientNetworkManager::send()
 			debugf("[err] fail to send!");
 		}
 	} break;
-	case ClientNetworkManager::ConnectionState::Connected:
+	case NetworkManager::ConnectionState::Connected:
 	{
 		processMessages();
 	} break;
 	}
 }
 
-void ClientNetworkManager::receive()
+void NetworkManager::receive()
 {
 	uint8 receiveArr[2048];
 	byte_stream receiveStream(sizeof(receiveArr), receiveArr);
@@ -126,6 +128,7 @@ void ClientNetworkManager::receive()
 				// send the ping back immediately
 				// no need to push into received buffer
 				mMessageQueue.push_back(std::move(messagePing));
+				send();
 			} break;
 			case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
 			{
@@ -150,7 +153,7 @@ void ClientNetworkManager::receive()
 
 }
 
-void ClientNetworkManager::processMessages()
+void NetworkManager::processMessages()
 {
 	const uint32 current_sequence_number = mClientSequence++;
 	protocol_payload packet(current_sequence_number);
@@ -208,5 +211,7 @@ void ClientNetworkManager::processMessages()
 		//       - messages sent will be delete because of unique_ptr
 		mMessageQueue.erase(mMessageQueue.begin(), mMessageQueue.begin() + messages_packed);
 	}
+
+}
 
 }

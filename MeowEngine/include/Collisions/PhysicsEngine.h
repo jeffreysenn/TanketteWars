@@ -10,36 +10,36 @@
 namespace mw
 {
 
-	class PhysicsEngine
+class PhysicsEngine
+{
+public:
+	void checkCollision();
+
+	void pushCollisionInfo(Actor* actor, Collider* collider);
+
+private:
+	struct CollisionInfo
 	{
-	public:
-		void checkCollision();
+		CollisionInfo();
+		CollisionInfo(Actor* actor, Collider* collider);
+		Actor* actor;
+		Collider* collider;
+	};
 
-		void pushCollisionInfo(Actor* actor, Collider* collider);
+	void clearCollisionBuffer();
 
-	private:
-		struct CollisionInfo
-		{
-			CollisionInfo();
-			CollisionInfo(Actor* actor, Collider* collider);
-			Actor* actor;
-			Collider* collider;
-		};
+	void resolveCollision(const CollisionInfo& infoA, const CollisionInfo& infoB, const ::sf::Vector2f& penetration);
 
-		void clearCollisionBuffer();
+	::sf::FloatRect getTransformedRect(CollisionInfo collisionInfo);
 
-		void resolveCollision(const CollisionInfo& infoA, const CollisionInfo& infoB, const ::sf::Vector2f& penetration);
+	// returns a penetration vector from rect A to B, returns 0 vector when no penetration
+	::sf::Vector2f getPenetration(const ::sf::FloatRect& rectA, const ::sf::FloatRect& rectB) const;
 
-		::sf::FloatRect getTransformedRect(CollisionInfo collisionInfo);
-
-		// returns a penetration vector from rect A to B, returns 0 vector when no penetration
-		::sf::Vector2f getPenetration(const ::sf::FloatRect& rectA, const ::sf::FloatRect& rectB) const;
-
-	private:
+private:
 #define type_cast static_cast<Collision::ObjectType>
 
-		::std::array<::std::vector<CollisionInfo>, Collision::objectTypeCount> mCollisionBuffer;
-	};
+	::std::array<::std::vector<CollisionInfo>, Collision::objectTypeCount> mCollisionBuffer;
+};
 
 
 }

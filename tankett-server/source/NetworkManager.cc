@@ -1,10 +1,12 @@
 // tankett_server.cc
 
 #include "tankett_debug.h"
-#include "ServerNetworkManager.h"
+#include "NetworkManager.h"
 #include "Helpers/helper.h"
+namespace server
+{
 
-ServerNetworkManager::ServerNetworkManager()
+NetworkManager::NetworkManager()
 {
 	if (init())
 		debugf("[nfo] server running at %s", mlocal.as_string());
@@ -12,7 +14,7 @@ ServerNetworkManager::ServerNetworkManager()
 		debugf("[err] could not initialize server!");
 }
 
-bool ServerNetworkManager::init()
+bool NetworkManager::init()
 {
 	if (!network_init())
 	{
@@ -29,13 +31,13 @@ bool ServerNetworkManager::init()
 	return true;
 }
 
-void ServerNetworkManager::shut()
+void NetworkManager::shut()
 {
 	mSocket.close();
 	network_shut();
 }
 
-void ServerNetworkManager::receive()
+void NetworkManager::receive()
 {
 	uint8 base[2048];
 	byte_stream receive_stream(sizeof(base), base);
@@ -104,13 +106,13 @@ void ServerNetworkManager::receive()
 
 	case tankett::PACKET_TYPE_PAYLOAD:
 	{
-		if(mClients.find(OUT_addr) == mClients.end())
+		if (mClients.find(OUT_addr) == mClients.end())
 			break;
 
 		protocol_payload packet;
 		if (!packet.read(reader))
 		{
-			debugf("[err] IP: %s fail to read payload" , OUT_addr.as_string());
+			debugf("[err] IP: %s fail to read payload", OUT_addr.as_string());
 			break;
 		}
 
@@ -122,19 +124,9 @@ void ServerNetworkManager::receive()
 		bool shouldRead = true;
 		while (!payload_reader.eos() && shouldRead)
 		{
-			network_message_type message_type = (network_message_type) payload_reader.peek();
+			network_message_type message_type = (network_message_type)payload_reader.peek();
 			switch (message_type)
 			{
-			case tankett::NETWORK_MESSAGE_PING:
-			{
-				network_message_ping* message_ping = new network_message_ping;
-				if (!message_ping->read(payload_reader))
-				{
-					// error
-				}
-				mClients[OUT_addr].sendMessageQueue.push_back(message_ping);
-			} break;
-
 			case tankett::NETWORK_MESSAGE_CLIENT_TO_SERVER:
 			{
 				message_client_to_server* message_c2s = new message_client_to_server;
@@ -157,7 +149,7 @@ void ServerNetworkManager::receive()
 
 }
 
-void ServerNetworkManager::send()
+void NetworkManager::send()
 {
 	for (auto& challenge : mChallenges)
 	{
@@ -171,7 +163,7 @@ void ServerNetworkManager::send()
 	processClientQueues();
 }
 
-void ServerNetworkManager::pushMessage(const ip_address& clientAddr, network_message_header* message)
+void NetworkManager::pushMessage(const ip_address& clientAddr, network_message_header* message)
 {
 	auto found = mClients.find(clientAddr);
 	if (found == mClients.end())
@@ -182,7 +174,7 @@ void ServerNetworkManager::pushMessage(const ip_address& clientAddr, network_mes
 	found->second.sendMessageQueue.push_back(message);
 }
 
-void ServerNetworkManager::processClientQueues()
+void NetworkManager::processClientQueues()
 {
 	// note: use the same server sequence number for all sends
 	const uint32 current_sequence_number = mServerSequence++;
@@ -257,7 +249,7 @@ void ServerNetworkManager::processClientQueues()
 	}
 }
 
-void ServerNetworkManager::clearAllClientsReceivedMessages()
+void NetworkManager::clearAllClientsReceivedMessages()
 {
 	for (auto& client : mClients)
 	{
@@ -265,11 +257,13 @@ void ServerNetworkManager::clearAllClientsReceivedMessages()
 	}
 }
 
-void ServerNetworkManager::client::clear_received_messages()
+void NetworkManager::client::clear_received_messages()
 {
 	for (auto& received_message : receivedMessages)
 	{
 		delete received_message;
 	}
 	receivedMessages.clear();
+}
+
 }

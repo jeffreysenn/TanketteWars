@@ -4,8 +4,8 @@
 namespace mw
 {
 
-	namespace Flags
-	{
-		CommandCategory AvatarNEnemy = CommandCategory::Avatar | CommandCategory::Enemy;
-	}
+namespace Flags
+{
+CommandCategory AvatarNEnemy = CommandCategory::Avatar | CommandCategory::Enemy;
+}
 }

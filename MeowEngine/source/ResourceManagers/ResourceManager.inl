@@ -14,7 +14,7 @@ ResourceManager<ResourceType, IdentityType>::~ResourceManager()
 }
 
 template<typename ResourceType, typename IdentityType>
-bool ResourceManager<ResourceType, IdentityType>::load(IdentityType id, const ::std::string &fileName)
+bool ResourceManager<ResourceType, IdentityType>::load(IdentityType id, const ::std::string& fileName)
 {
 	// In case of multiple loading
 	if (mResourceMap.find(id) != mResourceMap.end())
@@ -32,7 +32,7 @@ bool ResourceManager<ResourceType, IdentityType>::load(IdentityType id, const ::
 
 template<typename ResourceType, typename IdentityType>
 template<typename SecondType>
-bool ResourceManager<ResourceType, IdentityType>::load(IdentityType id, const ::std::string & fileName, const SecondType & secondParam)
+bool ResourceManager<ResourceType, IdentityType>::load(IdentityType id, const ::std::string& fileName, const SecondType& secondParam)
 {
 	// In case of multiple loading
 	if (mResourceMap.find(id) != mResourceMap.end())

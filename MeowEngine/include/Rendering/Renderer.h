@@ -8,21 +8,21 @@
 namespace mw
 {
 
-	class Renderer : public ::sf::Drawable
-	{
-	public:
-		Renderer();
-		~Renderer();
+class Renderer : public ::sf::Drawable
+{
+public:
+	Renderer();
+	~Renderer();
 
-		void draw(::sf::RenderTarget& target, ::sf::RenderStates states = ::sf::RenderStates::Default) const override;
+	void draw(::sf::RenderTarget& target, ::sf::RenderStates states = ::sf::RenderStates::Default) const override;
 
-		void pushRenderInfo(const RenderInfo renderInfo, Rendering::Layer layer);
+	void pushRenderInfo(const RenderInfo renderInfo, Rendering::Layer layer);
 
-		void clearRenderBuffer();
+	void clearRenderBuffer();
 
-	private:
-		::std::array<::std::vector<RenderInfo>, Rendering::LayerCount> mRenderBuffer;
-	};
+private:
+	::std::array<::std::vector<RenderInfo>, Rendering::LayerCount> mRenderBuffer;
+};
 
 
 }

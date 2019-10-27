@@ -4,12 +4,12 @@
 
 namespace mw
 {
-	class CameraActor : public ::sf::View, public MovableActor
-	{
-	public:
-		CameraActor();
-		~CameraActor();
+class CameraActor : public ::sf::View, public MovableActor
+{
+public:
+	CameraActor();
+	~CameraActor();
 
-		virtual void updateSelf(float deltaSeconds) override;
-	};
+	virtual void updateSelf(float deltaSeconds) override;
+};
 }

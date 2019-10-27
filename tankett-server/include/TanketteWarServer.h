@@ -1,10 +1,12 @@
 #pragma once
 #include "Game.h"
-#include "ServerNetworkManager.h"
+#include "NetworkManager.h"
 #include "ServerStateStack.h"
-#include "ServerContext.h"
+#include "Context.h"
 
 using namespace tankett;
+namespace server
+{
 
 class TanketteWarServer : public mw::Game
 {
@@ -19,6 +21,8 @@ private:
 	void registerStates();
 
 private:
-	ServerNetworkManager mNetworkManager;
+	NetworkManager mNetworkManager;
 	ServerStateStack mStateStack;
 };
+
+}

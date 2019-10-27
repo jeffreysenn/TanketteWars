@@ -1,19 +1,21 @@
 #include "SettingState.h"
-#include "ClientContext.h"
+#include "Context.h"
 #include "ClientStateStack.h"
+namespace client
+{
 
 SettingState::SettingState()
 	: MenuTemplate<Setting::Option>(Setting::OptionNames, static_cast<int>(Setting::Option::COUNT))
 {
-	mBackgroundShape.setFillColor(sf::Color(0, 0, 0, 255));
-	mBackgroundShape.setSize(sf::Vector2f(getRenderWindow().getSize()));
+	mBackgroundShape.setFillColor(::sf::Color(0, 0, 0, 255));
+	mBackgroundShape.setSize(::sf::Vector2f(getRenderWindow().getSize()));
 
-	mCreditText.setFont(*ClientContext::getInstance().fontManager->get(Font::MineCraft));
+	mCreditText.setFont(*Context::getInstance().fontManager->get(Font::MineCraft));
 	mCreditText.setString("WIP");
-	mCreditText.setFillColor(sf::Color::Blue);
+	mCreditText.setFillColor(::sf::Color::Blue);
 	mCreditText.setCharacterSize(50);
 	helper::Graphics::centreOrigin(mCreditText);
-	sf::Vector2u windowSize(getRenderWindow().getSize());
+	::sf::Vector2u windowSize(getRenderWindow().getSize());
 	mCreditText.setPosition((float)windowSize.x / 2,
 		(float)windowSize.y / 2);
 }
@@ -30,5 +32,6 @@ void SettingState::draw()
 
 void SettingState::handleConfirmInput()
 {
-	ClientContext::getInstance().stack->popState();
+	Context::getInstance().stack->popState();
+}
 }

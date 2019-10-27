@@ -1,4 +1,6 @@
 #pragma once
+namespace server
+{
 
 class ServerState
 {
@@ -9,3 +11,5 @@ public:
 
 };
 
+
+}

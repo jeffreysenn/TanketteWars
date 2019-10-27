@@ -1,7 +1,9 @@
 #pragma once
 #include "States/StateStack.h"
 #include "ServerState.h"
-#include "ServerContext.h"
+#include "Context.h"
+namespace server
+{
 
 class ServerStateStack : public mw::StateStack<ServerState>
 {
@@ -11,3 +13,4 @@ public:
 	void processMessages();
 
 };
+}

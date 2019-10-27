@@ -1,9 +1,9 @@
 #include "World.h"
-#include "ClientContext.h"
-#include "Units/Units.h"
+#include "Context.h"
+#include "Units/unit.h"
 #include "Actors/Actor.h"
 #include "Actors/CameraActor.h"
-#include "Actors/Tank.h"
+#include "Tank.h"
 #include "Actors/Obstacle.h"
 
 #include <SFML/Graphics/Rect.hpp>
@@ -11,10 +11,14 @@
 
 #include <iostream>
 
+using namespace tankett;
+namespace client
+{
+
 World::World()
-	: mWindow(*ClientContext::getInstance().window)
-	, mTextureManager(*ClientContext::getInstance().textureManager)
-	, mMapManager(*ClientContext::getInstance().mapManager)
+	: mWindow(*Context::getInstance().window)
+	, mTextureManager(*Context::getInstance().textureManager)
+	, mMapManager(*Context::getInstance().mapManager)
 	, mCamera(nullptr)
 	, mAvatar(nullptr)
 {
@@ -58,19 +62,20 @@ void World::buildScene()
 						background sprite
 	*/
 
-	sf::Texture* oilTexture = mTextureManager.get(Texture::Oil);
-	rs::Map* map = mMapManager.get(Map::DefaultMap);
-	auto mapObj = map->buildMap(Units::unit2pix(1), Units::unit2pix(1), *oilTexture);
+	::sf::Texture* oilTexture = mTextureManager.get(Texture::Oil);
+	Map* map = mMapManager.get(Map::DefaultMap);
+	auto mapObj = map->buildMap(unit::unit2pix(1), unit::unit2pix(1), *oilTexture);
 	mSceneGraph.attachChild(std::move(mapObj));
 
 
 	for (int i = 0; i < 4; ++i)
 	{
-		sf::Texture* tankHullTexture = mTextureManager.get(Texture::TankBlackHull);
-		sf::Texture* tankBarrelTexture = mTextureManager.get(Texture::TankBlackBarrel);
-		sf::Texture* tankBulletTexture = mTextureManager.get(Texture::TankBlackBullet);
+		::sf::Texture* tankHullTexture = mTextureManager.get(Texture::TankBlackHull);
+		::sf::Texture* tankBarrelTexture = mTextureManager.get(Texture::TankBlackBarrel);
+		::sf::Texture* tankBulletTexture = mTextureManager.get(Texture::TankBlackBullet);
 		std::unique_ptr<Tank> tankActor = std::make_unique<Tank>(*tankHullTexture, *tankBarrelTexture, *tankBulletTexture);
-		tankActor->setPosition(200, 500.f * i);
+		::sf::Vector2i randomTile = map->getRandomEmptyTile();
+		tankActor->setPosition(randomTile.x * unit::unit2pix(1), randomTile.y * unit::unit2pix(1));
 		tankActor->setCommandCategory((CommandCategory)((int)CommandCategory::Tank0 << i));
 		if (i == 0)
 			mAvatar = tankActor.get();
@@ -81,7 +86,7 @@ void World::buildScene()
 	std::unique_ptr<CameraActor> cameraActor(std::make_unique<CameraActor>());
 	mCamera = cameraActor.get();
 	mAvatar->attachChild(std::move(cameraActor));
-	const sf::Vector2f cameraSize(1920, 1080);
+	const ::sf::Vector2f cameraSize(1920, 1080);
 	mCamera->setSize(cameraSize);
 	//mCamera->setPosition(cameraSize.x / 2, cameraSize.y / 2);
 
@@ -89,13 +94,13 @@ void World::buildScene()
 	// Create a background node and attach to the scene graph
 	std::unique_ptr<Actor> backgroundNode(std::make_unique<Actor>());
 
-	sf::Texture* backgroundTexture = mTextureManager.get(Texture::Back);
+	::sf::Texture* backgroundTexture = mTextureManager.get(Texture::Back);
 	backgroundTexture->setRepeated(true);
 	std::unique_ptr<SpriteActor> backgroundSprite(std::make_unique<SpriteActor>(
 		*backgroundTexture,
 		Rendering::Layer::Background));
 	backgroundSprite->getSprite()->setOrigin(0, 0);
-	sf::IntRect backgroundRect(0, 0, (int)cameraSize.x, (int)cameraSize.y);
+	::sf::IntRect backgroundRect(0, 0, (int)cameraSize.x, (int)cameraSize.y);
 	backgroundSprite->getSprite()->setTextureRect(backgroundRect);
 	backgroundNode->attachChild(std::move(backgroundSprite));
 
@@ -121,4 +126,5 @@ void World::draw()
 	mSceneGraph.reportRenderInfo(mRenderer);
 	mWindow.draw(mRenderer);
 	mRenderer.clearRenderBuffer();
+}
 }

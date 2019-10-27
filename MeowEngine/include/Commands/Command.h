@@ -6,21 +6,20 @@
 
 namespace mw
 {
+struct Command
+{
+	::std::function<void(class Actor&, float)> action;
+	CommandCategory category = CommandCategory::None;
+};
 
-	struct Command
+template<typename MovableActor, typename Function>
+::std::function<void(Actor&, float)> derivedAction(Function fn)
+{
+	return [=](Actor& node, float deltaSeconds)
 	{
-		::std::function<void(class Actor&, float)> action;
-		CommandCategory category = CommandCategory::None;
+		auto ptr = dynamic_cast<MovableActor*>(&node);
+		assert(ptr);
+		fn(*ptr, deltaSeconds);
 	};
-
-	template<typename MovableActor, typename Function>
-	::std::function<void(Actor&, float)> derivedAction(Function fn)
-	{
-		return [=](Actor& node, float deltaSeconds)
-		{
-			auto ptr = dynamic_cast<MovableActor*>(&node);
-			assert(ptr);
-			fn(*ptr, deltaSeconds);
-		};
-	}
+}
 }

@@ -2,7 +2,7 @@
 #include <SFML/System/NonCopyable.hpp>
 
 #include "ResourceManagers/ResourceIdentifiers.h"
-#include "ResourceManagers/Map.h"
+#include "Map.h"
 #include "Actors/SceneGraph.h"
 #include "Rendering/Renderer.h"
 #include "Commands/CommandQueue.h"
@@ -13,18 +13,24 @@
 
 using namespace mw;
 
+namespace tankett
+{
+class Tank;
+}
+
 namespace mw
 {
-	class CameraActor;
-	class Tank;
+class CameraActor;
 }
 
 namespace sf
 {
-	class RenderWindow;
+class RenderWindow;
 }
+namespace client
+{
 
-class World : private sf::NonCopyable
+class World : private ::sf::NonCopyable
 {
 public:
 	World();
@@ -43,17 +49,19 @@ private:
 	void buildScene();
 
 private:
-	sf::RenderWindow &mWindow;
+	::sf::RenderWindow& mWindow;
 	Renderer mRenderer;
 	CameraActor* mCamera;
-	Tank* mAvatar;
+	tankett::Tank* mAvatar;
 
 	TextureManager& mTextureManager;
-	MapManager& mMapManager;
+	tankett::MapManager& mMapManager;
 
 	SceneGraph mSceneGraph;
-	sf::Vector2f mSpawnPosition = sf::Vector2f(0, -20);
+	::sf::Vector2f mSpawnPosition = ::sf::Vector2f(0, -20);
 	CommandQueue mCommandQueue;
 	PhysicsEngine mPhysicsEngine;
 };
 
+
+}

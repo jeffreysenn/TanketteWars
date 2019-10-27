@@ -2,7 +2,7 @@
 
 #include "Game.h"
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	mw::Game* game = mw::Game::create();
 

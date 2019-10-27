@@ -8,34 +8,34 @@
 
 namespace mw
 {
-	namespace Input
+namespace Input
+{
+enum class Type
+{
+	Joystick,
+	Keyboard,
+	Mouse,
+};
+
+struct Input
+{
+	Type type;
+
+	union
 	{
-		enum class Type
-		{
-			Joystick,
-			Keyboard,
-			Mouse,
-		};
+		uint32_t joystickButtonID;
+		::sf::Joystick::Axis joystickAxis;
 
-		struct Input
-		{
-			Type type;
+		::sf::Keyboard::Key keyboardKey;
 
-			union
-			{
-				uint32_t joystickButtonID;
-				::sf::Joystick::Axis joystickAxis;
+		::sf::Mouse::Button mouseButton;
+	};
+};
 
-				::sf::Keyboard::Key keyboardKey;
-
-				::sf::Mouse::Button mouseButton;
-			};
-		};
-
-		typedef ::std::vector<Input> InputCollection;
-		bool inputCollectionPressed(const InputCollection& inputCollection);
-		bool eventInputCollectionPressed(const ::sf::Event& event, const InputCollection& inputCollection);
-	}
+typedef ::std::vector<Input> InputCollection;
+bool inputCollectionPressed(const InputCollection& inputCollection);
+bool eventInputCollectionPressed(const ::sf::Event& event, const InputCollection& inputCollection);
+}
 
 
 }
