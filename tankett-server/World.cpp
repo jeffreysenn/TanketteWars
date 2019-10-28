@@ -32,6 +32,7 @@ void World::buildScene()
 	mSceneGraph.attachChild(::std::move(mapObj));
 
 	auto tankManager = ::std::make_unique<::tankett::TankManager>(mMap);
+	mTankManager = tankManager.get();
 	mSceneGraph.attachChild(::std::move(tankManager));
 }
 

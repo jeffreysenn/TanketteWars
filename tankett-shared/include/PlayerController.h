@@ -52,6 +52,9 @@ public:
 	void spawnTank_server(TankManager* tankManager);
 	void spawnTank_client(TankManager* tankManager, ::sf::Vector2f pos);
 
+	float getTankTurretAngle();
+	::sf::Vector2f getTankPosition() const;
+
 private:
 	enum class Action
 	{

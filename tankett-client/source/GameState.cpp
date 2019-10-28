@@ -2,6 +2,7 @@
 #include "StateIdentifiers.h"
 #include "Context.h"
 #include "ClientStateStack.h"
+#include "NetworkManager.h"
 #include <SFML/Window/Event.hpp>
 
 namespace client
@@ -10,9 +11,6 @@ GameState::GameState()
 try : mWorld()
 , mFrameNum(0)
 {
-	::std::unique_ptr<PlayerController> controller(new PlayerController(0, true, Context::getInstance().window));
-	mPlayerControllers.push_back(std::move(controller));
-	mPlayerControllers.back()->spawnTank_server(mWorld.getTankManager());
 }
 catch (const std::runtime_error & e)
 {
@@ -25,8 +23,58 @@ GameState::~GameState()
 {
 }
 
+void GameState::processMessages()
+{
+	auto& networkManager = *Context::getInstance().networkManager;
+	auto& receivedMessages = networkManager.getReceivedMessages();
+	for (auto& message : receivedMessages)
+	{
+		network_message_type type = (network_message_type)message->type_;
+		switch (type)
+		{
+		case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
+		{
+			message_server_to_client* msgS2C = (message_server_to_client*)message.get();
+			if (!msgS2C) break;
+
+			auto dataArr = msgS2C->client_data;
+
+			// if new players are connected
+			if (mPlayerControllers.size() < msgS2C->client_count)
+			{
+				for (int i = 0; i < msgS2C->client_count; ++i)
+				{
+					bool controllerExist = false;
+					for (auto& controller : mPlayerControllers)
+					{
+						if (controller->getID() == dataArr[i].client_id)
+						{
+							controllerExist = true;
+							break;
+						}
+					}
+					if (!controllerExist)
+					{
+						bool listenToInput = msgS2C->receiver_id == dataArr[i].client_id;
+						auto controller = ::std::make_unique<PlayerController>(dataArr[i].client_id, listenToInput, Context::getInstance().window);
+						auto pos = ::sf::Vector2f(dataArr[i].position.x_, dataArr[i].position.y_);
+						controller->spawnTank_client(mWorld.getTankManager(), pos);
+						mPlayerControllers.push_back(::std::move(controller));
+					}
+				}
+			}
+		}
+		break;
+		default:
+			break;
+		}
+	}
+}
+
 bool GameState::update(float deltaSeconds)
 {
+	processMessages();
+
 	++mFrameNum;
 	mWorld.update(deltaSeconds);
 	if (Context::getInstance().isWindowFocused)

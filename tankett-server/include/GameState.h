@@ -21,7 +21,7 @@ private:
 
 private:
 	World mWorld;
-	::std::map<::alpha::ip_address, ::tankett::PlayerController> mControllers;
+	::std::map<uint8_t, ::tankett::PlayerController> mControllers;
 	NetworkManager& mNetworkManager;
 
 };

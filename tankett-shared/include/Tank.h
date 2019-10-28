@@ -44,7 +44,8 @@ public:
 	void setCamera(::mw::CameraActor* camera) { mCamera = camera; }
 	::mw::CameraActor* resetCamera();
 
-	float mousePosToAngle(const sf::Vector2f& pos);
+	float mousePosToAngle(const sf::Vector2f& pos) const;
+	float getTurretAngle() const { return mTurretAngle; }
 
 protected:
 	virtual void reportRenderInfoSelf(class Renderer& renderer, ::sf::RenderStates states) const override;

@@ -147,7 +147,7 @@ int Tank::getBullet(Bullet* bullet)
 	return temp;
 }
 
-float Tank::mousePosToAngle(const sf::Vector2f& pos)
+float Tank::mousePosToAngle(const sf::Vector2f& pos) const
 {
 	::sf::Vector2f dir = pos - getWorldPosition();
 	float length = helper::Vector::getLength(dir);

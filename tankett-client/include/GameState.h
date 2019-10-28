@@ -24,6 +24,9 @@ public:
 	virtual bool handleEvent(const ::sf::Event& event) override;
 
 private:
+	void processMessages();
+
+private:
 	World mWorld;
 	::std::vector<::std::unique_ptr<PlayerController>> mPlayerControllers;
 	Renderer mRenderer;

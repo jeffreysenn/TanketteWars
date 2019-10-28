@@ -95,6 +95,24 @@ void PlayerController::spawnTank_client(TankManager* tankManager, ::sf::Vector2f
 	tankManager->spawnTank(pos, mID, this, mListenToInput);
 }
 
+float PlayerController::getTankTurretAngle()
+{
+	if (mPossessedTank)
+	{
+		return mPossessedTank->getTurretAngle();
+	}
+	return 0.0f;
+}
+
+::sf::Vector2f PlayerController::getTankPosition() const
+{
+	if (mPossessedTank)
+	{
+		return mPossessedTank->getWorldPosition();
+	}
+	return ::sf::Vector2f();
+}
+
 void PlayerController::bindInputs()
 {
 	mInputBinding[Action::Up] =
