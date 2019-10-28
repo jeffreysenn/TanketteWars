@@ -22,9 +22,11 @@ public:
 
 	bool loadFromFile(const ::std::string& filename);
 
+	::std::unique_ptr<Actor> buildMap(float width, float height);
 	::std::unique_ptr<Actor> buildMap(float width, float height, const ::sf::Texture& texture);
 
-	::sf::Vector2i getRandomEmptyTile();
+	::sf::Vector2i getSize() const { return ::sf::Vector2i((int)mCol, (int)mRow); }
+	::sf::Vector2i getRandomEmptyTile() const;
 
 private:
 	size_t mRow;

@@ -22,6 +22,7 @@ using namespace mw;
 
 namespace tankett
 {
+class Tank;
 class PlayerController
 {
 public:
@@ -32,6 +33,11 @@ public:
 
 	::sf::Vector2f getMousePosition() const;
 
+	void spawnTankClient(CommandQueue& commandQueue, uint32_t frameNum, const::sf::Vector2f& pos);
+	void spawnTankServer(CommandQueue& commandQueue, uint32_t frameNum);
+	void possessTank(Tank* tank) { mPossessedTank = tank; }
+	void unpossess() { mPossessedTank = nullptr; }
+
 private:
 	enum class Action
 	{
@@ -40,6 +46,7 @@ private:
 		Left,
 		Right,
 		Fire,
+		SpawnServer,
 	};
 
 	struct GameInput
@@ -50,7 +57,8 @@ private:
 
 private:
 	void bindInputs();
-	void bindActions();
+	void bindInputActions();
+	void bindCommands();
 
 private:
 	Command mMousePosCommand;
@@ -58,9 +66,10 @@ private:
 	bool mListenToInput;
 
 	::std::map<Action, GameInput> mInputBinding;
-	::std::map<Action, Command> mActionBinding;
+	::std::map<Action, Command> mInputActionBinding;
+	::std::map<Action, Command> mCommands;
 	::std::map<uint32_t, ::std::vector<Command>> mCommandBuffer;
 	::sf::RenderWindow* mWindow;
-	
+	Tank* mPossessedTank;
 };
 }

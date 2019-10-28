@@ -271,6 +271,7 @@ struct network_message_ping : network_message_header
 	}
 };
 
+
 constexpr uint32 PROTOCOL_PAYLOAD_SIZE = 1200;
 
 struct message_client_to_server : network_message_header
@@ -279,9 +280,33 @@ struct message_client_to_server : network_message_header
 	{
 	}
 
-	uint16 input_field = 0;
+	uint8 input_field = 0;
 	float turret_angle = .0f;
 	uint32 input_number = 0;
+
+	enum INPUT
+	{
+		SHOOT = 0,
+		RIGHT = 1,
+		LEFT = 2,
+		DOWN = 3,
+		UP = 4
+	};
+
+	bool get_input(INPUT input)
+	{
+		return (input_field >> input) & 1;
+	}
+
+	void set_input(bool shoot, bool right, bool left, bool down, bool up)
+	{
+		input_field = 0;
+		input_field |= (shoot << SHOOT);
+		input_field |= (right << RIGHT);
+		input_field |= (left << LEFT);
+		input_field |= (down << DOWN);
+		input_field |= (up << UP);
+	}
 
 	template<typename S>
 	bool serialize(S& stream)
@@ -309,6 +334,12 @@ struct message_client_to_server : network_message_header
 	}
 };
 
+struct bullet_data
+{
+	vector2 position;
+	uint8 id = 0;
+};
+
 struct server_to_client_data
 {
 	bool alive = true;
@@ -319,7 +350,7 @@ struct server_to_client_data
 	uint8 client_id = 0;
 	uint32 ping = ~0U;
 	uint8 bullet_count = 0;
-	vector2 bullets[10];
+	bullet_data bullets[10];
 };
 
 enum class GAME_STATE : uint8
@@ -363,13 +394,12 @@ struct message_server_to_client : network_message_header
 		{
 			server_to_client_data& currentData = client_data[i];
 
-			uint8 alive = (uint8)currentData.alive;
-			result &= stream.serialize(alive);
-			currentData.alive = (bool)alive;
+			uint8 bit_field = currentData.alive & 1;
+			bit_field |= (currentData.connected << 1);
+			result &= stream.serialize(bit_field);
+			currentData.alive = bit_field & 1;
+			currentData.connected = (bit_field >> 1) & 1;
 
-			uint8 connected = (uint8)currentData.connected;
-			result &= stream.serialize(connected);
-			currentData.connected = (bool)connected;
 			result &= stream.serialize(currentData.position.x_);
 			result &= stream.serialize(currentData.position.y_);
 
@@ -387,8 +417,9 @@ struct message_server_to_client : network_message_header
 
 			for (int j = 0; j < currentData.bullet_count; j++)
 			{
-				result &= stream.serialize(currentData.bullets[j].x_);
-				result &= stream.serialize(currentData.bullets[j].y_);
+				result &= stream.serialize(currentData.bullets[j].position.x_);
+				result &= stream.serialize(currentData.bullets[j].position.y_);
+				result &= stream.serialize(currentData.bullets[j].id);
 			}
 		}
 
@@ -416,7 +447,6 @@ struct message_server_to_client : network_message_header
 		return serialize(reader);
 	}
 };
-
 } // !tankett
 
 #endif // !TANKETT_SHARED_H_INCLUDED

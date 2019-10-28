@@ -39,6 +39,24 @@ bool Map::loadFromFile(const ::std::string& filename)
 	return true;
 }
 
+::std::unique_ptr<Actor> Map::buildMap(float width, float height)
+{
+	::std::unique_ptr<Actor> map = ::std::make_unique<Actor>();
+	for (uint32_t i = 0; i < mRow; ++i)
+	{
+		for (uint32_t j = 0; j < mCol; ++j)
+		{
+			if (mMatrix[static_cast<uint64_t>(mCol)* i + j])
+			{
+				::std::unique_ptr<Obstacle> obstacle = ::std::make_unique<Obstacle>(width, height);
+				obstacle->setPosition(width * j, height * i);
+				map->attachChild(::std::move(obstacle));
+			}
+		}
+	}
+	return map;
+}
+
 ::std::unique_ptr<Actor> Map::buildMap(float width, float height, const ::sf::Texture& texture)
 {
 	::std::unique_ptr<Actor> map = ::std::make_unique<Actor>();
@@ -57,7 +75,7 @@ bool Map::loadFromFile(const ::std::string& filename)
 	return map;
 }
 
-::sf::Vector2i Map::getRandomEmptyTile()
+::sf::Vector2i Map::getRandomEmptyTile() const
 {
 	size_t x, y;
 	do

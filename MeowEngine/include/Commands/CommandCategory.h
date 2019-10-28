@@ -1,13 +1,16 @@
 #pragma once
+#include <stdint.h>
+
 namespace mw
 {
-enum class CommandCategory : unsigned int
+enum class CommandCategory : uint32_t
 {
-	None = 0 << 0,
-	Tank0 = 1 << 1,
-	Tank1 = 1 << 2,
-	Tank2 = 1 << 3,
-	Tank3 = 1 << 4,
+	None = 0,
+	Tank0 = 1 << 0,
+	Tank1 = 1 << 1,
+	Tank2 = 1 << 2,
+	Tank3 = 1 << 3,
+	TankManager = 1 << 4,
 };
 
 inline CommandCategory operator | (CommandCategory a, CommandCategory b)

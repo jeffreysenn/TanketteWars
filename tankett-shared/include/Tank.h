@@ -7,8 +7,15 @@
 
 using namespace mw;
 
+namespace mw
+{
+class CameraActor;
+}
+
 namespace tankett
 {
+class PlayerController;
+
 class Tank : public Pawn
 {
 public:
@@ -21,12 +28,23 @@ public:
 	void addDirection(const ::sf::Vector2f& dd) { mDirection += dd; }
 	void addDirection(float ddx, float ddy) { mDirection += ::sf::Vector2f(ddx, ddy); }
 	void aimAt(const ::sf::Vector2f pos);
+	void aimAt(float angle);
 	void fire();
 
 	void spawnBullet();
 	bool addBullet(Bullet* bullet);
 	bool removeBullet(Bullet* bullet);
 	int getBullet(Bullet* bullet);
+
+	void setIsLocal(bool isLocal) { mIsLocal = isLocal; }
+	bool getIsLocal() const { return mIsLocal; }
+
+	void setController(PlayerController* controller) { mController = controller; }
+	PlayerController* getController() const { return mController; }
+	void setCamera(::mw::CameraActor* camera) { mCamera = camera; }
+	::mw::CameraActor* resetCamera();
+
+	float mousePosToAngle(const sf::Vector2f& pos);
 
 protected:
 	virtual void reportRenderInfoSelf(class Renderer& renderer, ::sf::RenderStates states) const override;
@@ -52,7 +70,10 @@ private:
 
 	Collider mCollider;
 	::std::vector<Bullet*> mBullets;
-
+	bool mIsLocal;
+	// TODO: decrease dependency
+	PlayerController* mController;
+	::mw::CameraActor* mCamera;
 	//::sf::CircleShape mDebugCircle;
 };
 

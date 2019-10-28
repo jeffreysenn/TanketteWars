@@ -12,12 +12,12 @@ struct Command
 	CommandCategory category = CommandCategory::None;
 };
 
-template<typename MovableActor, typename Function>
+template<typename ActorType, typename Function>
 ::std::function<void(Actor&, float)> derivedAction(Function fn)
 {
 	return [=](Actor& node, float deltaSeconds)
 	{
-		auto ptr = dynamic_cast<MovableActor*>(&node);
+		auto ptr = dynamic_cast<ActorType*>(&node);
 		assert(ptr);
 		fn(*ptr, deltaSeconds);
 	};

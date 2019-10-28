@@ -17,6 +17,8 @@
     <ClInclude Include="include\Tank.h" />
     <ClInclude Include="include\tankett_debug.h" />
     <ClInclude Include="include\tankett_shared.h" />
+    <ClInclude Include="include\TankManager.h" />
+    <ClInclude Include="include\Unit.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Bullet.cpp" />
@@ -25,6 +27,7 @@
     <ClCompile Include="source\Tank.cpp" />
     <ClCompile Include="source\tankett_debug.cc" />
     <ClCompile Include="source\tankett_shared.cc" />
+    <ClCompile Include="source\TankManager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

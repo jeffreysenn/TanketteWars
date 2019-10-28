@@ -20,7 +20,7 @@ enum ID
 	TankBlackBullet,
 
 
-	Oil,
+	Dirt,
 	NONEXIST
 };
 }

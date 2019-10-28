@@ -35,7 +35,6 @@
     <ClInclude Include="include\ResourceManagers\ResourceIdentifiers.h" />
     <ClInclude Include="include\ResourceManagers\ResourceManager.h" />
     <ClInclude Include="include\States\StateStack.h" />
-    <ClInclude Include="include\Units\unit.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\ResourceManagers\ResourceManager.inl" />

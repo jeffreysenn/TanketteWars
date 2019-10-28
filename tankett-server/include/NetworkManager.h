@@ -19,23 +19,25 @@ namespace server
 class NetworkManager
 {
 public:
-	struct challenge
+	struct Challenge
 	{
 		uint64 serverKey{};
 		uint64 clientKey{};
 		alpha::time timestamp;
 	};
 
-	struct client
+	struct Client
 	{
 		void clear_received_messages();
 
+		uint8 id;
 		alpha::time connectionTime;
 		uint64 serverKey{};
 		uint64 clientKey{};
 		crypt::xorinator xorinator;
 		uint32 latestReceivedSequence{};
 		alpha::time latestReceiveTime;
+
 		dynamic_array<network_message_header*> sendMessageQueue;
 		dynamic_array<network_message_header*> receivedMessages;
 	};
@@ -52,7 +54,7 @@ public:
 	void pushMessage(const ip_address& clientAddr, network_message_header* message);
 	void processClientQueues();
 
-	std::map<ip_address, client>& getClients() { return mClients; }
+	std::map<ip_address, Client>& getClients() { return mClients; }
 
 	void clearAllClientsReceivedMessages();
 
@@ -60,8 +62,8 @@ private:
 	ip_address mlocal;
 	udp_socket mSocket;
 
-	std::map<ip_address, challenge> mChallenges;
-	std::map<ip_address, client> mClients;
+	std::map<ip_address, Challenge> mChallenges;
+	std::map<ip_address, Client> mClients;
 	uint32 mServerSequence{};
 
 };

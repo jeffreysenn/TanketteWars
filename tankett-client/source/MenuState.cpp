@@ -51,6 +51,6 @@ void MenuState::setupBackgroundSprite()
 	mBackgroundSprite.setTexture(backgroungTexture);
 	::sf::IntRect rect(0, 0, getRenderWindow().getSize().x, getRenderWindow().getSize().y);
 	// TODO: make scale adaptable to different resolutions
-	mBackgroundSprite.setScale(3, 3);
+	mBackgroundSprite.setScale(4, 4);
 }
 }

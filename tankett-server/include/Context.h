@@ -1,5 +1,10 @@
 #pragma once
 
+namespace tankett
+{
+class Map;
+}
+
 namespace server
 {
 

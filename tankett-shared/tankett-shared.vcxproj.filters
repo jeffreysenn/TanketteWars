@@ -30,6 +30,12 @@
     <ClInclude Include="include\Map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\TankManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Unit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\tankett_debug.cc">
@@ -48,6 +54,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\TankManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

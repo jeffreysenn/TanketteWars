@@ -62,7 +62,7 @@ void NetworkManager::receive()
 			if (mChallenges.find(OUT_addr) != mChallenges.end())
 				break;
 
-			challenge challenge;
+			Challenge challenge;
 			challenge.serverKey = mw::helper::Number::getRandom<uint64>();
 			challenge.clientKey = request.client_key_;
 			challenge.timestamp = time::now();
@@ -89,7 +89,8 @@ void NetworkManager::receive()
 			if (mClients.find(OUT_addr) != mClients.end())
 				break;
 
-			client client;
+			Client client;
+			client.id = (uint8)mClients.size();
 			client.serverKey = challenge.serverKey;
 			client.clientKey = challenge.clientKey;
 			client.xorinator = crypt::xorinator(client.serverKey, client.clientKey);
@@ -257,7 +258,7 @@ void NetworkManager::clearAllClientsReceivedMessages()
 	}
 }
 
-void NetworkManager::client::clear_received_messages()
+void NetworkManager::Client::clear_received_messages()
 {
 	for (auto& received_message : receivedMessages)
 	{

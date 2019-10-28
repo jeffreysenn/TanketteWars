@@ -16,6 +16,7 @@ using namespace mw;
 namespace tankett
 {
 class Tank;
+class TankManager;
 }
 
 namespace mw
@@ -51,8 +52,8 @@ private:
 private:
 	::sf::RenderWindow& mWindow;
 	Renderer mRenderer;
-	CameraActor* mCamera;
-	tankett::Tank* mAvatar;
+	::mw::CameraActor* mCamera;
+	tankett::TankManager* mTankManager;
 
 	TextureManager& mTextureManager;
 	tankett::MapManager& mMapManager;

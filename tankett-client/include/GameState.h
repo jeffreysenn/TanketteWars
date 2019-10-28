@@ -25,7 +25,7 @@ public:
 
 private:
 	World mWorld;
-	::std::vector<PlayerController> mPlayerControllers;
+	::std::vector<::std::unique_ptr<PlayerController>> mPlayerControllers;
 	Renderer mRenderer;
 	Input::InputCollection mPauseInputs{
 		{ Input::Type::Keyboard, ::sf::Keyboard::Escape },

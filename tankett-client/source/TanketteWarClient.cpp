@@ -30,7 +30,7 @@ namespace client
 TanketteWarClient::TanketteWarClient()
 try
 	: mWindow(
-	::sf::VideoMode(960, 540),
+	::sf::VideoMode(1280, 720),
 	"Tankket Wars",
 	::sf::Style::Titlebar | ::sf::Style::Close)
 	, mStateStack()

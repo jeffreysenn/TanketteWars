@@ -87,9 +87,6 @@
     <ClInclude Include="include\Helpers\Helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Units\unit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\ResourceManagers\ResourceManager.inl">

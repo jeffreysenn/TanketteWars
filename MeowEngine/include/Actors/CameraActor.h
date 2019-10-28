@@ -11,5 +11,10 @@ public:
 	~CameraActor();
 
 	virtual void updateSelf(float deltaSeconds) override;
+	void attachToActor(Actor* actor) { mPossessedActor = actor; }
+	void detach() { mPossessedActor = nullptr; }
+
+private:
+	Actor* mPossessedActor{};
 };
 }

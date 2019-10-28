@@ -1,7 +1,9 @@
 #include "Tank.h"
 #include "Rendering/Renderer.h"
-#include "Units/unit.h"
+#include "Unit.h"
 #include "Helpers/Helper.h"
+#include "PlayerController.h"
+#include "Actors/CameraActor.h"
 
 namespace tankett
 {
@@ -11,6 +13,10 @@ Tank::Tank()
 	, mLastFireTime(::sf::seconds(-100))
 	, mTurretAngle(0)
 	, mCollider(Collision::ObjectType::Dynamic, Collision::ObjectResponsePreset::CollideAll)
+	, mTurretLayer(Rendering::Turret)
+	, mIsLocal(false)
+	, mController(nullptr)
+	, mCamera(nullptr)
 {
 }
 
@@ -23,6 +29,9 @@ Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture,
 	, mTurretAngle(0)
 	, mCollider(Collision::ObjectType::Dynamic, Collision::ObjectResponsePreset::CollideAll)
 	, mLastFireTime(::sf::seconds(-100))
+	, mIsLocal(false)
+	, mController(nullptr)
+	, mCamera(nullptr)
 	//, mDebugCircle(5)
 {
 	::sf::FloatRect spriteBounds(mBarrelSprite.getLocalBounds());
@@ -42,6 +51,11 @@ Tank::~Tank()
 	{
 		bullet->resetOwner();
 	}
+
+	if (mController)
+		mController->unpossess();
+	if (mCamera)
+		mCamera->detach();
 }
 
 void Tank::aimAt(const ::sf::Vector2f pos)
@@ -55,6 +69,11 @@ void Tank::aimAt(const ::sf::Vector2f pos)
 	mTurretAngle = helper::Vector::rad2deg(angleRads);
 
 	mBarrelSprite.setRotation(mTurretAngle - 90.f);
+}
+
+void Tank::aimAt(float angle)
+{
+	mBarrelSprite.setRotation(angle - 90.f);
 }
 
 constexpr uint32_t cooldown = 1000;
@@ -118,6 +137,26 @@ int Tank::getBullet(Bullet* bullet)
 	}
 
 	return -1;
+}
+
+::mw::CameraActor* Tank::resetCamera()
+{
+	auto temp = mCamera;
+	mCamera = nullptr;
+	return temp;
+}
+
+float Tank::mousePosToAngle(const sf::Vector2f& pos)
+{
+	::sf::Vector2f dir = pos - getWorldPosition();
+	float length = helper::Vector::getLength(dir);
+	if (length < 0.01f)
+		return 0;
+
+	auto angleRads = ::std::atan2(dir.y, dir.x);
+	float angle = helper::Vector::rad2deg(angleRads);
+
+	return mTurretAngle;
 }
 
 void Tank::reportRenderInfoSelf(Renderer& renderer, ::sf::RenderStates states) const

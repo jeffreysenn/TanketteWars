@@ -1,10 +1,7 @@
 #pragma once
-#include "ResourceManagers/ResourceIdentifiers.h"
 #include "Commands/CommandQueue.h"
 #include "Map.h"
-
-using namespace mw;
-using namespace tankett;
+#include "Actors/SceneGraph.h"
 
 namespace mw
 {
@@ -14,6 +11,7 @@ class Actor;
 namespace tankett
 {
 class Tank;
+class TankManager;
 }
 
 namespace server
@@ -23,17 +21,19 @@ class World
 public:
 	World();
 
-	void update(float deltaSeconds);
+	void executeCommands(float deltaSeconds);
 
 	CommandQueue& getCommandQueue() { return mCommandQueue; }
 
 private:
-	void buildScene();
+	void load();
+	void buildScene(); 
 
 private:
-	Actor* mTanks;
 	CommandQueue mCommandQueue;
-	MapManager mMapManager;
+	::mw::SceneGraph mSceneGraph;
+	::tankett::MapManager mMapManager;
+	::tankett::Map* mMap;
+	::tankett::TankManager* mTankManager;
 };
-
 }
