@@ -23,20 +23,34 @@ using namespace mw;
 namespace tankett
 {
 class Tank;
+class TankManager;
 class PlayerController
 {
 public:
-	PlayerController(CommandCategory category = CommandCategory::None, bool listenToInput = false, ::sf::RenderWindow* window = nullptr);
+	struct TankInput
+	{
+		void setDirections(bool up, bool down, bool left, bool right);
+		void setFire(bool fire);
 
-	void handleEvent(const ::sf::Event& event, CommandQueue& commandQueue, uint32_t frameNum);
-	void handleRealtimeInput(CommandQueue& commandQueue, uint32_t frameNum);
+		uint8_t buttom;
+		float angle;
+	};
+
+public:
+	PlayerController(uint8_t id = 0, bool listenToInput = false, ::sf::RenderWindow* window = nullptr);
+
+	void handleEvent(const ::sf::Event& event, uint32_t frameNum);
+	void handleRealtimeInput(uint32_t frameNum);
 
 	::sf::Vector2f getMousePosition() const;
-
-	void spawnTankClient(CommandQueue& commandQueue, uint32_t frameNum, const::sf::Vector2f& pos);
-	void spawnTankServer(CommandQueue& commandQueue, uint32_t frameNum);
-	void possessTank(Tank* tank) { mPossessedTank = tank; }
+	
+	void possessTank(Tank* tank);
 	void unpossess() { mPossessedTank = nullptr; }
+
+	uint8_t getID() { return mID; }
+
+	void spawnTank_server(TankManager* tankManager);
+	void spawnTank_client(TankManager* tankManager, ::sf::Vector2f pos);
 
 private:
 	enum class Action
@@ -49,26 +63,18 @@ private:
 		SpawnServer,
 	};
 
-	struct GameInput
-	{
-		Input::InputCollection inputCollection;
-		bool bIsRealTime{};
-	};
-
 private:
 	void bindInputs();
-	void bindInputActions();
-	void bindCommands();
 
 private:
+	uint8_t mID;
 	Command mMousePosCommand;
-	CommandCategory mCommandCategoty;
 	bool mListenToInput;
 
-	::std::map<Action, GameInput> mInputBinding;
+	::std::map<Action, ::mw::Input::InputCollection> mInputBinding;
 	::std::map<Action, Command> mInputActionBinding;
 	::std::map<Action, Command> mCommands;
-	::std::map<uint32_t, ::std::vector<Command>> mCommandBuffer;
+	::std::map<uint32_t, TankInput> mInputBuffer;
 	::sf::RenderWindow* mWindow;
 	Tank* mPossessedTank;
 };

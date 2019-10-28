@@ -10,9 +10,9 @@ GameState::GameState()
 try : mWorld()
 , mFrameNum(0)
 {
-	::std::unique_ptr<PlayerController> controller(new PlayerController(::mw::CommandCategory::Tank0, true, Context::getInstance().window));
+	::std::unique_ptr<PlayerController> controller(new PlayerController(0, true, Context::getInstance().window));
 	mPlayerControllers.push_back(std::move(controller));
-	mPlayerControllers.back()->spawnTankServer(mWorld.getCommandQueue(), 0);
+	mPlayerControllers.back()->spawnTank_server(mWorld.getTankManager());
 }
 catch (const std::runtime_error & e)
 {
@@ -33,7 +33,7 @@ bool GameState::update(float deltaSeconds)
 	{
 		for (auto& playerController : mPlayerControllers)
 		{
-			playerController->handleRealtimeInput(mWorld.getCommandQueue(), mFrameNum);
+			playerController->handleRealtimeInput(mFrameNum);
 		}
 	}
 
@@ -49,7 +49,7 @@ bool GameState::handleEvent(const ::sf::Event& event)
 {
 	for (auto& playerController : mPlayerControllers)
 	{
-		playerController->handleEvent(event, mWorld.getCommandQueue(), mFrameNum);
+		playerController->handleEvent(event, mFrameNum);
 	}
 
 	if (Input::eventInputCollectionPressed(event, mPauseInputs))

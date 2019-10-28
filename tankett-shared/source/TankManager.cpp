@@ -21,22 +21,21 @@ void TankManager::setTankTextures(int tankID, int textureID, ::sf::Texture* text
 	mTankTextures[tankID][textureID] = texture;
 }
 
-void TankManager::spawnTankRandom(::mw::CommandCategory category, bool isLocal, PlayerController* controller)
+void TankManager::spawnTankRandom(uint8_t id, PlayerController* controller, bool isLocal)
 {
 	if (!mMap)
 		return;
 
 	::sf::Vector2i randomTile = mMap->getRandomEmptyTile();
 	sf::Vector2f position(randomTile.x * unit::unit2pix(1), randomTile.y * unit::unit2pix(1));
-	spawnTank(position, category, isLocal, controller);
+	spawnTank(position, id, controller, isLocal);
 }
 
-void TankManager::spawnTank(::sf::Vector2f position, ::mw::CommandCategory category, bool isLocal, PlayerController* controller)
+void TankManager::spawnTank(::sf::Vector2f position, uint8_t id,  PlayerController* controller, bool isLocal)
 {
-	int tankIndex = (int)log2((uint32_t)category / (uint32_t)::mw::CommandCategory::Tank0);
-	::sf::Texture* tankHullTexture = mTankTextures[tankIndex][0];
-	::sf::Texture* tankBarrelTexture = mTankTextures[tankIndex][1];
-	::sf::Texture* tankBulletTexture = mTankTextures[tankIndex][2];
+	::sf::Texture* tankHullTexture = mTankTextures[id][0];
+	::sf::Texture* tankBarrelTexture = mTankTextures[id][1];
+	::sf::Texture* tankBulletTexture = mTankTextures[id][2];
 	std::unique_ptr<Tank> tank;
 	if (tankHullTexture && tankBarrelTexture && tankBulletTexture)
 	{
@@ -46,7 +45,6 @@ void TankManager::spawnTank(::sf::Vector2f position, ::mw::CommandCategory categ
 	{
 		tank = std::make_unique<Tank>();
 	}
-	tank->setCommandCategory(category);
 	tank->setPosition(position);
 	tank->setIsLocal(isLocal);
 	if (mCamera && isLocal)
@@ -56,7 +54,6 @@ void TankManager::spawnTank(::sf::Vector2f position, ::mw::CommandCategory categ
 	}
 	if (controller)
 	{
-		tank->setController(controller);
 		controller->possessTank(tank.get());
 	}
 	attachChild(std::move(tank));

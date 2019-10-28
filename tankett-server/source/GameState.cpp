@@ -45,8 +45,7 @@ void GameState::checkJoin()
 		{
 			::mw::CommandCategory commandCategory =
 				(::mw::CommandCategory)((uint32_t)::mw::CommandCategory::Tank0 << client.second.id);
-			::tankett::PlayerController controller(commandCategory);
-			controller.spawnTankServer(mWorld.getCommandQueue(), 0);
+			::tankett::PlayerController controller(client.second.id);
 			mControllers.insert(::std::make_pair(client.first, controller));
 		}
 	}

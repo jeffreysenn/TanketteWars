@@ -42,6 +42,8 @@ public:
 	void draw();
 
 	CommandQueue& getCommandQueue() { return mCommandQueue; }
+	::tankett::TankManager* getTankManager() { return mTankManager; }
+
 private:
 	void loadResources();
 	void loadMaps();

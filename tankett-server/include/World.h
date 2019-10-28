@@ -24,6 +24,7 @@ public:
 	void executeCommands(float deltaSeconds);
 
 	CommandQueue& getCommandQueue() { return mCommandQueue; }
+	::tankett::TankManager* getTankManager() { return mTankManager; }
 
 private:
 	void load();

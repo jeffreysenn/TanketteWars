@@ -6,60 +6,69 @@
 
 namespace tankett
 {
-PlayerController::PlayerController(CommandCategory category, bool listenToInput, ::sf::RenderWindow* window)
+PlayerController::PlayerController(uint8_t id, bool listenToInput, ::sf::RenderWindow* window)
 	: mWindow(window)
-	, mCommandCategoty(category)
 	, mListenToInput(listenToInput)
 	, mPossessedTank(nullptr)
+	, mID(id)
 {
 	if (mListenToInput)
 	{
 		bindInputs();
-		bindInputActions();
 	}
-	bindCommands();
 }
 
-void PlayerController::handleEvent(const ::sf::Event& event, CommandQueue& commandQueue, uint32_t frameNum)
+void PlayerController::handleEvent(const ::sf::Event& event, uint32_t frameNum)
 {
-	if (!mListenToInput)
+	if (!(mListenToInput && mPossessedTank))
 		return;
 
-	for (auto& pair : mInputActionBinding)
+	if (Input::eventInputCollectionPressed(event, mInputBinding[Action::Fire]))
 	{
-		const auto& gameInput = mInputBinding[pair.first];
-		if ((!gameInput.bIsRealTime) &&
-			Input::eventInputCollectionPressed(event, gameInput.inputCollection))
-		{
-			commandQueue.push(pair.second);
-			mCommandBuffer[frameNum].push_back(pair.second);
-		}
+		mPossessedTank->fire();
+		mInputBuffer[frameNum].setFire(true);
 	}
+
 }
 
 constexpr size_t bufferSize = 60;
-void PlayerController::handleRealtimeInput(CommandQueue& commandQueue, uint32_t frameNum)
+void PlayerController::handleRealtimeInput(uint32_t frameNum)
 {
-	if (!mListenToInput)
+	if (!(mListenToInput && mPossessedTank))
 		return;
 
-	for (auto& pair : mInputActionBinding)
+	bool up{}, down{}, left{}, right{};
+	if (Input::inputCollectionPressed(mInputBinding[Action::Up]))
 	{
-		const auto& gameInput = mInputBinding[pair.first];
-		if (gameInput.bIsRealTime &&
-			Input::inputCollectionPressed(gameInput.inputCollection))
-		{
-			commandQueue.push(pair.second);
-			mCommandBuffer[frameNum].push_back(pair.second);
-
-			// discard the old buffers
-			auto it = mCommandBuffer.find(frameNum - bufferSize);
-			if (it != mCommandBuffer.end())
-				mCommandBuffer.erase(mCommandBuffer.begin(), it);
-		}
+		mPossessedTank->addDirection(0, -1);
+		up = true;
+	}
+	if (Input::inputCollectionPressed(mInputBinding[Action::Down]))
+	{
+		mPossessedTank->addDirection(0, 1);
+		down = true;
+	}
+	if (Input::inputCollectionPressed(mInputBinding[Action::Left]))
+	{
+		mPossessedTank->addDirection(-1, 0);
+		left = true;
+	}
+	if (Input::inputCollectionPressed(mInputBinding[Action::Right]))
+	{
+		mPossessedTank->addDirection(1, 0);
+		right = true;
 	}
 
-	commandQueue.push(mMousePosCommand);
+	float aimAngle = mPossessedTank->mousePosToAngle(getMousePosition());
+	mPossessedTank->aimAt(aimAngle);
+
+	mInputBuffer[frameNum].setDirections(up, down, left, right);
+	mInputBuffer[frameNum].angle = aimAngle;
+
+	// discard the old buffers
+	auto it = mInputBuffer.find(frameNum - bufferSize);
+	if (it != mInputBuffer.end())
+		mInputBuffer.erase(mInputBuffer.begin(), it);
 }
 
 ::sf::Vector2f PlayerController::getMousePosition() const
@@ -70,102 +79,62 @@ void PlayerController::handleRealtimeInput(CommandQueue& commandQueue, uint32_t 
 	return ::sf::Vector2f();
 }
 
-void PlayerController::spawnTankServer(CommandQueue& commandQueue, uint32_t frameNum)
+void PlayerController::possessTank(Tank* tank)
 {
-	commandQueue.push(mCommands[Action::SpawnServer]);
+	mPossessedTank = tank; 
+	tank->setController(this);
 }
 
-void PlayerController::spawnTankClient(CommandQueue& commandQueue, uint32_t frameNum, const ::sf::Vector2f& pos)
+void PlayerController::spawnTank_server(TankManager* tankManager)
 {
-	::mw::Command command;
-	command.action =
-		derivedAction<TankManager>([&](TankManager& tankManager, float)
-								   {
-									   tankManager.spawnTank(pos, mCommandCategoty, mListenToInput, this);
-								   });
-	command.category = CommandCategory::TankManager;
-	commandQueue.push(command);
+	tankManager->spawnTankRandom(mID, this, mListenToInput);
+}
+
+void PlayerController::spawnTank_client(TankManager* tankManager, ::sf::Vector2f pos)
+{
+	tankManager->spawnTank(pos, mID, this, mListenToInput);
 }
 
 void PlayerController::bindInputs()
 {
 	mInputBinding[Action::Up] =
 	{
-		{
 			{Input::Type::Keyboard, ::sf::Keyboard::W},
 			{Input::Type::Keyboard, ::sf::Keyboard::Up}
-		}, true
 	};
 
 	mInputBinding[Action::Down] =
 	{
-		{
 			{Input::Type::Keyboard, ::sf::Keyboard::S},
 			{Input::Type::Keyboard, ::sf::Keyboard::Down}
-		}, true
 	};
 
 	mInputBinding[Action::Left] =
 	{
-		{
 			{Input::Type::Keyboard, ::sf::Keyboard::A},
 			{Input::Type::Keyboard, ::sf::Keyboard::Left}
-		}, true
 	};
 
 	mInputBinding[Action::Right] =
 	{
-		{
-			{Input::Type::Keyboard, ::sf::Keyboard::D},
-			{Input::Type::Keyboard, ::sf::Keyboard::Right}
-		}, true
+		{Input::Type::Keyboard, ::sf::Keyboard::D},
+		{Input::Type::Keyboard, ::sf::Keyboard::Right}
 	};
 
 	mInputBinding[Action::Fire] =
 	{
-		{{Input::Type::Mouse, ::sf::Mouse::Left}},
-		false
+		{Input::Type::Mouse, ::sf::Mouse::Left}
 	};
 }
-
-void PlayerController::bindInputActions()
+void PlayerController::TankInput::setDirections(bool up, bool down, bool left, bool right)
 {
-	mInputActionBinding[Action::Up].action =
-		derivedAction<Tank>([&](Tank& tank, float) { tank.addDirection(0, -1); });
-
-	mInputActionBinding[Action::Down].action =
-		derivedAction<Tank>([&](Tank& tank, float) { tank.addDirection(0, 1); });
-
-	mInputActionBinding[Action::Left].action =
-		derivedAction<Tank>([&](Tank& tank, float) { tank.addDirection(-1, 0); });
-
-	mInputActionBinding[Action::Right].action =
-		derivedAction<Tank>([&](Tank& tank, float) { tank.addDirection(1, 0); });
-
-	mInputActionBinding[Action::Fire].action =
-		derivedAction<Tank>([&](Tank& tank, float) { tank.fire(); });
-
-	for (auto& pair : mInputActionBinding)
-		pair.second.category = mCommandCategoty;
-
-	mMousePosCommand.action =
-		derivedAction<Tank>([&](Tank& tank, float)
-							{
-								tank.aimAt(getMousePosition());
-							});
-
-	mMousePosCommand.category = mCommandCategoty;
+	buttom |= up << 4;
+	buttom |= down << 3;
+	buttom |= left << 2;
+	buttom |= right << 1;
 }
-
-void PlayerController::bindCommands()
+void PlayerController::TankInput::setFire(bool fire)
 {
-	mCommands[Action::SpawnServer].action =
-		derivedAction<TankManager>([&](TankManager& tankManager, float)
-								   {
-									   tankManager.spawnTankRandom(mCommandCategoty, mListenToInput, this);
-								   });
-	mCommands[Action::SpawnServer].category = CommandCategory::TankManager;
-	
-	
+	buttom |= fire << 0;
 }
 }

@@ -73,6 +73,7 @@ void Tank::aimAt(const ::sf::Vector2f pos)
 
 void Tank::aimAt(float angle)
 {
+	mTurretAngle = angle;
 	mBarrelSprite.setRotation(angle - 90.f);
 }
 
@@ -156,7 +157,7 @@ float Tank::mousePosToAngle(const sf::Vector2f& pos)
 	auto angleRads = ::std::atan2(dir.y, dir.x);
 	float angle = helper::Vector::rad2deg(angleRads);
 
-	return mTurretAngle;
+	return angle;
 }
 
 void Tank::reportRenderInfoSelf(Renderer& renderer, ::sf::RenderStates states) const
