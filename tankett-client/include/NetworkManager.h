@@ -32,6 +32,8 @@ public:
 
 	std::vector<std::unique_ptr<network_message_header>>& getReceivedMessages() { return mReceivedMessages; }
 	void pushMessage(::std::unique_ptr<network_message_header> message);
+
+	void clearReceivedMessages();
 private:
 	void processMessages();
 

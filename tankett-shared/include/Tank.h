@@ -38,10 +38,6 @@ public:
 	::std::vector<Bullet*>& getBullets() { return mBullets; }
 	const ::std::vector<Bullet*>& getBullets() const { return mBullets; }
 
-
-	void setIsLocal(bool isLocal);
-	bool getIsLocal() const { return mIsLocal; }
-
 	void setController(PlayerController* controller) { mController = controller; }
 	PlayerController* getController() const { return mController; }
 	void setCamera(::mw::CameraActor* camera) { mCamera = camera; }
@@ -53,7 +49,6 @@ public:
 protected:
 	virtual void reportRenderInfoSelf(class Renderer& renderer, ::sf::RenderStates states) const override;
 	virtual void updateSelf(float deltaSeconds) override;
-	virtual Collider* getCollider() { return &mCollider; }
 	virtual void onCollisionEnter(Actor& other) override;
 
 private:
@@ -72,9 +67,7 @@ private:
 			 /______________
 	*/
 
-	Collider mCollider;
 	::std::vector<Bullet*> mBullets;
-	bool mIsLocal;
 	// TODO: decrease dependency
 	PlayerController* mController;
 	::mw::CameraActor* mCamera;

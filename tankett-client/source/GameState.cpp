@@ -40,7 +40,6 @@ void GameState::processReceivedMessages()
 			if (!msgS2C) break;
 
 			checkNewRemote(msgS2C);
-
 			updateRemoteState(msgS2C);
 		}
 		break;
@@ -48,6 +47,7 @@ void GameState::processReceivedMessages()
 			break;
 		}
 	}
+	networkManager.clearReceivedMessages();
 }
 
 void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
@@ -71,10 +71,19 @@ void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 			{
 				bool listenToInput = msgS2C->receiver_id == dataArr[i].client_id;
 				auto controller = ::std::make_unique<PlayerController>(dataArr[i].client_id, listenToInput, Context::getInstance().window);
-				if (listenToInput)
-					mLocalController = controller.get();
 				auto pos = ::sf::Vector2f(dataArr[i].position.x_, dataArr[i].position.y_);
-				controller->spawnTank_client(mWorld.getTankManager(), pos);
+				if (listenToInput)
+				{
+					controller->setNetRole(NetRole::AutonomousProxy);
+					mLocalController = controller.get();
+					controller->spawnTank_client(mWorld.getTankManager(), pos);
+				}
+				else
+				{
+					controller->setNetRole(NetRole::SimulatedProxy);
+					controller->spawnTank_client(mWorld.getTankManager(), pos);
+				}
+
 				mPlayerControllers.push_back(::std::move(controller));
 			}
 		}
@@ -101,12 +110,12 @@ void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 				auto& tank = *controller->getPossessedTank();
 				auto& existingBullets = tank.getBullets();
 				// bullets exist both on server and local: transform
-				// bullet exist only on local: destroy
-				// bullet exist only on server: spawn
+				// bullets exist only on local: destroy
+				// bullets exist only on server: spawn
 				::std::map<uint8_t, ::std::pair<::tankett::Bullet*, ::tankett::bullet_data*>> bulletMap{};
 				for (int bulletIndex = 0; bulletIndex < bulletCount; ++bulletIndex)
 				{
-					bulletMap[bullets[bulletIndex].id].second = &(bullets[bulletIndex]);
+					bulletMap[bullets[bulletIndex].id].second = &bullets[bulletIndex];
 				}
 				for (auto& existingBullet : existingBullets)
 				{
@@ -126,8 +135,8 @@ void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 					else if (!bulletPair.first && bulletPair.second)
 					{
 						Bullet* newBullet = tank.spawnBullet();
+						newBullet->setNetRole(NetRole::SimulatedProxy);
 						newBullet->setID(bulletPair.second->id);
-						newBullet->setIsLocal(false);
 						newBullet->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
 					}
 				}

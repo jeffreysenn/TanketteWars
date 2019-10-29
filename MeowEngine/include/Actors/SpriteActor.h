@@ -30,7 +30,6 @@ protected:
 
 protected:
 	::sf::Sprite mSprite;
-
 	Rendering::Layer mLayer;
 };
 

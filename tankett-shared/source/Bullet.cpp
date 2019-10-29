@@ -6,33 +6,25 @@
 namespace tankett
 {
 Bullet::Bullet(Tank* owner)
-	: mCollider(Collision::ObjectType::Dynamic, Collision::ObjectResponsePreset::CollideAll)
-	, mOwner(owner)
-	, mID((uint8_t)owner->getBullets().size())
+	: mOwner(owner)
+	, mID(0)
 {
 	owner->addBullet(this);
-
-	float width = unit::unit2pix(0.2f);
-	float height = unit::unit2pix(0.2f);
-	const ::sf::FloatRect colliderRect(0, -width / 2, width, height);
-	mCollider.rect = colliderRect;
+	registerCollider();
 }
 
 Bullet::Bullet(const ::sf::Texture& texture, Tank* owner)
 	: SpriteActor(texture, Rendering::Bullet)
-	, mCollider(Collision::ObjectType::Dynamic, Collision::ObjectResponsePreset::CollideAll)
 	, mOwner(owner)
-	, mID((uint8_t)owner->getBullets().size())
+	, mID(0)
 {
 	owner->addBullet(this);
 
 	::sf::FloatRect spriteBounds(getSprite()->getLocalBounds());
 	getSprite()->setOrigin(spriteBounds.width / 2, spriteBounds.height);
 	getSprite()->setRotation(90);
-	float width = unit::unit2pix(0.2f);
-	float height = unit::unit2pix(0.2f);
-	const ::sf::FloatRect colliderRect(0, -width / 2, width, height);
-	mCollider.rect = colliderRect;
+
+	registerCollider();
 }
 
 Bullet::~Bullet()
@@ -52,22 +44,12 @@ void Bullet::onCollisionEnter(Actor& other)
 
 	destroy(this);
 }
-
-void Bullet::setIsLocal(bool isLocal)
+void Bullet::registerCollider()
 {
-	mIsLocal = isLocal;
-	if (!isLocal)
-	{
-		mCollider.response = ::mw::Collision::ObjectResponse(Collision::ObjectResponsePreset::NoCollision);
-	}
-	else
-	{
-		mCollider.response = ::mw::Collision::ObjectResponse(Collision::ObjectResponsePreset::CollideAll);
-	}
-}
-
-Collider* Bullet::getCollider()
-{
-	return &mCollider;
+	float width = unit::unit2pix(0.2f);
+	float height = unit::unit2pix(0.2f);
+	const ::sf::FloatRect colliderRect(0, -width / 2, width, height);
+	auto collider = ::std::make_unique<Collider>(Collision::ObjectType::Dynamic, Collision::ObjectResponsePreset::CollideAll, colliderRect);
+	setCollider(collider);
 }
 }

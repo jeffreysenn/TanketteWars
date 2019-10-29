@@ -8,11 +8,12 @@
 
 namespace tankett
 {
-PlayerController::PlayerController(uint8_t id, bool listenToInput, ::sf::RenderWindow* window)
+PlayerController::PlayerController(uint8_t id, bool listenToInput, ::sf::RenderWindow* window, ::mw::NetRole netRole)
 	: mWindow(window)
 	, mListenToInput(listenToInput)
 	, mPossessedTank(nullptr)
 	, mID(id)
+	, mNetRole(netRole)
 {
 	if (mListenToInput)
 	{
@@ -87,12 +88,12 @@ void PlayerController::possessTank(Tank* tank)
 
 void PlayerController::spawnTank_server(TankManager* tankManager)
 {
-	tankManager->spawnTankRandom(mID, this, mListenToInput);
+	tankManager->spawnTankRandom(mID, this, mNetRole);
 }
 
 void PlayerController::spawnTank_client(TankManager* tankManager, ::sf::Vector2f pos)
 {
-	tankManager->spawnTank(pos, mID, this, true, mListenToInput);
+	tankManager->spawnTank(pos, mID, this, mNetRole);
 }
 
 void PlayerController::updateTank(bool up, bool down, bool left, bool right, bool fire, float aimAngle, float deltaSeconds)
@@ -108,8 +109,6 @@ void PlayerController::updateTank(bool up, bool down, bool left, bool right, boo
 	{
 		bullet->update(deltaSeconds);
 	}
-
-	auto pos0 = mPossessedTank->getPosition();
 
 	::mw::SceneGraph* sceneGraph = (SceneGraph*) mPossessedTank->getSceneGraph();
 	if (sceneGraph)

@@ -21,17 +21,17 @@ void TankManager::setTankTextures(int tankID, int textureID, ::sf::Texture* text
 	mTankTextures[tankID][textureID] = texture;
 }
 
-void TankManager::spawnTankRandom(uint8_t id, PlayerController* controller, bool isLocal)
+void TankManager::spawnTankRandom(uint8_t id, PlayerController* controller, ::mw::NetRole netRole)
 {
 	if (!mMap)
 		return;
 
 	::sf::Vector2i randomTile = mMap->getRandomEmptyTile();
 	sf::Vector2f position(randomTile.x * unit::unit2pix(1), randomTile.y * unit::unit2pix(1));
-	spawnTank(position, id, controller, false, false);
+	spawnTank(position, id, controller, netRole);
 }
 
-void TankManager::spawnTank(::sf::Vector2f position, uint8_t id,  PlayerController* controller, bool isClient, bool isLocal)
+void TankManager::spawnTank(::sf::Vector2f position, uint8_t id,  PlayerController* controller, ::mw::NetRole netRole)
 {
 	::sf::Texture* tankHullTexture = mTankTextures[id][0];
 	::sf::Texture* tankBarrelTexture = mTankTextures[id][1];
@@ -45,16 +45,14 @@ void TankManager::spawnTank(::sf::Vector2f position, uint8_t id,  PlayerControll
 	{
 		tank = std::make_unique<Tank>();
 	}
+	tank->setNetRole(netRole);
 	tank->setPosition(position);
 
-	if (isClient)
+	// attach a camera if AutonomousProxy
+	if (netRole == ::mw::NetRole::AutonomousProxy && mCamera)
 	{
-		tank->setIsLocal(isLocal);
-		if (mCamera && isLocal)
-		{
-			tank->setCamera(mCamera);
-			mCamera->attachToActor(tank.get());
-		}
+		tank->setCamera(mCamera);
+		mCamera->attachToActor(tank.get());
 	}
 
 	if (controller)

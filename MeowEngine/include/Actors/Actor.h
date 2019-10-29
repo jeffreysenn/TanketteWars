@@ -5,6 +5,7 @@
 
 #include "Commands/CommandCategory.h"
 #include "Network/NetRole.h"
+#include "Collisions/Collider.h"
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <memory>
@@ -14,6 +15,7 @@
 namespace mw
 {
 class PhysicsEngine;
+class Renderer;
 
 class Actor
 	: public ::sf::Transformable, private ::sf::NonCopyable
@@ -40,7 +42,7 @@ public:
 
 	void onCommand(const struct Command& command, float deltaSeconds);
 
-	void reportRenderInfo(class Renderer& renderer, ::sf::RenderStates states = ::sf::RenderStates::Default) const;
+	void reportRenderInfo(Renderer& renderer, ::sf::RenderStates states = ::sf::RenderStates::Default) const;
 
 	::sf::Transform getWorldTransform() const;
 	::sf::Vector2f getWorldPosition() const;
@@ -52,18 +54,20 @@ public:
 	void setCommandCategory(const CommandCategory& category) { mCommandCategory = category; }
 	CommandCategory getCommandCategory() const { return mCommandCategory; }
 
-	virtual struct Collider* getCollider() { return nullptr; }
+	struct Collider* getCollider();
 
 	void reportCollisionInfo(PhysicsEngine& physicsEngine);
 
 	void onCollision(Actor& other);
 	void onOverlap(Actor& other);
 
+	void setNetRole(NetRole netRole) { mNetRole = netRole; }
+	NetRole getNetRole() const { return mNetRole; }
 
 protected:
 	virtual void updateSelf(float deltaSeconds);
 
-	virtual void reportRenderInfoSelf(class Renderer& renderer, ::sf::RenderStates states) const;
+	virtual void reportRenderInfoSelf(Renderer& renderer, ::sf::RenderStates states) const;
 
 	virtual void reportCollisionInfoSelf(PhysicsEngine& physicsEngine);
 
@@ -74,10 +78,12 @@ protected:
 	virtual void onOverlapExit();
 	virtual void onOverlapStay(Actor& other);
 
+	void setCollider(::std::unique_ptr<Collider>& collider) { mCollider = std::move(collider); }
+
 private:
 	void updateChildren(float deltaSeconds);
 
-	void reportRenderInfoChildren(class Renderer& renderer, ::sf::RenderStates states) const;
+	void reportRenderInfoChildren(Renderer& renderer, ::sf::RenderStates states) const;
 
 	void reportCollisionInfoChildren(PhysicsEngine& physicsEngine);
 
@@ -85,17 +91,14 @@ private:
 
 protected:
 	CommandCategory mCommandCategory;
-
 	::std::vector<::std::unique_ptr<Actor>> mChildren;
-
 	Actor* mParent;
 
 private:
+	::std::unique_ptr<Collider> mCollider;
 	::std::pair<bool, bool> mOverlapPair;
-
 	bool mPendingDestroy;
-
-	NetRole mRole;
+	NetRole mNetRole;
 };
 
 }

@@ -12,9 +12,7 @@ Tank::Tank()
 	, mBulletTexture(nullptr)
 	, mLastFireTime(::sf::seconds(-100))
 	, mTurretAngle(0)
-	, mCollider(Collision::ObjectType::Dynamic, Collision::ObjectResponsePreset::CollideAll)
 	, mTurretLayer(Rendering::Turret)
-	, mIsLocal(false)
 	, mController(nullptr)
 	, mCamera(nullptr)
 {
@@ -24,7 +22,10 @@ Tank::Tank()
 									   -height / 2,
 									   width,
 									   height);
-	mCollider.rect = colliderRect;
+	auto collider = std::make_unique<Collider>(Collision::ObjectType::Dynamic, 
+											   Collision::ObjectResponsePreset::CollideAll,
+											   colliderRect);
+	setCollider(collider);
 }
 
 Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture, const ::sf::Texture& bulletTexture)
@@ -34,9 +35,7 @@ Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture,
 	, mSpeed(unit::unit2pix(4))
 	, mBulletTexture(&bulletTexture)
 	, mTurretAngle(0)
-	, mCollider(Collision::ObjectType::Dynamic, Collision::ObjectResponsePreset::CollideAll)
 	, mLastFireTime(::sf::seconds(-100))
-	, mIsLocal(false)
 	, mController(nullptr)
 	, mCamera(nullptr)
 	//, mDebugCircle(5)
@@ -50,7 +49,10 @@ Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture,
 									   -height / 2,
 									   width,
 									   height);
-	mCollider.rect = colliderRect;
+	auto collider = std::make_unique<Collider>(Collision::ObjectType::Dynamic,
+											   Collision::ObjectResponsePreset::CollideAll,
+											   colliderRect);
+	setCollider(collider);
 }
 
 Tank::~Tank()
@@ -86,19 +88,23 @@ void Tank::aimAt(float angle)
 }
 
 constexpr uint32_t cooldown = 1000;
+uint8_t bulletID = 0;
 void Tank::fire()
 {
 	auto timeNow = mFireClock.getElapsedTime();
 	if (timeNow - mLastFireTime > ::sf::milliseconds(cooldown))
 	{
+		if (mBullets.empty()) bulletID = 0;
 		mLastFireTime = timeNow;
-		spawnBullet();
+		spawnBullet()->setID(bulletID);
+		++bulletID;
 	}
 }
 
 constexpr int bulletSpeed = 8;
 Bullet* Tank::spawnBullet()
 {
+
 	::std::unique_ptr<Bullet> bullet;
 	if (mBulletTexture)
 		bullet = ::std::make_unique<Bullet>(*mBulletTexture, this);
@@ -113,6 +119,7 @@ Bullet* Tank::spawnBullet()
 							   dir.y * unit::unit2pix(bulletSpeed));
 	bullet->setVelocity(getWorldVelocity() + relativeVel);
 	getSceneGraph()->attachChild(::std::move(bullet));
+
 	return ptr;
 }
 
@@ -147,16 +154,6 @@ int Tank::getBullet(Bullet* bullet)
 	}
 
 	return -1;
-}
-
-void Tank::setIsLocal(bool isLocal)
-{
-	mIsLocal = isLocal;
-	
-	if (isLocal)
-		mCollider.response = Collision::ObjectResponse(Collision::ObjectResponsePreset::CollideAll);
-	else
-		mCollider.response = Collision::ObjectResponse(Collision::ObjectResponsePreset::NoCollision);
 }
 
 ::mw::CameraActor* Tank::resetCamera()

@@ -11,7 +11,7 @@ Actor::Actor()
 	: mParent(nullptr)
 	, mCommandCategory(CommandCategory::None)
 	, mPendingDestroy(false)
-	, mRole(NetRole::None)
+	, mNetRole(NetRole::Authority)
 {
 }
 
@@ -85,6 +85,21 @@ void Actor::reportRenderInfoChildren(Renderer& renderer, ::sf::RenderStates stat
 {
 	for (auto const& child : mChildren)
 		child->reportRenderInfo(renderer, states);
+}
+
+Collider* Actor::getCollider()
+{
+	switch (mNetRole)
+	{
+	case mw::NetRole::None:
+	case mw::NetRole::SimulatedProxy:
+		return nullptr;
+
+	case mw::NetRole::AutonomousProxy:
+	case mw::NetRole::Authority:
+		return mCollider.get();
+	}
+	return nullptr;
 }
 
 void Actor::reportCollisionInfo(PhysicsEngine& physicsEngine)

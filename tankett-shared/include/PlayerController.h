@@ -3,6 +3,7 @@
 #include "Commands/Command.h"
 #include "Commands/CommandCategory.h"
 #include "Input/Input.h"
+#include "Network/NetRole.h"
 
 #include <map>
 #include <vector>
@@ -34,7 +35,7 @@ public:
 	};
 
 public:
-	PlayerController(uint8_t id = 0, bool listenToInput = false, ::sf::RenderWindow* window = nullptr);
+	PlayerController(uint8_t id = 0, bool listenToInput = false, ::sf::RenderWindow* window = nullptr, ::mw::NetRole netRole = NetRole::Authority);
 
 	void handleEvent(const ::sf::Event& event, uint32_t frameNum);
 	void handleRealtimeInput(uint32_t frameNum);
@@ -55,6 +56,9 @@ public:
 
 	void updateTank(bool up, bool down, bool left, bool right, bool fire, float aimAngle, float deltaSeconds);
 	void setTankState(::sf::Vector2f pos, float aimAngle);
+
+	void setNetRole(::mw::NetRole netRole) { mNetRole = netRole; }
+	::mw::NetRole getNetRole() const { return mNetRole; }
 
 private:
 	enum class Action
@@ -81,5 +85,6 @@ private:
 	::std::map<uint32_t, TankInput> mInputBuffer;
 	::sf::RenderWindow* mWindow;
 	Tank* mPossessedTank;
+	NetRole mNetRole;
 };
 }
