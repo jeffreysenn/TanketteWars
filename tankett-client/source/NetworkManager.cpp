@@ -80,6 +80,7 @@ void NetworkManager::receive()
 		break;
 	case tankett::PACKET_TYPE_CONNECTION_CHALLENGE:
 	{
+		if (mState != ConnectionState::Discovering) break;
 		protocol_connection_challenge connectionChallenge;
 		connectionChallenge.serialize(reader);
 		mServerAddr = outAddr;
