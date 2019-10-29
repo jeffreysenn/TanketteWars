@@ -2,12 +2,19 @@
 #include "Actor.h"
 namespace mw
 {
+class PhysicsEngine;
+
 class SceneGraph :
 	public Actor
 {
 public:
-	SceneGraph();
+	SceneGraph(PhysicsEngine* physicsEngine = nullptr);
+
+	void checkSceneCollision();
 
 	void enforceDestruction(Actor& actor);
+
+private:
+	PhysicsEngine* mPhysicsEngine;
 };
 }

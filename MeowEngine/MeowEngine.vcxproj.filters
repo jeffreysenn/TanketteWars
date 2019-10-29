@@ -87,6 +87,9 @@
     <ClInclude Include="include\Helpers\Helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Network\NetRole.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\ResourceManagers\ResourceManager.inl">

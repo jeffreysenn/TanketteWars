@@ -8,6 +8,7 @@ namespace server
 World::World()
 	: mMap(nullptr)
 	, mTankManager(nullptr)
+	, mSceneGraph(&mPhysicsEngine)
 {
 	load();
 	buildScene();
@@ -35,6 +36,4 @@ void World::buildScene()
 	mTankManager = tankManager.get();
 	mSceneGraph.attachChild(::std::move(tankManager));
 }
-
-
 }

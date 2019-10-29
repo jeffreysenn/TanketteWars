@@ -271,9 +271,7 @@ struct network_message_ping : network_message_header
 	}
 };
 
-
 constexpr uint32 PROTOCOL_PAYLOAD_SIZE = 1200;
-
 struct message_client_to_server : network_message_header
 {
 	message_client_to_server() : network_message_header(NETWORK_MESSAGE_CLIENT_TO_SERVER)
@@ -295,7 +293,7 @@ struct message_client_to_server : network_message_header
 
 	bool get_input(INPUT input)
 	{
-		return (input_field >> input) & 1;
+		return (input_field >> input) & 1u;
 	}
 
 	void set_input(bool shoot, bool right, bool left, bool down, bool up)

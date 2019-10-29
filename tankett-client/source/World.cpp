@@ -21,6 +21,7 @@ World::World()
 	, mTextureManager(*Context::getInstance().textureManager)
 	, mMapManager(*Context::getInstance().mapManager)
 	, mCamera(nullptr)
+	, mSceneGraph(&mPhysicsEngine)
 {
 	loadResources();
 	buildScene();
@@ -124,8 +125,7 @@ void World::update(float deltaSeconds)
 		mSceneGraph.onCommand(mCommandQueue.pop(), deltaSeconds);
 
 	mSceneGraph.update(deltaSeconds);
-	mSceneGraph.reportCollisionInfo(mPhysicsEngine);
-	mPhysicsEngine.checkCollision();
+	mSceneGraph.checkSceneCollision();
 	mSceneGraph.enforceDestruction(mSceneGraph);
 }
 

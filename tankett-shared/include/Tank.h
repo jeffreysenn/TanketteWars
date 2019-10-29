@@ -31,12 +31,15 @@ public:
 	void aimAt(float angle);
 	void fire();
 
-	void spawnBullet();
+	Bullet* spawnBullet();
 	bool addBullet(Bullet* bullet);
 	bool removeBullet(Bullet* bullet);
 	int getBullet(Bullet* bullet);
+	::std::vector<Bullet*>& getBullets() { return mBullets; }
+	const ::std::vector<Bullet*>& getBullets() const { return mBullets; }
 
-	void setIsLocal(bool isLocal) { mIsLocal = isLocal; }
+
+	void setIsLocal(bool isLocal);
 	bool getIsLocal() const { return mIsLocal; }
 
 	void setController(PlayerController* controller) { mController = controller; }

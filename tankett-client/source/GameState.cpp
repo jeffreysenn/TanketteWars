@@ -4,14 +4,16 @@
 #include "ClientStateStack.h"
 #include "NetworkManager.h"
 #include <SFML/Window/Event.hpp>
+#include "Tank.h"
+#include "Bullet.h"
+#include "tankett_debug.h"
 
 namespace client
 {
 GameState::GameState()
 try : mWorld()
 , mFrameNum(0)
-{
-}
+{}
 catch (const std::runtime_error & e)
 {
 	std::cout << "Exception: " << e.what() << std::endl;
@@ -23,7 +25,7 @@ GameState::~GameState()
 {
 }
 
-void GameState::processMessages()
+void GameState::processReceivedMessages()
 {
 	auto& networkManager = *Context::getInstance().networkManager;
 	auto& receivedMessages = networkManager.getReceivedMessages();
@@ -37,32 +39,9 @@ void GameState::processMessages()
 			message_server_to_client* msgS2C = (message_server_to_client*)message.get();
 			if (!msgS2C) break;
 
-			auto dataArr = msgS2C->client_data;
+			checkNewRemote(msgS2C);
 
-			// if new players are connected
-			if (mPlayerControllers.size() < msgS2C->client_count)
-			{
-				for (int i = 0; i < msgS2C->client_count; ++i)
-				{
-					bool controllerExist = false;
-					for (auto& controller : mPlayerControllers)
-					{
-						if (controller->getID() == dataArr[i].client_id)
-						{
-							controllerExist = true;
-							break;
-						}
-					}
-					if (!controllerExist)
-					{
-						bool listenToInput = msgS2C->receiver_id == dataArr[i].client_id;
-						auto controller = ::std::make_unique<PlayerController>(dataArr[i].client_id, listenToInput, Context::getInstance().window);
-						auto pos = ::sf::Vector2f(dataArr[i].position.x_, dataArr[i].position.y_);
-						controller->spawnTank_client(mWorld.getTankManager(), pos);
-						mPlayerControllers.push_back(::std::move(controller));
-					}
-				}
-			}
+			updateRemoteState(msgS2C);
 		}
 		break;
 		default:
@@ -71,9 +50,112 @@ void GameState::processMessages()
 	}
 }
 
+void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
+{
+	auto dataArr = msgS2C->client_data;
+	// if new players are connected
+	if (mPlayerControllers.size() < msgS2C->client_count)
+	{
+		for (int i = 0; i < msgS2C->client_count; ++i)
+		{
+			bool controllerExist = false;
+			for (auto& controller : mPlayerControllers)
+			{
+				if (controller->getID() == dataArr[i].client_id)
+				{
+					controllerExist = true;
+					break;
+				}
+			}
+			if (!controllerExist)
+			{
+				bool listenToInput = msgS2C->receiver_id == dataArr[i].client_id;
+				auto controller = ::std::make_unique<PlayerController>(dataArr[i].client_id, listenToInput, Context::getInstance().window);
+				if (listenToInput)
+					mLocalController = controller.get();
+				auto pos = ::sf::Vector2f(dataArr[i].position.x_, dataArr[i].position.y_);
+				controller->spawnTank_client(mWorld.getTankManager(), pos);
+				mPlayerControllers.push_back(::std::move(controller));
+			}
+		}
+	}
+}
+
+void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
+{
+	auto dataArr = msgS2C->client_data;
+	// update state
+	for (int i = 0; i < msgS2C->client_count; ++i)
+	{
+		auto& data = dataArr[i];
+		for (auto& controller : mPlayerControllers)
+		{
+			// remote controllers
+			if (controller->getID() == data.client_id && controller.get() != mLocalController)
+			{
+				::sf::Vector2f pos = ::sf::Vector2f(data.position.x_, data.position.y_);
+				float aimAngle = data.angle;
+				controller->setTankState(pos, aimAngle);
+				uint8_t bulletCount = data.bullet_count;
+				auto& bullets = data.bullets;
+				auto& tank = *controller->getPossessedTank();
+				auto& existingBullets = tank.getBullets();
+				// bullets exist both on server and local: transform
+				// bullet exist only on local: destroy
+				// bullet exist only on server: spawn
+				::std::map<uint8_t, ::std::pair<::tankett::Bullet*, ::tankett::bullet_data*>> bulletMap{};
+				for (int bulletIndex = 0; bulletIndex < bulletCount; ++bulletIndex)
+				{
+					bulletMap[bullets[bulletIndex].id].second = &(bullets[bulletIndex]);
+				}
+				for (auto& existingBullet : existingBullets)
+				{
+					bulletMap[existingBullet->getID()].first = existingBullet;
+				}
+				for (auto& it : bulletMap)
+				{
+					auto& bulletPair = it.second;
+					if (bulletPair.first && bulletPair.second)
+					{
+						bulletPair.first->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
+					}
+					else if (bulletPair.first && !bulletPair.second)
+					{
+						::mw::Actor::destroy(bulletPair.first);
+					}
+					else if (!bulletPair.first && bulletPair.second)
+					{
+						Bullet* newBullet = tank.spawnBullet();
+						newBullet->setID(bulletPair.second->id);
+						newBullet->setIsLocal(false);
+						newBullet->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
+					}
+				}
+
+			}
+		}
+	}
+}
+
+void GameState::pushMessages()
+{
+	if (!mLocalController)
+		return;
+
+	auto& networkManager = *Context::getInstance().networkManager;
+	auto inputMessage = ::std::make_unique<message_client_to_server>();
+	auto currentInput = mLocalController->getInputBuffer()[mFrameNum];
+	inputMessage->set_input(currentInput.fire, currentInput.right, currentInput.left, currentInput.down, currentInput.up);
+	if (currentInput.fire)
+		int i = 0;
+	inputMessage->turret_angle = currentInput.angle;
+	inputMessage->input_number = mFrameNum;
+	networkManager.pushMessage(::std::move(inputMessage));
+}
+
 bool GameState::update(float deltaSeconds)
 {
-	processMessages();
+	processReceivedMessages();
 
 	++mFrameNum;
 	mWorld.update(deltaSeconds);
@@ -85,6 +167,7 @@ bool GameState::update(float deltaSeconds)
 		}
 	}
 
+	pushMessages();
 	return true;
 }
 

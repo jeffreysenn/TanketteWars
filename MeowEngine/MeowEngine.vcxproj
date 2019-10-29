@@ -30,6 +30,7 @@
     <ClInclude Include="include\Helpers\Helper.h" />
     <ClInclude Include="include\Input\Input.h" />
     <ClInclude Include="include\Input\InputCollections.h" />
+    <ClInclude Include="include\Network\NetRole.h" />
     <ClInclude Include="include\Rendering\Renderer.h" />
     <ClInclude Include="include\Rendering\RenderInfo.h" />
     <ClInclude Include="include\ResourceManagers\ResourceIdentifiers.h" />

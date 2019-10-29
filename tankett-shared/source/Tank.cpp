@@ -18,6 +18,13 @@ Tank::Tank()
 	, mController(nullptr)
 	, mCamera(nullptr)
 {
+	float width = unit::unit2pix(1);
+	float height = unit::unit2pix(1);
+	const ::sf::FloatRect colliderRect(-width / 2,
+									   -height / 2,
+									   width,
+									   height);
+	mCollider.rect = colliderRect;
 }
 
 Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture, const ::sf::Texture& bulletTexture)
@@ -37,11 +44,12 @@ Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture,
 	::sf::FloatRect spriteBounds(mBarrelSprite.getLocalBounds());
 	mBarrelSprite.setOrigin(spriteBounds.width / 2, 0);
 
-	::sf::FloatRect hullSpriteBounds(getSprite()->getLocalBounds());
-	const ::sf::FloatRect colliderRect(-hullSpriteBounds.width / 2,
-									   -hullSpriteBounds.height / 2,
-									   unit::unit2pix(1),
-									   unit::unit2pix(1));
+	float width = unit::unit2pix(1);
+	float height = unit::unit2pix(1);
+	const ::sf::FloatRect colliderRect(-width / 2,
+									   -height / 2,
+									   width,
+									   height);
 	mCollider.rect = colliderRect;
 }
 
@@ -89,7 +97,7 @@ void Tank::fire()
 }
 
 constexpr int bulletSpeed = 8;
-void Tank::spawnBullet()
+Bullet* Tank::spawnBullet()
 {
 	::std::unique_ptr<Bullet> bullet;
 	if (mBulletTexture)
@@ -97,7 +105,7 @@ void Tank::spawnBullet()
 	else
 		bullet = ::std::make_unique<Bullet>(this);
 
-	addBullet(bullet.get());
+	Bullet* ptr = bullet.get();
 	bullet->setPosition(getWorldPosition());
 	bullet->setRotation(mTurretAngle);
 	auto dir = helper::Vector::deg2vec(mTurretAngle);
@@ -105,6 +113,7 @@ void Tank::spawnBullet()
 							   dir.y * unit::unit2pix(bulletSpeed));
 	bullet->setVelocity(getWorldVelocity() + relativeVel);
 	getSceneGraph()->attachChild(::std::move(bullet));
+	return ptr;
 }
 
 bool Tank::addBullet(Bullet* bullet)
@@ -138,6 +147,16 @@ int Tank::getBullet(Bullet* bullet)
 	}
 
 	return -1;
+}
+
+void Tank::setIsLocal(bool isLocal)
+{
+	mIsLocal = isLocal;
+	
+	if (isLocal)
+		mCollider.response = Collision::ObjectResponse(Collision::ObjectResponsePreset::CollideAll);
+	else
+		mCollider.response = Collision::ObjectResponse(Collision::ObjectResponsePreset::NoCollision);
 }
 
 ::mw::CameraActor* Tank::resetCamera()

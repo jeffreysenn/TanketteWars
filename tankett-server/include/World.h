@@ -2,6 +2,8 @@
 #include "Commands/CommandQueue.h"
 #include "Map.h"
 #include "Actors/SceneGraph.h"
+#include "Collisions/PhysicsEngine.h"
+
 
 namespace mw
 {
@@ -32,6 +34,7 @@ private:
 
 private:
 	CommandQueue mCommandQueue;
+	::mw::PhysicsEngine mPhysicsEngine;
 	::mw::SceneGraph mSceneGraph;
 	::tankett::MapManager mMapManager;
 	::tankett::Map* mMap;

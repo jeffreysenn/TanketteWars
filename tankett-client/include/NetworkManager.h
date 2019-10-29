@@ -31,6 +31,7 @@ public:
 	ConnectionState getState() { return mState; }
 
 	std::vector<std::unique_ptr<network_message_header>>& getReceivedMessages() { return mReceivedMessages; }
+	void pushMessage(::std::unique_ptr<network_message_header> message);
 private:
 	void processMessages();
 

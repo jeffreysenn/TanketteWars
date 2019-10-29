@@ -21,7 +21,7 @@ public:
 
 	void spawnTankRandom(uint8_t id, PlayerController* controller = nullptr, bool isLocal = false);
 
-	void spawnTank(::sf::Vector2f position, uint8_t id,  PlayerController* controller = nullptr, bool isLocal = false);
+	void spawnTank(::sf::Vector2f position, uint8_t id,  PlayerController* controller = nullptr, bool isClient = false, bool isLocal = false);
 
 private:
 	::std::array<std::array<::sf::Texture*, 3>, 4> mTankTextures;

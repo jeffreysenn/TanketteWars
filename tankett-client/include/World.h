@@ -60,10 +60,10 @@ private:
 	TextureManager& mTextureManager;
 	tankett::MapManager& mMapManager;
 
+	PhysicsEngine mPhysicsEngine;
 	SceneGraph mSceneGraph;
 	::sf::Vector2f mSpawnPosition = ::sf::Vector2f(0, -20);
 	CommandQueue mCommandQueue;
-	PhysicsEngine mPhysicsEngine;
 };
 
 

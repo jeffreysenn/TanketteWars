@@ -29,11 +29,8 @@ class PlayerController
 public:
 	struct TankInput
 	{
-		void setDirections(bool up, bool down, bool left, bool right);
-		void setFire(bool fire);
-
-		uint8_t buttom;
-		float angle;
+		bool up{}, down{}, left{}, right{}, fire{};
+		float angle{};
 	};
 
 public:
@@ -46,14 +43,18 @@ public:
 	
 	void possessTank(Tank* tank);
 	void unpossess() { mPossessedTank = nullptr; }
+	Tank* getPossessedTank() const { return mPossessedTank; }
 
 	uint8_t getID() { return mID; }
 
 	void spawnTank_server(TankManager* tankManager);
 	void spawnTank_client(TankManager* tankManager, ::sf::Vector2f pos);
 
-	float getTankTurretAngle();
-	::sf::Vector2f getTankPosition() const;
+	
+	::std::map<uint32_t, TankInput>& getInputBuffer() { return mInputBuffer; }
+
+	void updateTank(bool up, bool down, bool left, bool right, bool fire, float aimAngle, float deltaSeconds);
+	void setTankState(::sf::Vector2f pos, float aimAngle);
 
 private:
 	enum class Action

@@ -16,8 +16,11 @@ public:
 
 	void processMessages() override;
 
+
 private:
 	void checkJoin();
+	void applyInput();
+	void packGameState();
 
 private:
 	World mWorld;

@@ -153,6 +153,11 @@ void NetworkManager::receive()
 
 }
 
+void NetworkManager::pushMessage(::std::unique_ptr<network_message_header> message)
+{
+	mMessageQueue.push_back(::std::move(message));
+}
+
 void NetworkManager::processMessages()
 {
 	const uint32 current_sequence_number = mClientSequence++;

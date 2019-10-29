@@ -2,7 +2,9 @@
 #include "Tank.h"
 #include "TankManager.h"
 #include "Commands/CommandQueue.h"
+#include "Actors/SceneGraph.h"
 #include <SFML/Graphics/RenderWindow.hpp>
+#include "tankett_debug.h"
 
 namespace tankett
 {
@@ -20,50 +22,48 @@ PlayerController::PlayerController(uint8_t id, bool listenToInput, ::sf::RenderW
 
 void PlayerController::handleEvent(const ::sf::Event& event, uint32_t frameNum)
 {
-	if (!(mListenToInput && mPossessedTank))
-		return;
-
-	if (Input::eventInputCollectionPressed(event, mInputBinding[Action::Fire]))
-	{
-		mPossessedTank->fire();
-		mInputBuffer[frameNum].setFire(true);
-	}
-
 }
 
-constexpr size_t bufferSize = 60;
+constexpr size_t bufferSize = 600;
 void PlayerController::handleRealtimeInput(uint32_t frameNum)
 {
 	if (!(mListenToInput && mPossessedTank))
 		return;
 
-	bool up{}, down{}, left{}, right{};
+	bool up{}, down{}, left{}, right{}, fire{};
 	if (Input::inputCollectionPressed(mInputBinding[Action::Up]))
 	{
-		mPossessedTank->addDirection(0, -1);
 		up = true;
 	}
 	if (Input::inputCollectionPressed(mInputBinding[Action::Down]))
 	{
-		mPossessedTank->addDirection(0, 1);
 		down = true;
 	}
 	if (Input::inputCollectionPressed(mInputBinding[Action::Left]))
 	{
-		mPossessedTank->addDirection(-1, 0);
 		left = true;
 	}
 	if (Input::inputCollectionPressed(mInputBinding[Action::Right]))
 	{
-		mPossessedTank->addDirection(1, 0);
 		right = true;
 	}
+	if (Input::inputCollectionPressed(mInputBinding[Action::Fire]))
+	{
+		mPossessedTank->fire();
+		fire = true;
+	}
+	mPossessedTank->addDirection((float)(-(int)left + (int)right), (float)(-(int)up + (int)down));
 
 	float aimAngle = mPossessedTank->mousePosToAngle(getMousePosition());
 	mPossessedTank->aimAt(aimAngle);
 
-	mInputBuffer[frameNum].setDirections(up, down, left, right);
+	mInputBuffer[frameNum].up = up;
+	mInputBuffer[frameNum].down = down;
+	mInputBuffer[frameNum].left = left;
+	mInputBuffer[frameNum].right = right;
+	mInputBuffer[frameNum].fire = fire;
 	mInputBuffer[frameNum].angle = aimAngle;
+
 
 	// discard the old buffers
 	auto it = mInputBuffer.find(frameNum - bufferSize);
@@ -92,25 +92,38 @@ void PlayerController::spawnTank_server(TankManager* tankManager)
 
 void PlayerController::spawnTank_client(TankManager* tankManager, ::sf::Vector2f pos)
 {
-	tankManager->spawnTank(pos, mID, this, mListenToInput);
+	tankManager->spawnTank(pos, mID, this, true, mListenToInput);
 }
 
-float PlayerController::getTankTurretAngle()
+void PlayerController::updateTank(bool up, bool down, bool left, bool right, bool fire, float aimAngle, float deltaSeconds)
 {
-	if (mPossessedTank)
+	if (!mPossessedTank) return;
+	mPossessedTank->addDirection((float)(-(int)left + (int)right), (float)(-(int)up + (int)down));
+	mPossessedTank->aimAt(aimAngle);
+	if (fire)
+		mPossessedTank->fire();
+	mPossessedTank->update(deltaSeconds);
+	auto& bullets = mPossessedTank->getBullets();
+	for (auto& bullet : bullets)
 	{
-		return mPossessedTank->getTurretAngle();
+		bullet->update(deltaSeconds);
 	}
-	return 0.0f;
+
+	auto pos0 = mPossessedTank->getPosition();
+
+	::mw::SceneGraph* sceneGraph = (SceneGraph*) mPossessedTank->getSceneGraph();
+	if (sceneGraph)
+	{
+		sceneGraph->checkSceneCollision();
+		sceneGraph->enforceDestruction(*sceneGraph);
+	}
 }
 
-::sf::Vector2f PlayerController::getTankPosition() const
+void PlayerController::setTankState(::sf::Vector2f pos, float aimAngle)
 {
-	if (mPossessedTank)
-	{
-		return mPossessedTank->getWorldPosition();
-	}
-	return ::sf::Vector2f();
+	if (!mPossessedTank) return;
+	mPossessedTank->setPosition(pos);
+	mPossessedTank->aimAt(aimAngle);
 }
 
 void PlayerController::bindInputs()
@@ -143,16 +156,5 @@ void PlayerController::bindInputs()
 	{
 		{Input::Type::Mouse, ::sf::Mouse::Left}
 	};
-}
-void PlayerController::TankInput::setDirections(bool up, bool down, bool left, bool right)
-{
-	buttom |= up << 4;
-	buttom |= down << 3;
-	buttom |= left << 2;
-	buttom |= right << 1;
-}
-void PlayerController::TankInput::setFire(bool fire)
-{
-	buttom |= fire << 0;
 }
 }

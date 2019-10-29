@@ -11,6 +11,7 @@ Actor::Actor()
 	: mParent(nullptr)
 	, mCommandCategory(CommandCategory::None)
 	, mPendingDestroy(false)
+	, mRole(NetRole::None)
 {
 }
 

@@ -1,12 +1,22 @@
 #include "Actors/SceneGraph.h"
 #include "Actors/CameraActor.h"
+#include "Collisions/PhysicsEngine.h"
 
 namespace mw
 {
 
-SceneGraph::SceneGraph()
+SceneGraph::SceneGraph(PhysicsEngine* physicsEngine)
 	: Actor()
+	, mPhysicsEngine(physicsEngine)
 {
+}
+
+void SceneGraph::checkSceneCollision()
+{
+	if (!mPhysicsEngine) return;
+
+	reportCollisionInfo(*mPhysicsEngine);
+	mPhysicsEngine->checkCollision();
 }
 
 void SceneGraph::enforceDestruction(Actor& actor)

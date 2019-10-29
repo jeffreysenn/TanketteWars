@@ -30,7 +30,7 @@ public:
 	{
 		void clear_received_messages();
 
-		uint8 id;
+		uint8 id{};
 		alpha::time connectionTime;
 		uint64 serverKey{};
 		uint64 clientKey{};

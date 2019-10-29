@@ -28,10 +28,10 @@ void TankManager::spawnTankRandom(uint8_t id, PlayerController* controller, bool
 
 	::sf::Vector2i randomTile = mMap->getRandomEmptyTile();
 	sf::Vector2f position(randomTile.x * unit::unit2pix(1), randomTile.y * unit::unit2pix(1));
-	spawnTank(position, id, controller, isLocal);
+	spawnTank(position, id, controller, false, false);
 }
 
-void TankManager::spawnTank(::sf::Vector2f position, uint8_t id,  PlayerController* controller, bool isLocal)
+void TankManager::spawnTank(::sf::Vector2f position, uint8_t id,  PlayerController* controller, bool isClient, bool isLocal)
 {
 	::sf::Texture* tankHullTexture = mTankTextures[id][0];
 	::sf::Texture* tankBarrelTexture = mTankTextures[id][1];
@@ -46,16 +46,22 @@ void TankManager::spawnTank(::sf::Vector2f position, uint8_t id,  PlayerControll
 		tank = std::make_unique<Tank>();
 	}
 	tank->setPosition(position);
-	tank->setIsLocal(isLocal);
-	if (mCamera && isLocal)
+
+	if (isClient)
 	{
-		tank->setCamera(mCamera);
-		mCamera->attachToActor(tank.get());
+		tank->setIsLocal(isLocal);
+		if (mCamera && isLocal)
+		{
+			tank->setCamera(mCamera);
+			mCamera->attachToActor(tank.get());
+		}
 	}
+
 	if (controller)
 	{
 		controller->possessTank(tank.get());
 	}
+
 	attachChild(std::move(tank));
 }
 }

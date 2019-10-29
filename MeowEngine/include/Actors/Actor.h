@@ -4,6 +4,7 @@
 #include <SFML/Graphics/Transformable.hpp>
 
 #include "Commands/CommandCategory.h"
+#include "Network/NetRole.h"
 
 #include <SFML/Graphics/RenderStates.hpp>
 #include <memory>
@@ -12,6 +13,8 @@
 
 namespace mw
 {
+class PhysicsEngine;
+
 class Actor
 	: public ::sf::Transformable, private ::sf::NonCopyable
 {
@@ -51,17 +54,18 @@ public:
 
 	virtual struct Collider* getCollider() { return nullptr; }
 
-	void reportCollisionInfo(class PhysicsEngine& physicsEngine);
+	void reportCollisionInfo(PhysicsEngine& physicsEngine);
 
 	void onCollision(Actor& other);
 	void onOverlap(Actor& other);
+
 
 protected:
 	virtual void updateSelf(float deltaSeconds);
 
 	virtual void reportRenderInfoSelf(class Renderer& renderer, ::sf::RenderStates states) const;
 
-	virtual void reportCollisionInfoSelf(class PhysicsEngine& physicsEngine);
+	virtual void reportCollisionInfoSelf(PhysicsEngine& physicsEngine);
 
 	virtual void onCollisionEnter(Actor& other);
 
@@ -75,7 +79,7 @@ private:
 
 	void reportRenderInfoChildren(class Renderer& renderer, ::sf::RenderStates states) const;
 
-	void reportCollisionInfoChildren(class PhysicsEngine& physicsEngine);
+	void reportCollisionInfoChildren(PhysicsEngine& physicsEngine);
 
 	void updateCollision(::std::pair<bool, bool>& collisionPair, ::std::function<void(void)> exitFunction);
 
@@ -90,6 +94,8 @@ private:
 	::std::pair<bool, bool> mOverlapPair;
 
 	bool mPendingDestroy;
+
+	NetRole mRole;
 };
 
 }
