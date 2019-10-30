@@ -10,6 +10,7 @@ NetworkManager::NetworkManager()
 	, mServerKey(0u)
 	, mState(ConnectionState::None)
 	, mClientSequence(0u)
+	, mServerSequence(0u)
 {
 	if (!network_init())
 	{
@@ -108,6 +109,10 @@ void NetworkManager::receive()
 			break;
 		}
 
+		if (!packet.is_newer(mServerSequence)) break;
+
+		mServerSequence = packet.sequence_;
+
 		mXorinator.decrypt(packet.length_, packet.payload_);
 
 		byte_stream payloadStream(packet.length_, packet.payload_);
@@ -128,7 +133,7 @@ void NetworkManager::receive()
 				}
 				// send the ping back immediately
 				// no need to push into received buffer
-				mMessageQueue.push_back(std::move(messagePing));
+				mSendMessageQueue.push_back(std::move(messagePing));
 				send();
 			} break;
 			case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
@@ -156,7 +161,7 @@ void NetworkManager::receive()
 
 void NetworkManager::pushMessage(::std::unique_ptr<network_message_header> message)
 {
-	mMessageQueue.push_back(::std::move(message));
+	mSendMessageQueue.push_back(::std::move(message));
 }
 
 void NetworkManager::clearReceivedMessages()
@@ -174,7 +179,7 @@ void NetworkManager::processMessages()
 	int messages_evaluated = 0;
 	byte_stream stream(sizeof(packet.payload_), packet.payload_);
 	byte_stream_evaluator evaluator(stream);
-	for (auto iter = mMessageQueue.begin(); iter != mMessageQueue.end(); ++iter)
+	for (auto iter = mSendMessageQueue.begin(); iter != mSendMessageQueue.end(); ++iter)
 	{
 		if (!(*iter)->write(evaluator))
 		{
@@ -187,7 +192,7 @@ void NetworkManager::processMessages()
 	// note: actual packing of messages into the payload
 	int messages_packed = 0;
 	byte_stream_writer writer(stream);
-	for (auto iter = mMessageQueue.begin(); iter != mMessageQueue.end(); ++iter)
+	for (auto iter = mSendMessageQueue.begin(); iter != mSendMessageQueue.end(); ++iter)
 	{
 		if (!(*iter)->write(writer))
 		{
@@ -220,7 +225,7 @@ void NetworkManager::processMessages()
 		// note: if sending succeeds we can:
 		//       - remove them from client message queue
 		//       - messages sent will be delete because of unique_ptr
-		mMessageQueue.erase(mMessageQueue.begin(), mMessageQueue.begin() + messages_packed);
+		mSendMessageQueue.erase(mSendMessageQueue.begin(), mSendMessageQueue.begin() + messages_packed);
 	}
 
 }

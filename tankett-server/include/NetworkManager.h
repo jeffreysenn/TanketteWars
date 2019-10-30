@@ -31,12 +31,14 @@ public:
 		void clear_received_messages();
 
 		uint8 id{};
+
 		alpha::time connectionTime;
 		uint64 serverKey{};
 		uint64 clientKey{};
 		crypt::xorinator xorinator;
 		uint32 latestReceivedSequence{};
 		alpha::time latestReceiveTime;
+		uint32 latestReceivedInputSequence{};
 
 		dynamic_array<network_message_header*> sendMessageQueue;
 		dynamic_array<network_message_header*> receivedMessages;

@@ -14,6 +14,7 @@ PlayerController::PlayerController(uint8_t id, bool listenToInput, ::sf::RenderW
 	, mPossessedTank(nullptr)
 	, mID(id)
 	, mNetRole(netRole)
+	, mBullets{}
 {
 	if (mListenToInput)
 	{
@@ -25,7 +26,8 @@ void PlayerController::handleEvent(const ::sf::Event& event, uint32_t frameNum)
 {
 }
 
-constexpr size_t bufferSize = 600;
+constexpr size_t bufferSize = 120;
+constexpr size_t cleanBufferThreshold = 600;
 void PlayerController::handleRealtimeInput(uint32_t frameNum)
 {
 	if (!(mListenToInput && mPossessedTank))
@@ -67,9 +69,12 @@ void PlayerController::handleRealtimeInput(uint32_t frameNum)
 
 
 	// discard the old buffers
-	auto it = mInputBuffer.find(frameNum - bufferSize);
+	auto it = mInputBuffer.find(frameNum - cleanBufferThreshold);
 	if (it != mInputBuffer.end())
-		mInputBuffer.erase(mInputBuffer.begin(), it);
+	{
+		auto eraseTill = mInputBuffer.find(frameNum - bufferSize);
+		mInputBuffer.erase(mInputBuffer.begin(), eraseTill);
+	}
 }
 
 ::sf::Vector2f PlayerController::getMousePosition() const
@@ -84,6 +89,19 @@ void PlayerController::possessTank(Tank* tank)
 {
 	mPossessedTank = tank; 
 	tank->setController(this);
+}
+
+bool PlayerController::removeBullet(Bullet* bullet)
+{
+	for (auto it = mBullets.begin(); it != mBullets.end(); ++it)
+	{
+		if (*it == bullet)
+		{
+			mBullets.erase(it);
+			return true;
+		}
+	}
+	return false;
 }
 
 void PlayerController::spawnTank_server(TankManager* tankManager)
@@ -104,7 +122,7 @@ void PlayerController::updateTank(bool up, bool down, bool left, bool right, boo
 	if (fire)
 		mPossessedTank->fire();
 	mPossessedTank->update(deltaSeconds);
-	auto& bullets = mPossessedTank->getBullets();
+	auto& bullets = getBullets();
 	for (auto& bullet : bullets)
 	{
 		bullet->update(deltaSeconds);

@@ -25,6 +25,8 @@ namespace tankett
 {
 class Tank;
 class TankManager;
+class Bullet;
+
 class PlayerController
 {
 public:
@@ -45,6 +47,11 @@ public:
 	void possessTank(Tank* tank);
 	void unpossess() { mPossessedTank = nullptr; }
 	Tank* getPossessedTank() const { return mPossessedTank; }
+
+	void addBullet(Bullet* bullet) { mBullets.push_back(bullet); }
+	bool removeBullet(Bullet* bullet);
+	const ::std::vector<Bullet*>& getBullets() const { return mBullets; }
+	::std::vector<Bullet*>& getBullets() { return mBullets; }
 
 	uint8_t getID() { return mID; }
 
@@ -85,6 +92,7 @@ private:
 	::std::map<uint32_t, TankInput> mInputBuffer;
 	::sf::RenderWindow* mWindow;
 	Tank* mPossessedTank;
+	::std::vector<Bullet*> mBullets;
 	NetRole mNetRole;
 };
 }

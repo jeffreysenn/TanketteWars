@@ -31,6 +31,8 @@ public:
 	ConnectionState getState() { return mState; }
 
 	std::vector<std::unique_ptr<network_message_header>>& getReceivedMessages() { return mReceivedMessages; }
+	std::vector<std::unique_ptr<network_message_header>>& getSendMessageQueue() { return mSendMessageQueue; }
+
 	void pushMessage(::std::unique_ptr<network_message_header> message);
 
 	void clearReceivedMessages();
@@ -44,10 +46,11 @@ private:
 	ip_address mServerAddr;
 	udp_socket mSocket;
 	ip_address mLocalAddr;
-	std::vector<std::unique_ptr<network_message_header>> mMessageQueue;
+	std::vector<std::unique_ptr<network_message_header>> mSendMessageQueue;
 	std::vector<std::unique_ptr<network_message_header>> mReceivedMessages;
 	crypt::xorinator mXorinator;
-	uint32 mClientSequence;
+	uint32_t mClientSequence;
+	uint32_t mServerSequence;
 };
 
 

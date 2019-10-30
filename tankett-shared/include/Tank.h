@@ -32,11 +32,6 @@ public:
 	void fire();
 
 	Bullet* spawnBullet();
-	bool addBullet(Bullet* bullet);
-	bool removeBullet(Bullet* bullet);
-	int getBullet(Bullet* bullet);
-	::std::vector<Bullet*>& getBullets() { return mBullets; }
-	const ::std::vector<Bullet*>& getBullets() const { return mBullets; }
 
 	void setController(PlayerController* controller) { mController = controller; }
 	PlayerController* getController() const { return mController; }
@@ -67,11 +62,9 @@ private:
 			 /______________
 	*/
 
-	::std::vector<Bullet*> mBullets;
 	// TODO: decrease dependency
 	PlayerController* mController;
 	::mw::CameraActor* mCamera;
-	//::sf::CircleShape mDebugCircle;
 };
 
 

@@ -3,15 +3,15 @@
 #include "Actors/SpriteActor.h"
 #include "Collisions/Collider.h"
 
-using namespace mw;
-
 namespace tankett
 {
-class Bullet : public SpriteActor
+class PlayerController;
+
+class Bullet : public ::mw::SpriteActor
 {
 public:
-	Bullet(class Tank* owner);
-	Bullet(const ::sf::Texture& texture, class Tank* owner);
+	Bullet(PlayerController* owner);
+	Bullet(const ::sf::Texture& texture, PlayerController* owner);
 	~Bullet();
 
 	void resetOwner() { mOwner = nullptr; }
@@ -25,7 +25,7 @@ protected:
 	void registerCollider();
 
 private:
-	class Tank* mOwner;
+	PlayerController* mOwner;
 	uint8_t mID;
 };
 }

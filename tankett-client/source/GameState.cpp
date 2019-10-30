@@ -100,18 +100,15 @@ void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 		for (auto& controller : mPlayerControllers)
 		{
 			// remote controllers
-			if (controller->getID() == data.client_id && controller.get() != mLocalController)
+			if (controller->getID() == data.client_id)
 			{
-				::sf::Vector2f pos = ::sf::Vector2f(data.position.x_, data.position.y_);
-				float aimAngle = data.angle;
-				controller->setTankState(pos, aimAngle);
-				uint8_t bulletCount = data.bullet_count;
-				auto& bullets = data.bullets;
-				auto& tank = *controller->getPossessedTank();
-				auto& existingBullets = tank.getBullets();
+				// sync the bullets
 				// bullets exist both on server and local: transform
 				// bullets exist only on local: destroy
 				// bullets exist only on server: spawn
+				uint8_t bulletCount = data.bullet_count;
+				auto& bullets = data.bullets;
+				auto& existingBullets = controller->getBullets();
 				::std::map<uint8_t, ::std::pair<::tankett::Bullet*, ::tankett::bullet_data*>> bulletMap{};
 				for (int bulletIndex = 0; bulletIndex < bulletCount; ++bulletIndex)
 				{
@@ -134,32 +131,69 @@ void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 					}
 					else if (!bulletPair.first && bulletPair.second)
 					{
-						Bullet* newBullet = tank.spawnBullet();
-						newBullet->setNetRole(NetRole::SimulatedProxy);
-						newBullet->setID(bulletPair.second->id);
-						newBullet->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
+						auto tank = controller->getPossessedTank();
+						if(tank)
+						{
+							Bullet* newBullet = tank->spawnBullet();
+							newBullet->setNetRole(NetRole::SimulatedProxy);
+							newBullet->setID(bulletPair.second->id);
+							newBullet->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
+						}
 					}
 				}
 
+				// sync tank state
+				auto tank = controller->getPossessedTank();
+				if (data.alive)
+				{
+					::sf::Vector2f pos = ::sf::Vector2f(data.position.x_, data.position.y_);
+					float aimAngle = data.angle;
+					controller->setTankState(pos, aimAngle);
+				}
+				else if(tank)
+				{
+					Actor::destroy(tank);
+				}
+
+				// input prediction
+				if (controller.get() == mLocalController)
+				{
+					for (uint32_t inputIndex = msgS2C->input_number + 1; inputIndex < mFrameNum; ++inputIndex)
+					{
+						auto& input = controller->getInputBuffer()[inputIndex];
+						float deltaSeconds = 1.f / 60.f;
+						controller->updateTank(input.up, input.down, input.left, input.right, input.fire, input.angle, deltaSeconds);
+					}
+				}
 			}
 		}
 	}
 }
 
+constexpr uint32_t inputMsgPackNum = 10;
+constexpr size_t maxMsgNum = 30;
 void GameState::pushMessages()
 {
 	if (!mLocalController)
 		return;
 
 	auto& networkManager = *Context::getInstance().networkManager;
-	auto inputMessage = ::std::make_unique<message_client_to_server>();
-	auto currentInput = mLocalController->getInputBuffer()[mFrameNum];
-	inputMessage->set_input(currentInput.fire, currentInput.right, currentInput.left, currentInput.down, currentInput.up);
-	if (currentInput.fire)
-		int i = 0;
-	inputMessage->turret_angle = currentInput.angle;
-	inputMessage->input_number = mFrameNum;
-	networkManager.pushMessage(::std::move(inputMessage));
+	if (networkManager.getSendMessageQueue().size() >= maxMsgNum) return;
+
+	auto inputBuffer = mLocalController->getInputBuffer();
+	uint32_t inputBegin = mFrameNum - inputMsgPackNum;
+	if (inputBuffer.find(inputBegin) != inputBuffer.end())
+	{
+		for (uint32_t inputKey = inputBegin; inputKey < mFrameNum; ++inputKey)
+		{
+			auto inputMessage = ::std::make_unique<message_client_to_server>();
+			inputMessage->input_number = inputKey;
+			auto& inputValue = inputBuffer[inputKey];
+			inputMessage->set_input(inputValue.fire, inputValue.right, inputValue.left, inputValue.down, inputValue.up);
+			inputMessage->turret_angle = inputValue.angle;
+			networkManager.pushMessage(::std::move(inputMessage));
+		}
+	}
 }
 
 bool GameState::update(float deltaSeconds)

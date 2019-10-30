@@ -110,6 +110,7 @@ void NetworkManager::receive()
 		if (mClients.find(OUT_addr) == mClients.end())
 			break;
 
+
 		protocol_payload packet;
 		if (!packet.read(reader))
 		{
@@ -117,6 +118,10 @@ void NetworkManager::receive()
 			break;
 		}
 
+		if (!packet.is_newer(mClients[OUT_addr].latestReceivedSequence)) break;
+
+		mClients[OUT_addr].latestReceivedSequence = packet.sequence_;
+		mClients[OUT_addr].latestReceiveTime = time::now();
 		mClients[OUT_addr].xorinator.decrypt(packet.length_, packet.payload_);
 
 		byte_stream stream(packet.length_, packet.payload_);
@@ -130,12 +135,19 @@ void NetworkManager::receive()
 			{
 			case tankett::NETWORK_MESSAGE_CLIENT_TO_SERVER:
 			{
-				message_client_to_server* message_c2s = new message_client_to_server;
-				if (!message_c2s->read(payload_reader))
+				message_client_to_server messageC2S;
+				if (!messageC2S.read(payload_reader))
 				{
 					// error
 				}
-				mClients[OUT_addr].receivedMessages.push_back(message_c2s);
+				// check input sequence
+				// only push back messages that contains newer input sequence
+				if (messageC2S.input_number > mClients[OUT_addr].latestReceivedInputSequence)
+				{
+					mClients[OUT_addr].latestReceivedInputSequence = messageC2S.input_number;
+					// allocate memory when we have to
+					mClients[OUT_addr].receivedMessages.push_back(new message_client_to_server(messageC2S));
+				}
 			} break;
 
 			default:

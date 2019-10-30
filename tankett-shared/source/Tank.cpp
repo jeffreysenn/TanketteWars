@@ -38,7 +38,6 @@ Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture,
 	, mLastFireTime(::sf::seconds(-100))
 	, mController(nullptr)
 	, mCamera(nullptr)
-	//, mDebugCircle(5)
 {
 	::sf::FloatRect spriteBounds(mBarrelSprite.getLocalBounds());
 	mBarrelSprite.setOrigin(spriteBounds.width / 2, 0);
@@ -57,13 +56,9 @@ Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture,
 
 Tank::~Tank()
 {
-	for (auto& bullet : mBullets)
-	{
-		bullet->resetOwner();
-	}
-
 	if (mController)
 		mController->unpossess();
+
 	if (mCamera)
 		mCamera->detach();
 }
@@ -94,7 +89,7 @@ void Tank::fire()
 	auto timeNow = mFireClock.getElapsedTime();
 	if (timeNow - mLastFireTime > ::sf::milliseconds(cooldown))
 	{
-		if (mBullets.empty()) bulletID = 0;
+		if (mController->getBullets().empty()) bulletID = 0;
 		mLastFireTime = timeNow;
 		spawnBullet()->setID(bulletID);
 		++bulletID;
@@ -104,14 +99,14 @@ void Tank::fire()
 constexpr int bulletSpeed = 8;
 Bullet* Tank::spawnBullet()
 {
-
 	::std::unique_ptr<Bullet> bullet;
 	if (mBulletTexture)
-		bullet = ::std::make_unique<Bullet>(*mBulletTexture, this);
+		bullet = ::std::make_unique<Bullet>(*mBulletTexture, mController);
 	else
-		bullet = ::std::make_unique<Bullet>(this);
+		bullet = ::std::make_unique<Bullet>(mController);
 
 	Bullet* ptr = bullet.get();
+	bullet->setNetRole(getNetRole());
 	bullet->setPosition(getWorldPosition());
 	bullet->setRotation(mTurretAngle);
 	auto dir = helper::Vector::deg2vec(mTurretAngle);
@@ -121,39 +116,6 @@ Bullet* Tank::spawnBullet()
 	getSceneGraph()->attachChild(::std::move(bullet));
 
 	return ptr;
-}
-
-bool Tank::addBullet(Bullet* bullet)
-{
-	if (getBullet(bullet) != -1)
-		return false;
-
-	mBullets.push_back(bullet);
-	return true;
-}
-
-bool Tank::removeBullet(Bullet* bullet)
-{
-	int index = getBullet(bullet);
-	if (index != -1)
-	{
-		mBullets.erase(mBullets.begin() + index);
-		return true;
-	}
-	return false;
-}
-
-int Tank::getBullet(Bullet* bullet)
-{
-	for (auto it = mBullets.begin(); it != mBullets.end(); ++it)
-	{
-		if (*it == bullet)
-		{
-			return static_cast<int>(it - mBullets.begin());
-		}
-	}
-
-	return -1;
 }
 
 ::mw::CameraActor* Tank::resetCamera()
@@ -182,9 +144,6 @@ void Tank::reportRenderInfoSelf(Renderer& renderer, ::sf::RenderStates states) c
 
 	RenderInfo renderInfo(mBarrelSprite, states);
 	renderer.pushRenderInfo(renderInfo, Rendering::Turret);
-
-	//RenderInfo debugRenderInfo(mDebugCircle, states);
-	//renderer.pushRenderInfo(debugRenderInfo, Rendering::UI);
 }
 
 void Tank::updateSelf(float deltaSeconds)
@@ -205,13 +164,16 @@ void Tank::updateSelf(float deltaSeconds)
 void Tank::onCollisionEnter(Actor& other)
 {
 	Bullet* bullet = dynamic_cast<Bullet*>(&other);
+	bool isMyBullet = false;
 	if (bullet)
 	{
-		int index = getBullet(bullet);
-		if (index == -1)
+		for (const auto& ownBullet : mController->getBullets())
 		{
-			destroy(this);
+			if (bullet == ownBullet)
+				isMyBullet = true;
 		}
+		if (!isMyBullet)
+			destroy(this);
 	}
 
 	Tank* tank = dynamic_cast<Tank*>(&other);
@@ -220,5 +182,4 @@ void Tank::onCollisionEnter(Actor& other)
 		destroy(this);
 	}
 }
-
 }

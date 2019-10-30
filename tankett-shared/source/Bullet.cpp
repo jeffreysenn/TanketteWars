@@ -1,11 +1,11 @@
 #include "Bullet.h"
 #include "Rendering/Renderer.h"
 #include "Unit.h"
-#include "Tank.h"
+#include "PlayerController.h"
 
 namespace tankett
 {
-Bullet::Bullet(Tank* owner)
+Bullet::Bullet(PlayerController* owner)
 	: mOwner(owner)
 	, mID(0)
 {
@@ -13,7 +13,7 @@ Bullet::Bullet(Tank* owner)
 	registerCollider();
 }
 
-Bullet::Bullet(const ::sf::Texture& texture, Tank* owner)
+Bullet::Bullet(const ::sf::Texture& texture, PlayerController* owner)
 	: SpriteActor(texture, Rendering::Bullet)
 	, mOwner(owner)
 	, mID(0)
@@ -35,7 +35,7 @@ Bullet::~Bullet()
 
 void Bullet::onCollisionEnter(Actor& other)
 {
-	if (&other == mOwner)
+	if (&other == (Actor*) mOwner->getPossessedTank())
 		return;
 
 	Bullet* bullet = dynamic_cast<Bullet*>(&other);
