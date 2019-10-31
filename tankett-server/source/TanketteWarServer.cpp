@@ -48,14 +48,19 @@ void TanketteWarServer::run()
 		// network fixed send
 		timeSinceLastSend += lastLoopDuration;
 
+		bool hasSent = false;
 		while (timeSinceLastSend > networkInterval)
 		{
-			mNetworkManager.send();
+			if (!hasSent)
+			{
+				mStateStack.packMessages();
+				mNetworkManager.send();
+				hasSent = true;
+			}
 			timeSinceLastSend -= networkInterval;
 		}
 
 		mNetworkManager.receive();
-
 		mStateStack.processMessages();
 	}
 }

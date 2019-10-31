@@ -9,6 +9,8 @@ public:
 
 	virtual void processMessages();
 
+	virtual void packMessages();
+
 };
 
 

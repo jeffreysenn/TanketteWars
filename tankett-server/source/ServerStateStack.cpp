@@ -16,4 +16,12 @@ void ServerStateStack::processMessages()
 	applyPendingChanges();
 }
 
+void ServerStateStack::packMessages()
+{
+	for (auto rit = mStack.rbegin(); rit != mStack.rend(); ++rit)
+	{
+		(*rit)->packMessages();
+	}
+}
+
 }

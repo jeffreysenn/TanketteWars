@@ -11,6 +11,7 @@ public:
 	ServerStateStack();
 
 	void processMessages();
+	void packMessages();
 
 };
 }

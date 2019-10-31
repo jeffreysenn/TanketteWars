@@ -199,7 +199,7 @@ void GameState::updateState(::tankett::message_server_to_client* msgS2C)
 					for (uint32_t inputIndex = msgS2C->input_number + 1; inputIndex <= mFrameNum; ++inputIndex)
 					{
 						// break in case client is too behind the server
-						if(mFrameNum - inputIndex > 30) break;
+						if(mFrameNum - inputIndex > 10) break;
 
 						auto& input = controller->getInputBuffer()[inputIndex];
 						float deltaSeconds = 1.f / 60.f;
@@ -209,6 +209,7 @@ void GameState::updateState(::tankett::message_server_to_client* msgS2C)
 			}
 		}
 	}
+
 }
 
 constexpr uint32_t redundantInputNum = 10;

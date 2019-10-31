@@ -16,12 +16,11 @@ public:
 	GameState();
 
 	void processMessages() override;
-
+	void packMessages() override;
 
 private:
 	void checkJoin();
 	void applyInput();
-	void packGameState();
 	void checkTime();
 
 private:

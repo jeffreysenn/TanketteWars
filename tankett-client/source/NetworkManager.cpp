@@ -141,7 +141,11 @@ void NetworkManager::receive()
 				{
 					// error
 				}
-				mReceivedMessages.push_back(std::move(messageS2C));
+				if (messageS2C->input_number > mServerInputSequence || mServerInputSequence == 0)
+				{
+					mServerInputSequence = messageS2C->input_number;
+					mReceivedMessages.push_back(std::move(messageS2C));
+				}
 			} break;
 			default:
 				shouldRead = false;

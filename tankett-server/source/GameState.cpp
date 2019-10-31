@@ -27,7 +27,6 @@ void GameState::processMessages()
 	{
 		applyInput();
 	}
-	packGameState();
 	checkTime();
 }
 
@@ -81,7 +80,7 @@ void GameState::applyInput()
 				bool right = msgC2S->get_input(message_client_to_server::RIGHT);
 				bool fire = msgC2S->get_input(message_client_to_server::SHOOT);
 				float aimAngle = msgC2S->turret_angle;
-				float deltaSeconds = 1.f / (float)PROTOCOL_SEND_PER_SEC / (float)inputCount;
+				float deltaSeconds = 1.f / 60.f;
 				controller.updateTank(up, down, left, right, fire, aimAngle, deltaSeconds, msgC2S->input_number);
 			} break;
 			default:
@@ -94,10 +93,11 @@ void GameState::applyInput()
 
 }
 
-void GameState::packGameState()
+void GameState::packMessages()
 {
-	auto& clients = mNetworkManager.getClients();
+	if (mControllers.size() == 0) return;
 
+	auto& clients = mNetworkManager.getClients();
 	server_to_client_data dataArr[4];
 	for (auto& client : clients)
 	{
@@ -133,13 +133,12 @@ void GameState::packGameState()
 
 	for (auto& client : clients)
 	{
-		if (client.second.sendMessageQueue.size() != 0)
-			continue;
-
+		if(!client.second.sendMessageQueue.empty()) continue;
 		message_server_to_client* message = new message_server_to_client;
 		message->receiver_id = client.second.id;
 		message->round_time = ROUND_LENGTH - mRoundClock.getElapsedTime().asSeconds();
 		message->input_number = client.second.latestReceivedInputSequence;
+
 		message->game_state = GAME_STATE::ROUND_RUNNING;
 		message->client_count = (uint8_t)clients.size();
 		memcpy(message->client_data, dataArr, sizeof(dataArr));

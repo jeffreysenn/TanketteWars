@@ -11,4 +11,8 @@ void ServerState::processMessages()
 {
 }
 
+void ServerState::packMessages()
+{
+}
+
 }
