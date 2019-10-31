@@ -84,20 +84,34 @@ void Tank::aimAt(float angle)
 
 constexpr uint32_t cooldown = 1000;
 uint8_t bulletID = 0;
-void Tank::fire()
+uint32_t lastFireInputNum = 0;
+void Tank::fire(uint32_t inputNum)
 {
-	auto timeNow = mFireClock.getElapsedTime();
-	if (timeNow - mLastFireTime > ::sf::milliseconds(cooldown))
+	bool shouldSpawnBullet = true;
+	if(inputNum > lastFireInputNum || inputNum == 0)
 	{
+		auto timeNow = mFireClock.getElapsedTime();
+		if (timeNow - mLastFireTime < ::sf::milliseconds(cooldown))
+		{
+			shouldSpawnBullet = false;
+		}
+		else
+		{
+			mLastFireTime = timeNow;
+		}
+	}
+
+	if (shouldSpawnBullet)
+	{
+		lastFireInputNum = inputNum;
 		if (mController->getBullets().empty()) bulletID = 0;
-		mLastFireTime = timeNow;
-		spawnBullet()->setID(bulletID);
+		spawnBullet(mTurretAngle)->setID(bulletID);
 		++bulletID;
 	}
 }
 
 constexpr int bulletSpeed = 8;
-Bullet* Tank::spawnBullet()
+Bullet* Tank::spawnBullet(float angle)
 {
 	::std::unique_ptr<Bullet> bullet;
 	if (mBulletTexture)
@@ -108,8 +122,8 @@ Bullet* Tank::spawnBullet()
 	Bullet* ptr = bullet.get();
 	bullet->setNetRole(getNetRole());
 	bullet->setPosition(getWorldPosition());
-	bullet->setRotation(mTurretAngle);
-	auto dir = helper::Vector::deg2vec(mTurretAngle);
+	bullet->setRotation(angle);
+	auto dir = helper::Vector::deg2vec(angle);
 	::sf::Vector2f relativeVel(dir.x * unit::unit2pix(bulletSpeed),
 							   dir.y * unit::unit2pix(bulletSpeed));
 	bullet->setVelocity(getWorldVelocity() + relativeVel);

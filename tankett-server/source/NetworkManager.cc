@@ -127,6 +127,8 @@ void NetworkManager::receive()
 		byte_stream stream(packet.length_, packet.payload_);
 		byte_stream_reader payload_reader(stream);
 
+		::std::vector<message_client_to_server> inputMsgs;
+
 		bool shouldRead = true;
 		while (!payload_reader.eos() && shouldRead)
 		{
@@ -144,9 +146,7 @@ void NetworkManager::receive()
 				// only push back messages that contains newer input sequence
 				if (messageC2S.input_number > mClients[OUT_addr].latestReceivedInputSequence)
 				{
-					mClients[OUT_addr].latestReceivedInputSequence = messageC2S.input_number;
-					// allocate memory when we have to
-					mClients[OUT_addr].receivedMessages.push_back(new message_client_to_server(messageC2S));
+					inputMsgs.push_back(messageC2S);
 				}
 			} break;
 
@@ -156,6 +156,15 @@ void NetworkManager::receive()
 			}
 		}
 
+		::std::sort(inputMsgs.begin(), inputMsgs.end());
+		for (const auto& inputMsg : inputMsgs)
+		{
+			if (inputMsg.input_number > mClients[OUT_addr].latestReceivedInputSequence)
+			{
+				mClients[OUT_addr].latestReceivedInputSequence = inputMsg.input_number;
+				mClients[OUT_addr].receivedMessages.push_back(new message_client_to_server(inputMsg));
+			}
+		}
 	} break;
 	}
 
@@ -260,6 +269,16 @@ void NetworkManager::processClientQueues()
 			messages.erase(messages.begin(), messages.begin() + messages_packed);
 		}
 	}
+}
+
+bool NetworkManager::allClientReceivedMessagesEmpty()
+{
+	for (auto& client : mClients)
+	{
+		if (!client.second.receivedMessages.empty())
+			return false;
+	}
+	return true;
 }
 
 void NetworkManager::clearAllClientsReceivedMessages()

@@ -61,7 +61,7 @@ public:
 	
 	::std::map<uint32_t, TankInput>& getInputBuffer() { return mInputBuffer; }
 
-	void updateTank(bool up, bool down, bool left, bool right, bool fire, float aimAngle, float deltaSeconds);
+	void updateTank(bool up, bool down, bool left, bool right, bool fire, float aimAngle, float deltaSeconds, uint32_t inputNum);
 	void setTankState(::sf::Vector2f pos, float aimAngle);
 
 	void setNetRole(::mw::NetRole netRole) { mNetRole = netRole; }

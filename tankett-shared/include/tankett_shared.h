@@ -278,6 +278,11 @@ struct message_client_to_server : network_message_header
 	{
 	}
 
+	bool operator < (const message_client_to_server& rhs) const
+	{
+		return (input_number < rhs.input_number);
+	}
+
 	uint8 input_field = 0;
 	float turret_angle = .0f;
 	uint32 input_number = 0;

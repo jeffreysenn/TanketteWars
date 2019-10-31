@@ -2,8 +2,10 @@
 #include "ResourceManagers/ResourceIdentifiers.h"
 #include "Map.h"
 
-using namespace mw;
-using namespace tankett;
+namespace mw
+{
+class CameraActor;
+}
 
 namespace client
 {
@@ -26,10 +28,11 @@ public:
 public:
 	class ClientStateStack* stack{};
 	class ::sf::RenderWindow* window{};
-	TextureManager* textureManager{};
-	FontManager* fontManager{};
-	MapManager* mapManager{};
+	::mw::TextureManager* textureManager{};
+	::mw::FontManager* fontManager{};
+	::tankett::MapManager* mapManager{};
 	class NetworkManager* networkManager{};
 	bool isWindowFocused = true;
+	::mw::CameraActor* camera{};
 };
 }

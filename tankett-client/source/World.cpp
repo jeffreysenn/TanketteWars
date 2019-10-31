@@ -71,8 +71,10 @@ void World::buildScene()
 	// Create a camera and attach to the sceneGraph
 	auto cameraActor(std::make_unique<::mw::CameraActor>());
 	mCamera = cameraActor.get();
+	Context::getInstance().camera = mCamera;
 	mSceneGraph.attachChild(std::move(cameraActor));
 
+#define DYNAMIC_CAMERA
 #ifdef DYNAMIC_CAMERA 
 	// dynamic camera
 	const ::sf::Vector2f cameraSize(1920, 1080);
@@ -100,7 +102,6 @@ void World::buildScene()
 	}
 	mSceneGraph.attachChild(std::move(tankManager));
 
-
 	// Create a background node and attach to the scene graph
 	std::unique_ptr<Actor> backgroundNode(std::make_unique<Actor>());
 
@@ -119,8 +120,6 @@ void World::buildScene()
 
 void World::update(float deltaSeconds)
 {
-	mWindow.setView(*mCamera);
-
 	while (!mCommandQueue.isEmpty())
 		mSceneGraph.onCommand(mCommandQueue.pop(), deltaSeconds);
 

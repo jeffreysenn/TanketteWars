@@ -4,9 +4,11 @@
 #include "ClientStateStack.h"
 #include "NetworkManager.h"
 #include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 #include "Tank.h"
 #include "Bullet.h"
 #include "tankett_debug.h"
+#include "Actors/CameraActor.h"
 
 namespace client
 {
@@ -29,6 +31,7 @@ void GameState::processReceivedMessages()
 {
 	auto& networkManager = *Context::getInstance().networkManager;
 	auto& receivedMessages = networkManager.getReceivedMessages();
+
 	for (auto& message : receivedMessages)
 	{
 		network_message_type type = (network_message_type)message->type_;
@@ -90,6 +93,7 @@ void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 	}
 }
 
+float destroyedLocalBulletAngle = 0;
 void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 {
 	auto dataArr = msgS2C->client_data;
@@ -121,12 +125,19 @@ void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 				for (auto& it : bulletMap)
 				{
 					auto& bulletPair = it.second;
+
 					if (bulletPair.first && bulletPair.second)
 					{
 						bulletPair.first->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
 					}
 					else if (bulletPair.first && !bulletPair.second)
 					{
+						// TODO: destroyedLcalBulletAngle is a HACK
+						// It helps to spawn the local controller's bullet at its original angle
+						if (controller.get() == mLocalController)
+						{
+							destroyedLocalBulletAngle = bulletPair.first->getRotation();
+						}
 						::mw::Actor::destroy(bulletPair.first);
 					}
 					else if (!bulletPair.first && bulletPair.second)
@@ -134,8 +145,15 @@ void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 						auto tank = controller->getPossessedTank();
 						if(tank)
 						{
-							Bullet* newBullet = tank->spawnBullet();
-							newBullet->setNetRole(NetRole::SimulatedProxy);
+							Bullet* newBullet;
+							if (controller.get() == mLocalController)
+							{
+								newBullet = tank->spawnBullet(destroyedLocalBulletAngle);
+							}
+							else
+							{
+								newBullet = tank->spawnBullet(tank->getTurretAngle());
+							}
 							newBullet->setID(bulletPair.second->id);
 							newBullet->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
 						}
@@ -158,11 +176,14 @@ void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 				// input prediction
 				if (controller.get() == mLocalController)
 				{
-					for (uint32_t inputIndex = msgS2C->input_number + 1; inputIndex < mFrameNum; ++inputIndex)
+					for (uint32_t inputIndex = msgS2C->input_number + 1; inputIndex <= mFrameNum; ++inputIndex)
 					{
+						// break in case client is too behind the server
+						if(mFrameNum - inputIndex > 30) break;
+
 						auto& input = controller->getInputBuffer()[inputIndex];
 						float deltaSeconds = 1.f / 60.f;
-						controller->updateTank(input.up, input.down, input.left, input.right, input.fire, input.angle, deltaSeconds);
+						controller->updateTank(input.up, input.down, input.left, input.right, input.fire, input.angle, deltaSeconds, inputIndex);
 					}
 				}
 			}
@@ -170,30 +191,46 @@ void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 	}
 }
 
-constexpr uint32_t inputMsgPackNum = 10;
-constexpr size_t maxMsgNum = 30;
-void GameState::pushMessages()
+constexpr uint32_t redundantInputNum = 10;
+constexpr uint32_t maxInputNum = 60;
+void GameState::packInput()
 {
 	if (!mLocalController)
 		return;
+	sizeof(message_client_to_server);
 
 	auto& networkManager = *Context::getInstance().networkManager;
-	if (networkManager.getSendMessageQueue().size() >= maxMsgNum) return;
+	auto& inputBuffer = mLocalController->getInputBuffer();
 
-	auto inputBuffer = mLocalController->getInputBuffer();
-	uint32_t inputBegin = mFrameNum - inputMsgPackNum;
-	if (inputBuffer.find(inputBegin) != inputBuffer.end())
+	// pack in redundant input if Queue is empty
+	if (networkManager.getSendMessageQueue().empty())
 	{
-		for (uint32_t inputKey = inputBegin; inputKey < mFrameNum; ++inputKey)
+		uint32_t inputBegin = mFrameNum - redundantInputNum;
+		if (inputBuffer.find(inputBegin) != inputBuffer.end())
 		{
-			auto inputMessage = ::std::make_unique<message_client_to_server>();
-			inputMessage->input_number = inputKey;
-			auto& inputValue = inputBuffer[inputKey];
-			inputMessage->set_input(inputValue.fire, inputValue.right, inputValue.left, inputValue.down, inputValue.up);
-			inputMessage->turret_angle = inputValue.angle;
-			networkManager.pushMessage(::std::move(inputMessage));
+			for (uint32_t inputKey = inputBegin; inputKey < mFrameNum; ++inputKey)
+			{
+				auto& inputValue = inputBuffer[inputKey];
+				pushInputMessage(inputValue, inputKey);
+			}
 		}
 	}
+
+	if(networkManager.getSendMessageQueue().size() < 60)
+	{
+		auto& inputValue = inputBuffer[mFrameNum];
+		pushInputMessage(inputValue, mFrameNum);
+	}
+}
+
+void GameState::pushInputMessage(::tankett::PlayerController::TankInput& inputValue, uint32_t inputNum)
+{
+	auto inputMessage = ::std::make_unique<message_client_to_server>();
+	inputMessage->input_number = inputNum;
+	inputMessage->set_input(inputValue.fire, inputValue.right, inputValue.left, inputValue.down, inputValue.up);
+	inputMessage->turret_angle = inputValue.angle;
+	auto& networkManager = *Context::getInstance().networkManager;
+	networkManager.pushMessage(::std::move(inputMessage));
 }
 
 bool GameState::update(float deltaSeconds)
@@ -201,16 +238,19 @@ bool GameState::update(float deltaSeconds)
 	processReceivedMessages();
 
 	++mFrameNum;
-	mWorld.update(deltaSeconds);
+	
 	if (Context::getInstance().isWindowFocused)
 	{
+		// set the view to the world camera view to get relative mouse pos for player controller 
+		Context::getInstance().window->setView(*Context::getInstance().camera);
 		for (auto& playerController : mPlayerControllers)
 		{
 			playerController->handleRealtimeInput(mFrameNum);
 		}
 	}
+	mWorld.update(deltaSeconds);
 
-	pushMessages();
+	packInput();
 	return true;
 }
 

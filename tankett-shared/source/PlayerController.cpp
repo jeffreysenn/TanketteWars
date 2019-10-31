@@ -52,7 +52,7 @@ void PlayerController::handleRealtimeInput(uint32_t frameNum)
 	}
 	if (Input::inputCollectionPressed(mInputBinding[Action::Fire]))
 	{
-		mPossessedTank->fire();
+		mPossessedTank->fire(frameNum);
 		fire = true;
 	}
 	mPossessedTank->addDirection((float)(-(int)left + (int)right), (float)(-(int)up + (int)down));
@@ -114,13 +114,13 @@ void PlayerController::spawnTank_client(TankManager* tankManager, ::sf::Vector2f
 	tankManager->spawnTank(pos, mID, this, mNetRole);
 }
 
-void PlayerController::updateTank(bool up, bool down, bool left, bool right, bool fire, float aimAngle, float deltaSeconds)
+void PlayerController::updateTank(bool up, bool down, bool left, bool right, bool fire, float aimAngle, float deltaSeconds, uint32_t inputNum)
 {
 	if (!mPossessedTank) return;
 	mPossessedTank->addDirection((float)(-(int)left + (int)right), (float)(-(int)up + (int)down));
 	mPossessedTank->aimAt(aimAngle);
 	if (fire)
-		mPossessedTank->fire();
+		mPossessedTank->fire(inputNum);
 	mPossessedTank->update(deltaSeconds);
 	auto& bullets = getBullets();
 	for (auto& bullet : bullets)

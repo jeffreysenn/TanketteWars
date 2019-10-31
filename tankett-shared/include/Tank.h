@@ -29,9 +29,9 @@ public:
 	void addDirection(float ddx, float ddy) { mDirection += ::sf::Vector2f(ddx, ddy); }
 	void aimAt(const ::sf::Vector2f pos);
 	void aimAt(float angle);
-	void fire();
+	void fire(uint32_t inputNum = 0);
 
-	Bullet* spawnBullet();
+	Bullet* spawnBullet(float angle);
 
 	void setController(PlayerController* controller) { mController = controller; }
 	PlayerController* getController() const { return mController; }

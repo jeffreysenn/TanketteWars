@@ -29,7 +29,9 @@ private:
 	void processReceivedMessages();
 	void checkNewRemote(::tankett::message_server_to_client* msgS2C);
 	void updateRemoteState(::tankett::message_server_to_client* msgS2C);
-	void pushMessages();
+	void packInput();
+
+	void pushInputMessage(::tankett::PlayerController::TankInput& inputValue, uint32_t inputNum);
 
 private:
 	World mWorld;

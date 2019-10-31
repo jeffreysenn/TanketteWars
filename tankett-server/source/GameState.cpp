@@ -6,6 +6,7 @@
 #include "Unit.h"
 #include "Tank.h"
 #include "Bullet.h"
+#include "tankett_debug.h"
 #include <vector>
 
 namespace server
@@ -19,7 +20,10 @@ GameState::GameState()
 void GameState::processMessages()
 {
 	checkJoin();
-	applyInput();
+	if (!mNetworkManager.allClientReceivedMessagesEmpty())
+	{
+		applyInput();
+	}
 	packGameState();
 }
 
@@ -74,7 +78,7 @@ void GameState::applyInput()
 				bool fire = msgC2S->get_input(message_client_to_server::SHOOT);
 				float aimAngle = msgC2S->turret_angle;
 				float deltaSeconds = 1.f / (float)PROTOCOL_SEND_PER_SEC / (float)inputCount;
-				controller.updateTank(up, down, left, right, fire, aimAngle, deltaSeconds);
+				controller.updateTank(up, down, left, right, fire, aimAngle, deltaSeconds, msgC2S->input_number);
 			} break;
 			default:
 				break;
@@ -83,6 +87,7 @@ void GameState::applyInput()
 	}
 
 	mNetworkManager.clearAllClientsReceivedMessages();
+
 }
 
 void GameState::packGameState()

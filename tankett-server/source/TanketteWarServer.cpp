@@ -59,6 +59,4 @@ void TanketteWarServer::run()
 		mStateStack.processMessages();
 	}
 }
-
-
 }

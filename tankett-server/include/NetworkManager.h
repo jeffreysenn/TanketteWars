@@ -57,6 +57,7 @@ public:
 	void processClientQueues();
 
 	std::map<ip_address, Client>& getClients() { return mClients; }
+	bool allClientReceivedMessagesEmpty();
 
 	void clearAllClientsReceivedMessages();
 
