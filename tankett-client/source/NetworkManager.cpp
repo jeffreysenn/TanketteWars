@@ -14,14 +14,14 @@ NetworkManager::NetworkManager()
 {
 	if (!network_init())
 	{
-		debugf("[err] could not initialize network!");
+		::tankett::debugf("[err] could not initialize network!");
 	}
 	if (!mSocket.open())
 	{
-		debugf("[err] could not open socket!");
+		::tankett::debugf("[err] could not open socket!");
 	}
 
-	mLocalAddr = getLocalAddr();
+	mLocalAddr = ::tankett::getLocalAddr();
 }
 
 NetworkManager::~NetworkManager()
@@ -37,24 +37,24 @@ void NetworkManager::send()
 	case NetworkManager::ConnectionState::Discovering:
 	{
 		uint32 broadcastHost = mLocalAddr.host_ | 0x000000ffu;
-		mServerAddr = ip_address(broadcastHost, PROTOCOL_PORT);
+		mServerAddr = ip_address(broadcastHost, ::tankett::PROTOCOL_PORT);
 
-		protocol_connection_request connectionRequest;
+		::tankett::protocol_connection_request connectionRequest;
 		connectionRequest.client_key_ = mClientKey;
-		connectionRequest.protocol_ = PROTOCOL_ID;
-		connectionRequest.version_ = PROTOCOL_VERSION;
+		connectionRequest.protocol_ = ::tankett::PROTOCOL_ID;
+		connectionRequest.version_ = ::tankett::PROTOCOL_VERSION;
 
 		if (!sendPackage(mSocket, mServerAddr, connectionRequest))
 		{
-			debugf("[err] fail to send!");
+			::tankett::debugf("[err] fail to send!");
 		}
 	} break;
 	case NetworkManager::ConnectionState::Challenging:
 	{
-		protocol_challenge_response challengeResponse(mClientKey ^ mServerKey);
+		::tankett::protocol_challenge_response challengeResponse(mClientKey ^ mServerKey);
 		if (!sendPackage(mSocket, mServerAddr, challengeResponse))
 		{
-			debugf("[err] fail to send!");
+			::tankett::debugf("[err] fail to send!");
 		}
 	} break;
 	case NetworkManager::ConnectionState::Connected:
@@ -73,7 +73,7 @@ void NetworkManager::receive()
 		return;
 
 	byte_stream_reader reader(receiveStream);
-	packet_type type = (packet_type)reader.peek();
+	::tankett::packet_type type = (::tankett::packet_type)reader.peek();
 
 	switch (type)
 	{
@@ -82,7 +82,7 @@ void NetworkManager::receive()
 	case tankett::PACKET_TYPE_CONNECTION_CHALLENGE:
 	{
 		if (mState != ConnectionState::Discovering) break;
-		protocol_connection_challenge connectionChallenge;
+		::tankett::protocol_connection_challenge connectionChallenge;
 		connectionChallenge.serialize(reader);
 		mServerAddr = outAddr;
 		mServerKey = connectionChallenge.server_key_;
@@ -97,15 +97,15 @@ void NetworkManager::receive()
 	{
 		if (mState != ConnectionState::Connected)
 		{
-			debugf("[nfo] connected to server");
-			debugf("[nfo] IP: %s, SK: %#08x, CK: %#08x", outAddr.as_string(), mServerKey, mClientKey);
+			::tankett::debugf("[nfo] connected to server");
+			::tankett::debugf("[nfo] IP: %s, SK: %#08x, CK: %#08x", outAddr.as_string(), mServerKey, mClientKey);
 			mState = ConnectionState::Connected;
 		}
 
-		protocol_payload packet;
+		::tankett::protocol_payload packet;
 		if (!packet.read(reader))
 		{
-			debugf("[err] IP: %s fail to read payload", outAddr.as_string());
+			::tankett::debugf("[err] IP: %s fail to read payload", outAddr.as_string());
 			break;
 		}
 
@@ -121,24 +121,22 @@ void NetworkManager::receive()
 		bool shouldRead = true;
 		while (!payloadReader.eos() && shouldRead)
 		{
-			network_message_type messageType = (network_message_type)payloadReader.peek();
+			::tankett::network_message_type messageType = (::tankett::network_message_type)payloadReader.peek();
 			switch (messageType)
 			{
 			case tankett::NETWORK_MESSAGE_PING:
 			{
-				std::unique_ptr<network_message_ping> messagePing(new network_message_ping);
+				std::unique_ptr<::tankett::network_message_ping> messagePing(new ::tankett::network_message_ping);
 				if (!messagePing->read(payloadReader))
 				{
 					// error
 				}
-				// send the ping back immediately
 				// no need to push into received buffer
 				mSendMessageQueue.push_back(std::move(messagePing));
-				send();
 			} break;
 			case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
 			{
-				std::unique_ptr<message_server_to_client> messageS2C(new message_server_to_client);
+				std::unique_ptr<::tankett::message_server_to_client> messageS2C(new ::tankett::message_server_to_client);
 				if (!messageS2C->read(payloadReader))
 				{
 					// error
@@ -159,7 +157,7 @@ void NetworkManager::receive()
 
 }
 
-void NetworkManager::pushMessage(::std::unique_ptr<network_message_header> message)
+void NetworkManager::pushMessage(::std::unique_ptr<::tankett::network_message_header> message)
 {
 	mSendMessageQueue.push_back(::std::move(message));
 }
@@ -172,7 +170,7 @@ void NetworkManager::clearReceivedMessages()
 void NetworkManager::processMessages()
 {
 	const uint32 current_sequence_number = mClientSequence++;
-	protocol_payload packet(current_sequence_number);
+	::tankett::protocol_payload packet(current_sequence_number);
 
 	// note:  pack messages into payload, then send
 	// note: calculate the number of messages we can pack into the payload
@@ -209,7 +207,7 @@ void NetworkManager::processMessages()
 	// note: did the packing succeed?
 	if (messages_evaluated != messages_packed)
 	{
-		debugf("[err] sequence: %u - messages_evaluated != messages_packed",
+		::tankett::debugf("[err] sequence: %u - messages_evaluated != messages_packed",
 			   current_sequence_number);
 	}
 

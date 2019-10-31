@@ -39,6 +39,8 @@ public:
 		uint32 latestReceivedSequence{};
 		alpha::time latestReceiveTime;
 		uint32 latestReceivedInputSequence{};
+		std::map<uint8, alpha::time> pingMap;
+		uint32 ping{};
 
 		dynamic_array<network_message_header*> sendMessageQueue;
 		dynamic_array<network_message_header*> receivedMessages;
@@ -68,7 +70,7 @@ private:
 	std::map<ip_address, Challenge> mChallenges;
 	std::map<ip_address, Client> mClients;
 	uint32 mServerSequence{};
-
+	uint8 mPingSequence{};
 };
 
 #endif // !TANKETT_SERVER_H_INCLUDED

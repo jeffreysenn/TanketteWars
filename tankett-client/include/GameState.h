@@ -4,6 +4,7 @@
 #include "Rendering/Renderer.h"
 #include "Input/Input.h"
 #include "PlayerController.h"
+#include "ScoreBoard.h"
 
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -28,7 +29,7 @@ public:
 private:
 	void processReceivedMessages();
 	void checkNewRemote(::tankett::message_server_to_client* msgS2C);
-	void updateRemoteState(::tankett::message_server_to_client* msgS2C);
+	void updateState(::tankett::message_server_to_client* msgS2C);
 	void packInput();
 
 	void pushInputMessage(::tankett::PlayerController::TankInput& inputValue, uint32_t inputNum);
@@ -42,5 +43,8 @@ private:
 		{ Input::Type::Keyboard, ::sf::Keyboard::Escape },
 		{ Input::Type::Keyboard, ::sf::Keyboard::BackSpace } };
 	uint32_t mFrameNum;
+	::sf::Text mRoundTimerText;
+	::sf::Text mCooldownText;
+	ScoreBoard mScoreBoard;
 };
 }

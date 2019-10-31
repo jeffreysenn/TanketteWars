@@ -12,14 +12,25 @@ namespace Texture
 {
 enum ID
 {
-	Avatar,
 	Back,
-	Middle,
+
 	TankBlackHull,
 	TankBlackBarrel,
 	TankBlackBullet,
 
+	TankRedHull,
+	TankRedBarrel,
+	TankRedBullet,
 
+	TankGreenHull,
+	TankGreenBarrel,
+	TankGreenBullet,
+
+	TankBlueHull,
+	TankBlueBarrel,
+	TankBlueBullet,
+
+	Grass,
 	Dirt,
 	NONEXIST
 };
@@ -31,7 +42,7 @@ namespace Font
 {
 enum ID
 {
-	MineCraft
+	Sansation
 };
 }
 typedef ResourceManager<::sf::Font, Font::ID> FontManager;

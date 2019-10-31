@@ -124,8 +124,22 @@ network_message_header::network_message_header(network_message_type type)
 
 network_message_ping::network_message_ping()
 	: network_message_header(NETWORK_MESSAGE_PING)
+	, sequence_(0u)
 {
 }
+
+network_message_ping::network_message_ping(uint8 sequence)
+	: network_message_header(NETWORK_MESSAGE_PING)
+	, sequence_(sequence)
+{
+}
+
+bool network_message_ping::is_newer(uint8 sequence)
+{
+	return ((sequence_ > sequence) && (sequence_ - sequence <= 127)) ||
+		((sequence_ < sequence) && (sequence - sequence_ > 127));
+}
+
 ip_address getLocalAddr()
 {
 	dynamic_array<ip_address> addressess;

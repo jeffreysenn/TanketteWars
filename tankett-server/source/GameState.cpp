@@ -12,8 +12,11 @@
 namespace server
 {
 
+constexpr float ROUND_LENGTH = 90.f;
+
 GameState::GameState()
 	: mNetworkManager(*Context::getInstance().networkManager)
+	, mRoundClock()
 {
 }
 
@@ -25,6 +28,7 @@ void GameState::processMessages()
 		applyInput();
 	}
 	packGameState();
+	checkTime();
 }
 
 void GameState::checkJoin()
@@ -100,6 +104,8 @@ void GameState::packGameState()
 		uint8_t id = client.second.id;
 		auto& data = dataArr[id];
 		data.client_id = id;
+		data.ping = client.second.ping;
+		data.eliminations = mControllers[id].getScore();
 		const auto tank = mControllers[id].getPossessedTank();
 		if (tank)
 		{
@@ -132,12 +138,22 @@ void GameState::packGameState()
 
 		message_server_to_client* message = new message_server_to_client;
 		message->receiver_id = client.second.id;
+		message->round_time = ROUND_LENGTH - mRoundClock.getElapsedTime().asSeconds();
 		message->input_number = client.second.latestReceivedInputSequence;
 		message->game_state = GAME_STATE::ROUND_RUNNING;
 		message->client_count = (uint8_t)clients.size();
 		memcpy(message->client_data, dataArr, sizeof(dataArr));
 
 		mNetworkManager.pushMessage(client.first, message);
+	}
+}
+void GameState::checkTime()
+{
+	if (ROUND_LENGTH - mRoundClock.getElapsedTime().asSeconds() < 0)
+	{
+		auto& stack = Context::getInstance().stack;
+		stack->clearStates();
+		stack->pushState(GAME_STATE::ROUND_END);
 	}
 }
 }

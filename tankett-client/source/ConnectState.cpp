@@ -13,7 +13,7 @@ ConnectState::ConnectState()
 	mBackgroundShape.setFillColor(::sf::Color(0, 0, 0, 255));
 	mBackgroundShape.setSize(::sf::Vector2f(getRenderWindow().getSize()));
 
-	mConnectText.setFont(*Context::getInstance().fontManager->get(Font::MineCraft));
+	mConnectText.setFont(*Context::getInstance().fontManager->get(Font::Sansation));
 	mConnectText.setString("Connecting");
 	mConnectText.setFillColor(::sf::Color::Blue);
 	mConnectText.setCharacterSize(50);
@@ -37,14 +37,14 @@ bool ConnectState::update(float deltaSeconds)
 		auto& receivedMessages = mNetworkManager.getReceivedMessages();
 		for (auto& receivedMessage : receivedMessages)
 		{
-			network_message_type type = (network_message_type)receivedMessage->type_;
+			::tankett::network_message_type type = (::tankett::network_message_type)receivedMessage->type_;
 			switch (type)
 			{
 			case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
 			{
-				message_server_to_client* mS2C = static_cast<message_server_to_client*>(receivedMessage.get());
+				::tankett::message_server_to_client* mS2C = static_cast<::tankett::message_server_to_client*>(receivedMessage.get());
 
-				if (mS2C->game_state == GAME_STATE::ROUND_RUNNING)
+				if (mS2C->game_state == ::tankett::GAME_STATE::ROUND_RUNNING)
 				{
 					ClientStateStack& stack = *Context::getInstance().stack;
 					stack.clearStates();

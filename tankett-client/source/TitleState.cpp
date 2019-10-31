@@ -49,7 +49,7 @@ void TitleState::draw()
 void TitleState::setupContinueText()
 {
 	mContinueText.setString("Press any key to Continue");
-	mContinueText.setFont(*getContext().fontManager->get(Font::MineCraft));
+	mContinueText.setFont(*getContext().fontManager->get(Font::Sansation));
 	mContinueText.setFillColor(::sf::Color::White);
 	helper::Graphics::centreOrigin(mContinueText);
 	::sf::Vector2u windowSize(getRenderWindow().getSize());
@@ -59,9 +59,9 @@ void TitleState::setupContinueText()
 
 void TitleState::setupTitleText()
 {
-	mTitleText.setString("Fancy Title Screen");
-	mTitleText.setCharacterSize(50);
-	mTitleText.setFont(*getContext().fontManager->get(Font::MineCraft));
+	mTitleText.setString("Tankette Wars");
+	mTitleText.setCharacterSize(70);
+	mTitleText.setFont(*getContext().fontManager->get(Font::Sansation));
 	mTitleText.setFillColor(::sf::Color::Cyan);
 	helper::Graphics::centreOrigin(mTitleText);
 	::sf::Vector2u windowSize(getRenderWindow().getSize());

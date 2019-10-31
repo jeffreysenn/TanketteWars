@@ -2,6 +2,7 @@
 #include "Rendering/Renderer.h"
 #include "Unit.h"
 #include "PlayerController.h"
+#include "Tank.h"
 
 namespace tankett
 {
@@ -14,7 +15,7 @@ Bullet::Bullet(PlayerController* owner)
 }
 
 Bullet::Bullet(const ::sf::Texture& texture, PlayerController* owner)
-	: SpriteActor(texture, Rendering::Bullet)
+	: SpriteActor(texture, ::mw::Rendering::Bullet)
 	, mOwner(owner)
 	, mID(0)
 {
@@ -35,8 +36,18 @@ Bullet::~Bullet()
 
 void Bullet::onCollisionEnter(Actor& other)
 {
-	if (&other == (Actor*) mOwner->getPossessedTank())
-		return;
+	Tank* otherTank = dynamic_cast<Tank*>(&other);
+	if (otherTank)
+	{
+		if (otherTank == mOwner->getPossessedTank())
+		{
+			return;
+		}
+		else
+		{
+			mOwner->addScore(1);
+		}
+	}
 
 	Bullet* bullet = dynamic_cast<Bullet*>(&other);
 	if (bullet)
@@ -49,7 +60,7 @@ void Bullet::registerCollider()
 	float width = unit::unit2pix(0.2f);
 	float height = unit::unit2pix(0.2f);
 	const ::sf::FloatRect colliderRect(0, -width / 2, width, height);
-	auto collider = ::std::make_unique<Collider>(Collision::ObjectType::Dynamic, Collision::ObjectResponsePreset::CollideAll, colliderRect);
+	auto collider = ::std::make_unique<::mw::Collider>(::mw::Collision::ObjectType::Dynamic, ::mw::Collision::ObjectResponsePreset::CollideAll, colliderRect);
 	setCollider(collider);
 }
 }

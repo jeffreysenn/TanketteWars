@@ -41,8 +41,8 @@ void NetworkManager::receive()
 {
 	uint8 base[2048];
 	byte_stream receive_stream(sizeof(base), base);
-	ip_address OUT_addr;
-	if (!mSocket.recv_from(OUT_addr, receive_stream))
+	ip_address outAddr;
+	if (!mSocket.recv_from(outAddr, receive_stream))
 		return;
 
 	byte_stream_reader reader(receive_stream);
@@ -59,7 +59,7 @@ void NetworkManager::receive()
 				request.version_ == PROTOCOL_VERSION))
 				break;
 
-			if (mChallenges.find(OUT_addr) != mChallenges.end())
+			if (mChallenges.find(outAddr) != mChallenges.end())
 				break;
 
 			Challenge challenge;
@@ -67,7 +67,7 @@ void NetworkManager::receive()
 			challenge.clientKey = request.client_key_;
 			challenge.timestamp = time::now();
 
-			mChallenges.insert(std::make_pair(OUT_addr, challenge));
+			mChallenges.insert(std::make_pair(outAddr, challenge));
 		}
 	} break;
 
@@ -79,14 +79,14 @@ void NetworkManager::receive()
 			//error
 			break;
 		}
-		auto found = mChallenges.find(OUT_addr);
+		auto found = mChallenges.find(outAddr);
 		if (found == mChallenges.end())
 			break;
 
 		auto& challenge = found->second;
 		if (challenge_response.combined_key_ == (challenge.clientKey ^ challenge.serverKey))
 		{
-			if (mClients.find(OUT_addr) != mClients.end())
+			if (mClients.find(outAddr) != mClients.end())
 				break;
 
 			Client client;
@@ -97,32 +97,32 @@ void NetworkManager::receive()
 			client.connectionTime = time::now();
 			client.latestReceiveTime = time::now();
 
-			mClients.insert(std::make_pair(OUT_addr, client));
-			mChallenges.erase(OUT_addr);
+			mClients.insert(std::make_pair(outAddr, client));
+			mChallenges.erase(outAddr);
 			debugf("[nfo] a client has connected");
-			debugf("[nfo] IP: %s, SK: %#08x, CK: %#08x", OUT_addr.as_string(), client.serverKey, client.clientKey);
+			debugf("[nfo] IP: %s, SK: %#08x, CK: %#08x", outAddr.as_string(), client.serverKey, client.clientKey);
 		}
 
 	} break;
 
 	case tankett::PACKET_TYPE_PAYLOAD:
 	{
-		if (mClients.find(OUT_addr) == mClients.end())
+		if (mClients.find(outAddr) == mClients.end())
 			break;
 
 
 		protocol_payload packet;
 		if (!packet.read(reader))
 		{
-			debugf("[err] IP: %s fail to read payload", OUT_addr.as_string());
+			debugf("[err] IP: %s fail to read payload", outAddr.as_string());
 			break;
 		}
 
-		if (!packet.is_newer(mClients[OUT_addr].latestReceivedSequence)) break;
+		if (!packet.is_newer(mClients[outAddr].latestReceivedSequence)) break;
 
-		mClients[OUT_addr].latestReceivedSequence = packet.sequence_;
-		mClients[OUT_addr].latestReceiveTime = time::now();
-		mClients[OUT_addr].xorinator.decrypt(packet.length_, packet.payload_);
+		mClients[outAddr].latestReceivedSequence = packet.sequence_;
+		mClients[outAddr].latestReceiveTime = time::now();
+		mClients[outAddr].xorinator.decrypt(packet.length_, packet.payload_);
 
 		byte_stream stream(packet.length_, packet.payload_);
 		byte_stream_reader payload_reader(stream);
@@ -135,6 +135,22 @@ void NetworkManager::receive()
 			network_message_type message_type = (network_message_type)payload_reader.peek();
 			switch (message_type)
 			{
+			case NETWORK_MESSAGE_PING:
+			{
+				network_message_ping messagePing;
+				if (!messagePing.read(payload_reader))
+				{
+					// error
+				}
+				auto& pingMap = mClients[outAddr].pingMap;
+				auto found = pingMap.find(messagePing.sequence_);
+				if (found != pingMap.end())
+				{
+					mClients[outAddr].ping = (uint32)(time::now() - found->second).tick_;
+					pingMap.erase(pingMap.begin(), found);
+				}
+			} break;
+
 			case tankett::NETWORK_MESSAGE_CLIENT_TO_SERVER:
 			{
 				message_client_to_server messageC2S;
@@ -144,7 +160,7 @@ void NetworkManager::receive()
 				}
 				// check input sequence
 				// only push back messages that contains newer input sequence
-				if (messageC2S.input_number > mClients[OUT_addr].latestReceivedInputSequence)
+				if (messageC2S.input_number > mClients[outAddr].latestReceivedInputSequence)
 				{
 					inputMsgs.push_back(messageC2S);
 				}
@@ -159,16 +175,14 @@ void NetworkManager::receive()
 		::std::sort(inputMsgs.begin(), inputMsgs.end());
 		for (const auto& inputMsg : inputMsgs)
 		{
-			if (inputMsg.input_number > mClients[OUT_addr].latestReceivedInputSequence)
+			if (inputMsg.input_number > mClients[outAddr].latestReceivedInputSequence)
 			{
-				mClients[OUT_addr].latestReceivedInputSequence = inputMsg.input_number;
-				mClients[OUT_addr].receivedMessages.push_back(new message_client_to_server(inputMsg));
+				mClients[outAddr].latestReceivedInputSequence = inputMsg.input_number;
+				mClients[outAddr].receivedMessages.push_back(new message_client_to_server(inputMsg));
 			}
 		}
 	} break;
 	}
-
-
 }
 
 void NetworkManager::send()
@@ -201,6 +215,15 @@ void NetworkManager::processClientQueues()
 	// note: use the same server sequence number for all sends
 	const uint32 current_sequence_number = mServerSequence++;
 	protocol_payload packet(current_sequence_number);
+
+	// note: iterate over all clients and pack ping messages into payload
+	for (auto& client : mClients)
+	{
+		network_message_ping* pingMsg = new network_message_ping(mPingSequence);
+		client.second.pingMap[mPingSequence] = time::now();
+		pushMessage(client.first, pingMsg);
+		++mPingSequence;
+	}
 
 	// note: iterate over all clients and pack messages into payload, then send
 	for (auto& client : mClients)

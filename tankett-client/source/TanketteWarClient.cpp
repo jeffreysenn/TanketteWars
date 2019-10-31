@@ -9,7 +9,6 @@
 #include "ConnectState.h"
 #include "Context.h"
 
-
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <string>  
@@ -41,8 +40,8 @@ try
 	mTextureManager.load(Texture::Back,
 						 "../Assets/sunny-land-files/environment/back.png");
 
-	mFontManager.load(Font::MineCraft, "../Assets/Fonts/Minecraft.ttf");
-	mStatsText.setFont(*mFontManager.get(Font::MineCraft));
+	mFontManager.load(Font::Sansation, "../Assets/Fonts/Sansation.ttf");
+	mStatsText.setFont(*mFontManager.get(Font::Sansation));
 	mStatsText.setCharacterSize(20);
 	mStatsText.setPosition(10, 10);
 	mStatsText.setFillColor(::sf::Color::Magenta);
@@ -66,7 +65,7 @@ catch (const std::runtime_error & e)
 }
 
 const ::sf::Time updateInterval = ::sf::seconds(1.f / 60.f);
-const ::sf::Time networkInterval = ::sf::seconds(1.f / PROTOCOL_SEND_PER_SEC);
+const ::sf::Time networkInterval = ::sf::seconds(1.f / (float)::tankett::PROTOCOL_SEND_PER_SEC);
 void TanketteWarClient::run()
 {
 	::sf::Clock clock;

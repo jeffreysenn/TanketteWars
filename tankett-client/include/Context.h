@@ -7,6 +7,11 @@ namespace mw
 class CameraActor;
 }
 
+namespace sf
+{
+class RenderWindow;
+}
+
 namespace client
 {
 struct Context
@@ -27,7 +32,7 @@ public:
 
 public:
 	class ClientStateStack* stack{};
-	class ::sf::RenderWindow* window{};
+	::sf::RenderWindow* window{};
 	::mw::TextureManager* textureManager{};
 	::mw::FontManager* fontManager{};
 	::tankett::MapManager* mapManager{};

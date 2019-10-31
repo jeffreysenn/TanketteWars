@@ -9,7 +9,6 @@ namespace Menu
 {
 enum class Option
 {
-	Play,
 	Connect,
 	Settings,
 	Credits,
@@ -19,7 +18,6 @@ enum class Option
 
 static const char* OptionNames[static_cast<int>(Option::COUNT)] =
 {
-	"Play",
 	"Connect",
 	"Settings",
 	"Credits",

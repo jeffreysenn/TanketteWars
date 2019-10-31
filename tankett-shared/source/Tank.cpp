@@ -12,7 +12,7 @@ Tank::Tank()
 	, mBulletTexture(nullptr)
 	, mLastFireTime(::sf::seconds(-100))
 	, mTurretAngle(0)
-	, mTurretLayer(Rendering::Turret)
+	, mTurretLayer(::mw::Rendering::Turret)
 	, mController(nullptr)
 	, mCamera(nullptr)
 {
@@ -22,16 +22,16 @@ Tank::Tank()
 									   -height / 2,
 									   width,
 									   height);
-	auto collider = std::make_unique<Collider>(Collision::ObjectType::Dynamic, 
-											   Collision::ObjectResponsePreset::CollideAll,
+	auto collider = std::make_unique<::mw::Collider>(::mw::Collision::ObjectType::Dynamic,
+													 ::mw::Collision::ObjectResponsePreset::CollideAll,
 											   colliderRect);
 	setCollider(collider);
 }
 
 Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture, const ::sf::Texture& bulletTexture)
-	: Pawn(1, hullTexture, Rendering::Default)
+	: ::mw::Pawn(1, hullTexture, ::mw::Rendering::Default)
 	, mBarrelSprite(turretTexture)
-	, mTurretLayer(Rendering::Turret)
+	, mTurretLayer(::mw::Rendering::Turret)
 	, mSpeed(unit::unit2pix(4))
 	, mBulletTexture(&bulletTexture)
 	, mTurretAngle(0)
@@ -48,8 +48,8 @@ Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture,
 									   -height / 2,
 									   width,
 									   height);
-	auto collider = std::make_unique<Collider>(Collision::ObjectType::Dynamic,
-											   Collision::ObjectResponsePreset::CollideAll,
+	auto collider = std::make_unique<::mw::Collider>(::mw::Collision::ObjectType::Dynamic,
+													 ::mw::Collision::ObjectResponsePreset::CollideAll,
 											   colliderRect);
 	setCollider(collider);
 }
@@ -66,12 +66,12 @@ Tank::~Tank()
 void Tank::aimAt(const ::sf::Vector2f pos)
 {
 	::sf::Vector2f dir = pos - getWorldPosition();
-	float length = helper::Vector::getLength(dir);
+	float length = ::mw::helper::Vector::getLength(dir);
 	if (length < 0.01f)
 		return;
 
 	auto angleRads = ::std::atan2(dir.y, dir.x);
-	mTurretAngle = helper::Vector::rad2deg(angleRads);
+	mTurretAngle = ::mw::helper::Vector::rad2deg(angleRads);
 
 	mBarrelSprite.setRotation(mTurretAngle - 90.f);
 }
@@ -82,13 +82,12 @@ void Tank::aimAt(float angle)
 	mBarrelSprite.setRotation(angle - 90.f);
 }
 
-constexpr uint32_t cooldown = 1000;
+constexpr int cooldown = 1000;
 uint8_t bulletID = 0;
-uint32_t lastFireInputNum = 0;
 void Tank::fire(uint32_t inputNum)
 {
 	bool shouldSpawnBullet = true;
-	if(inputNum > lastFireInputNum || inputNum == 0)
+	if(inputNum > mLastFireInputNum || inputNum == 0)
 	{
 		auto timeNow = mFireClock.getElapsedTime();
 		if (timeNow - mLastFireTime < ::sf::milliseconds(cooldown))
@@ -103,11 +102,18 @@ void Tank::fire(uint32_t inputNum)
 
 	if (shouldSpawnBullet)
 	{
-		lastFireInputNum = inputNum;
+		mLastFireInputNum = inputNum;
 		if (mController->getBullets().empty()) bulletID = 0;
 		spawnBullet(mTurretAngle)->setID(bulletID);
 		++bulletID;
 	}
+}
+
+int Tank::getCooldown() const
+{
+	auto timeNow = mFireClock.getElapsedTime();
+	auto remaining = (::sf::milliseconds(cooldown) - (timeNow - mLastFireTime)).asMilliseconds();
+	return (remaining < 0) ? 0 : (cooldown < remaining) ? cooldown : remaining;
 }
 
 constexpr int bulletSpeed = 8;
@@ -123,7 +129,7 @@ Bullet* Tank::spawnBullet(float angle)
 	bullet->setNetRole(getNetRole());
 	bullet->setPosition(getWorldPosition());
 	bullet->setRotation(angle);
-	auto dir = helper::Vector::deg2vec(angle);
+	auto dir = ::mw::helper::Vector::deg2vec(angle);
 	::sf::Vector2f relativeVel(dir.x * unit::unit2pix(bulletSpeed),
 							   dir.y * unit::unit2pix(bulletSpeed));
 	bullet->setVelocity(getWorldVelocity() + relativeVel);
@@ -142,31 +148,31 @@ Bullet* Tank::spawnBullet(float angle)
 float Tank::mousePosToAngle(const sf::Vector2f& pos) const
 {
 	::sf::Vector2f dir = pos - getWorldPosition();
-	float length = helper::Vector::getLength(dir);
+	float length = ::mw::helper::Vector::getLength(dir);
 	if (length < 0.01f)
 		return 0;
 
 	auto angleRads = ::std::atan2(dir.y, dir.x);
-	float angle = helper::Vector::rad2deg(angleRads);
+	float angle = ::mw::helper::Vector::rad2deg(angleRads);
 
 	return angle;
 }
 
-void Tank::reportRenderInfoSelf(Renderer& renderer, ::sf::RenderStates states) const
+void Tank::reportRenderInfoSelf(::mw::Renderer& renderer, ::sf::RenderStates states) const
 {
 	Pawn::reportRenderInfoSelf(renderer, states);
 
-	RenderInfo renderInfo(mBarrelSprite, states);
-	renderer.pushRenderInfo(renderInfo, Rendering::Turret);
+	::mw::RenderInfo renderInfo(mBarrelSprite, states);
+	renderer.pushRenderInfo(renderInfo, ::mw::Rendering::Turret);
 }
 
 void Tank::updateSelf(float deltaSeconds)
 {
-	auto direction = helper::Vector::normalize(mDirection);
+	auto direction = ::mw::helper::Vector::normalize(mDirection);
 	if (direction != ::sf::Vector2f())
 	{
 		float angleRads = (float)::std::atan2(direction.y, direction.x);
-		auto angleDegs = helper::Vector::rad2deg(angleRads) - 90;
+		auto angleDegs = ::mw::helper::Vector::rad2deg(angleRads) - 90;
 		getSprite()->setRotation((float)angleDegs);
 	}
 	setVelocity(direction * mSpeed);

@@ -10,7 +10,7 @@ SettingState::SettingState()
 	mBackgroundShape.setFillColor(::sf::Color(0, 0, 0, 255));
 	mBackgroundShape.setSize(::sf::Vector2f(getRenderWindow().getSize()));
 
-	mCreditText.setFont(*Context::getInstance().fontManager->get(Font::MineCraft));
+	mCreditText.setFont(*Context::getInstance().fontManager->get(Font::Sansation));
 	mCreditText.setString("WIP");
 	mCreditText.setFillColor(::sf::Color::Blue);
 	mCreditText.setCharacterSize(50);

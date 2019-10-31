@@ -3,7 +3,6 @@
 #include "ClientStateStack.h"
 namespace client
 {
-
 MenuState::MenuState()
 	: MenuTemplate(Menu::OptionNames, static_cast<int>(Menu::Option::COUNT))
 {
@@ -23,10 +22,6 @@ void MenuState::handleConfirmInput()
 
 	switch (getCurrentOption())
 	{
-	case Menu::Option::Play:
-		stack.popState();
-		stack.pushState(StateID::Game);
-		break;
 	case Menu::Option::Connect:
 		stack.pushState(StateID::Connect);
 		break;

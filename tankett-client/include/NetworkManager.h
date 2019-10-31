@@ -5,7 +5,6 @@
 #include <memory>
 
 using namespace alpha;
-using namespace tankett;
 namespace client
 {
 
@@ -30,10 +29,10 @@ public:
 	void setState(const ConnectionState& state) { mState = state; }
 	ConnectionState getState() { return mState; }
 
-	std::vector<std::unique_ptr<network_message_header>>& getReceivedMessages() { return mReceivedMessages; }
-	std::vector<std::unique_ptr<network_message_header>>& getSendMessageQueue() { return mSendMessageQueue; }
+	std::vector<std::unique_ptr<::tankett::network_message_header>>& getReceivedMessages() { return mReceivedMessages; }
+	std::vector<std::unique_ptr<::tankett::network_message_header>>& getSendMessageQueue() { return mSendMessageQueue; }
 
-	void pushMessage(::std::unique_ptr<network_message_header> message);
+	void pushMessage(::std::unique_ptr<::tankett::network_message_header> message);
 
 	void clearReceivedMessages();
 private:
@@ -46,8 +45,8 @@ private:
 	ip_address mServerAddr;
 	udp_socket mSocket;
 	ip_address mLocalAddr;
-	std::vector<std::unique_ptr<network_message_header>> mSendMessageQueue;
-	std::vector<std::unique_ptr<network_message_header>> mReceivedMessages;
+	std::vector<std::unique_ptr<::tankett::network_message_header>> mSendMessageQueue;
+	std::vector<std::unique_ptr<::tankett::network_message_header>> mReceivedMessages;
 	crypt::xorinator mXorinator;
 	uint32_t mClientSequence;
 	uint32_t mServerSequence;

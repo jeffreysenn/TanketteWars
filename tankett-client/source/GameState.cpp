@@ -9,13 +9,29 @@
 #include "Bullet.h"
 #include "tankett_debug.h"
 #include "Actors/CameraActor.h"
+#include "Context.h"
+#include <Helpers/Helper.h>
 
 namespace client
 {
 GameState::GameState()
 try : mWorld()
 , mFrameNum(0)
-{}
+{
+	mRoundTimerText.setFont(*Context::getInstance().fontManager->get(Font::Sansation));
+	mRoundTimerText.setString("90");
+	mRoundTimerText.setCharacterSize(60);
+	mRoundTimerText.setPosition(Context::getInstance().window->getSize().x / 2.f, 50.f);
+	::mw::helper::Graphics::centreOrigin(mRoundTimerText);	
+	
+	mCooldownText.setFont(*Context::getInstance().fontManager->get(Font::Sansation));
+	mCooldownText.setString("1000");
+	mCooldownText.setCharacterSize(14);
+	mCooldownText.setPosition(Context::getInstance().window->getSize().x / 2.f, Context::getInstance().window->getSize().y/2.f - 50.f);
+	::mw::helper::Graphics::centreOrigin(mCooldownText);
+
+	mScoreBoard.setPosition(Context::getInstance().window->getSize().x - 100.f, 50.f);
+}
 catch (const std::runtime_error & e)
 {
 	std::cout << "Exception: " << e.what() << std::endl;
@@ -34,16 +50,16 @@ void GameState::processReceivedMessages()
 
 	for (auto& message : receivedMessages)
 	{
-		network_message_type type = (network_message_type)message->type_;
+		::tankett::network_message_type type = (::tankett::network_message_type)message->type_;
 		switch (type)
 		{
 		case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
 		{
-			message_server_to_client* msgS2C = (message_server_to_client*)message.get();
+			::tankett::message_server_to_client* msgS2C = (::tankett::message_server_to_client*)message.get();
 			if (!msgS2C) break;
 
 			checkNewRemote(msgS2C);
-			updateRemoteState(msgS2C);
+			updateState(msgS2C);
 		}
 		break;
 		default:
@@ -73,17 +89,17 @@ void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 			if (!controllerExist)
 			{
 				bool listenToInput = msgS2C->receiver_id == dataArr[i].client_id;
-				auto controller = ::std::make_unique<PlayerController>(dataArr[i].client_id, listenToInput, Context::getInstance().window);
+				auto controller = ::std::make_unique<::tankett::PlayerController>(dataArr[i].client_id, listenToInput, Context::getInstance().window);
 				auto pos = ::sf::Vector2f(dataArr[i].position.x_, dataArr[i].position.y_);
 				if (listenToInput)
 				{
-					controller->setNetRole(NetRole::AutonomousProxy);
+					controller->setNetRole(::mw::NetRole::AutonomousProxy);
 					mLocalController = controller.get();
 					controller->spawnTank_client(mWorld.getTankManager(), pos);
 				}
 				else
 				{
-					controller->setNetRole(NetRole::SimulatedProxy);
+					controller->setNetRole(::mw::NetRole::SimulatedProxy);
 					controller->spawnTank_client(mWorld.getTankManager(), pos);
 				}
 
@@ -94,8 +110,11 @@ void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 }
 
 float destroyedLocalBulletAngle = 0;
-void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
+void GameState::updateState(::tankett::message_server_to_client* msgS2C)
 {
+	int remainingTime = (int) msgS2C->round_time;
+	mRoundTimerText.setString(::std::to_string(remainingTime));
+
 	auto dataArr = msgS2C->client_data;
 	// update state
 	for (int i = 0; i < msgS2C->client_count; ++i)
@@ -103,9 +122,10 @@ void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 		auto& data = dataArr[i];
 		for (auto& controller : mPlayerControllers)
 		{
-			// remote controllers
 			if (controller->getID() == data.client_id)
 			{
+				controller->setPing(data.ping);
+				controller->setScore(data.eliminations);
 				// sync the bullets
 				// bullets exist both on server and local: transform
 				// bullets exist only on local: destroy
@@ -145,7 +165,7 @@ void GameState::updateRemoteState(::tankett::message_server_to_client* msgS2C)
 						auto tank = controller->getPossessedTank();
 						if(tank)
 						{
-							Bullet* newBullet;
+							::tankett::Bullet* newBullet;
 							if (controller.get() == mLocalController)
 							{
 								newBullet = tank->spawnBullet(destroyedLocalBulletAngle);
@@ -197,7 +217,6 @@ void GameState::packInput()
 {
 	if (!mLocalController)
 		return;
-	sizeof(message_client_to_server);
 
 	auto& networkManager = *Context::getInstance().networkManager;
 	auto& inputBuffer = mLocalController->getInputBuffer();
@@ -225,7 +244,7 @@ void GameState::packInput()
 
 void GameState::pushInputMessage(::tankett::PlayerController::TankInput& inputValue, uint32_t inputNum)
 {
-	auto inputMessage = ::std::make_unique<message_client_to_server>();
+	auto inputMessage = ::std::make_unique<::tankett::message_client_to_server>();
 	inputMessage->input_number = inputNum;
 	inputMessage->set_input(inputValue.fire, inputValue.right, inputValue.left, inputValue.down, inputValue.up);
 	inputMessage->turret_angle = inputValue.angle;
@@ -250,13 +269,39 @@ bool GameState::update(float deltaSeconds)
 	}
 	mWorld.update(deltaSeconds);
 
+	if (mLocalController && mLocalController->getPossessedTank())
+	{
+		auto inversedCooldown = 1000 - mLocalController->getPossessedTank()->getCooldown();
+		mCooldownText.setString(::std::to_string(inversedCooldown));
+		if (inversedCooldown == 1000)
+		{
+			mCooldownText.setFillColor(::sf::Color::Green);
+		}
+		else
+		{
+			mCooldownText.setFillColor(::sf::Color::Red);
+		}
+	}
+
 	packInput();
+
+	// update scoreboard
+	for (auto& playerController : mPlayerControllers)
+	{
+		mScoreBoard.setScoreBoard(playerController->getID(), playerController->getScore(), playerController->getPing());
+	}
+
 	return true;
 }
 
 void GameState::draw()
 {
 	mWorld.draw();
+	auto& window = Context::getInstance().window;
+	window->setView(window->getDefaultView());
+	window->draw(mRoundTimerText);
+	window->draw(mCooldownText);
+	window->draw(mScoreBoard);
 }
 
 bool GameState::handleEvent(const ::sf::Event& event)

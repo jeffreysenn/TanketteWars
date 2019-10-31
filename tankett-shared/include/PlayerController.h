@@ -14,13 +14,6 @@ class Event;
 class RenderWindow;
 }
 
-namespace mw
-{
-class CommandQueue;
-}
-
-using namespace mw;
-
 namespace tankett
 {
 class Tank;
@@ -37,7 +30,7 @@ public:
 	};
 
 public:
-	PlayerController(uint8_t id = 0, bool listenToInput = false, ::sf::RenderWindow* window = nullptr, ::mw::NetRole netRole = NetRole::Authority);
+	PlayerController(uint8_t id = 0, bool listenToInput = false, ::sf::RenderWindow* window = nullptr, ::mw::NetRole netRole = ::mw::NetRole::Authority);
 
 	void handleEvent(const ::sf::Event& event, uint32_t frameNum);
 	void handleRealtimeInput(uint32_t frameNum);
@@ -67,6 +60,13 @@ public:
 	void setNetRole(::mw::NetRole netRole) { mNetRole = netRole; }
 	::mw::NetRole getNetRole() const { return mNetRole; }
 
+	void setPing(uint32_t ping) { mPing = ping; }
+	uint32_t getPing() const { return mPing; }
+
+	void setScore(uint8_t score) { mScore = score; }
+	void addScore(uint8_t ds) { mScore += ds; }
+	uint8_t getScore() const { return mScore; }
+
 private:
 	enum class Action
 	{
@@ -83,16 +83,15 @@ private:
 
 private:
 	uint8_t mID;
-	Command mMousePosCommand;
 	bool mListenToInput;
 
 	::std::map<Action, ::mw::Input::InputCollection> mInputBinding;
-	::std::map<Action, Command> mInputActionBinding;
-	::std::map<Action, Command> mCommands;
 	::std::map<uint32_t, TankInput> mInputBuffer;
 	::sf::RenderWindow* mWindow;
 	Tank* mPossessedTank;
 	::std::vector<Bullet*> mBullets;
-	NetRole mNetRole;
+	::mw::NetRole mNetRole;
+	uint32_t mPing;
+	uint8_t mScore;
 };
 }

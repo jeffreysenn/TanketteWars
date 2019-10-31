@@ -37,6 +37,7 @@ struct allocator
 	virtual void deallocate(void* pointer) = 0;
 };
 
+
 constexpr uint32 PROTOCOL_ID = 0x11223344u;
 constexpr uint32 PROTOCOL_VERSION = 0x01000001u;
 constexpr uint16 PROTOCOL_PORT = 32100ui16;
@@ -257,6 +258,9 @@ struct network_message_header
 struct network_message_ping : network_message_header
 {
 	network_message_ping();
+	network_message_ping(uint8 sequence);
+
+	bool is_newer(uint8 sequence);
 
 	bool write(byte_stream_writer& writer) override final { return serialize(writer); }
 	bool write(byte_stream_evaluator& evaluator) override final { return serialize(evaluator); }
@@ -267,8 +271,11 @@ struct network_message_ping : network_message_header
 	{
 		bool result = true;
 		result &= stream.serialize(type_);
+		result &= stream.serialize(sequence_);
 		return result;
 	}
+
+	uint8 sequence_;
 };
 
 constexpr uint32 PROTOCOL_PAYLOAD_SIZE = 1200;

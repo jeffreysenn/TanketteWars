@@ -29,8 +29,6 @@ World::World()
 
 World::~World()
 {
-	mTextureManager.unload(Texture::Middle);
-	mTextureManager.unload(Texture::Avatar);
 }
 
 void World::loadResources()
@@ -46,11 +44,24 @@ void World::loadMaps()
 
 void World::loadTextures()
 {
-	mTextureManager.load(Texture::Middle, "../Assets/PNG/Environment/grass.png");
+	mTextureManager.load(Texture::Grass, "../Assets/PNG/Environment/grass.png");
+	mTextureManager.load(Texture::Dirt, "../Assets/PNG/Environment/dirt.png");
+
 	mTextureManager.load(Texture::TankBlackHull, "../Assets/PNG/Tanks/tankBlack_outline.png");
 	mTextureManager.load(Texture::TankBlackBarrel, "../Assets/PNG/Tanks/barrelBlack_outline.png");
 	mTextureManager.load(Texture::TankBlackBullet, "../Assets/PNG/Bullets/bulletSilverSilver_outline.png");
-	mTextureManager.load(Texture::Dirt, "../Assets/PNG/Environment/dirt.png");
+
+	mTextureManager.load(Texture::TankRedHull, "../Assets/PNG/Tanks/tankRed_outline.png");
+	mTextureManager.load(Texture::TankRedBarrel, "../Assets/PNG/Tanks/barrelRed_outline.png");
+	mTextureManager.load(Texture::TankRedBullet, "../Assets/PNG/Bullets/bulletRedSilver_outline.png");
+	
+	mTextureManager.load(Texture::TankGreenHull, "../Assets/PNG/Tanks/tankGreen_outline.png");
+	mTextureManager.load(Texture::TankGreenBarrel, "../Assets/PNG/Tanks/barrelGreen_outline.png");
+	mTextureManager.load(Texture::TankGreenBullet, "../Assets/PNG/Bullets/bulletGreenSilver_outline.png");
+	
+	mTextureManager.load(Texture::TankBlueHull, "../Assets/PNG/Tanks/tankBlue_outline.png");
+	mTextureManager.load(Texture::TankBlueBarrel, "../Assets/PNG/Tanks/barrelBlue_outline.png");
+	mTextureManager.load(Texture::TankBlueBullet, "../Assets/PNG/Bullets/bulletBlueSilver_outline.png");
 }
 
 void World::buildScene()
@@ -91,21 +102,20 @@ void World::buildScene()
 #endif
 
 	mTankManager = tankManager.get();
-	::sf::Texture* tankHullTexture = mTextureManager.get(Texture::TankBlackHull);
-	::sf::Texture* tankBarrelTexture = mTextureManager.get(Texture::TankBlackBarrel);
-	::sf::Texture* tankBulletTexture = mTextureManager.get(Texture::TankBlackBullet);
 	for (int i = 0; i < 4; ++i)
 	{
-		mTankManager->setTankTextures(i, 0, tankHullTexture);
-		mTankManager->setTankTextures(i, 1, tankBarrelTexture);
-		mTankManager->setTankTextures(i, 2, tankBulletTexture);
+		for (int j = 0; j < 3; ++j)
+		{
+			mTankManager->setTankTextures(i, j, mTextureManager.get((Texture::ID)(i * 3 + j + Texture::TankBlackHull)));
+		}
 	}
+
 	mSceneGraph.attachChild(std::move(tankManager));
 
 	// Create a background node and attach to the scene graph
 	std::unique_ptr<Actor> backgroundNode(std::make_unique<Actor>());
 
-	::sf::Texture* backgroundTexture = mTextureManager.get(Texture::Middle);
+	::sf::Texture* backgroundTexture = mTextureManager.get(Texture::Grass);
 	backgroundTexture->setRepeated(true);
 	std::unique_ptr<SpriteActor> backgroundSprite(std::make_unique<SpriteActor>(
 		*backgroundTexture,

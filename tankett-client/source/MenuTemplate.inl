@@ -72,7 +72,7 @@ template<typename EnumClass>
 void MenuTemplate<EnumClass>::setupOptionsText(::sf::Text& text, const EnumClass& option)
 {
 	text.setString(helper::Enum::getText(option, mOptionNames));
-	text.setFont(*getContext().fontManager->get(Font::MineCraft));
+	text.setFont(*getContext().fontManager->get(Font::Sansation));
 	text.setCharacterSize(40);
 	helper::Graphics::centreOrigin(text);
 	text.setFillColor(::sf::Color::Black);

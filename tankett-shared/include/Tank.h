@@ -5,8 +5,6 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
 
-using namespace mw;
-
 namespace mw
 {
 class CameraActor;
@@ -16,7 +14,7 @@ namespace tankett
 {
 class PlayerController;
 
-class Tank : public Pawn
+class Tank : public ::mw::Pawn
 {
 public:
 	Tank();
@@ -30,6 +28,7 @@ public:
 	void aimAt(const ::sf::Vector2f pos);
 	void aimAt(float angle);
 	void fire(uint32_t inputNum = 0);
+	int getCooldown() const;
 
 	Bullet* spawnBullet(float angle);
 
@@ -42,30 +41,22 @@ public:
 	float getTurretAngle() const { return mTurretAngle; }
 
 protected:
-	virtual void reportRenderInfoSelf(class Renderer& renderer, ::sf::RenderStates states) const override;
+	virtual void reportRenderInfoSelf(::mw::Renderer& renderer, ::sf::RenderStates states) const override;
 	virtual void updateSelf(float deltaSeconds) override;
 	virtual void onCollisionEnter(Actor& other) override;
 
 private:
 	::sf::Sprite mBarrelSprite;
-	Rendering::Layer mTurretLayer;
+	::mw::Rendering::Layer mTurretLayer;
 	const float mSpeed;
 	::sf::Vector2f mDirection;
 	::sf::Clock mFireClock;
 	::sf::Time mLastFireTime;
 	const ::sf::Texture* mBulletTexture;
 	float mTurretAngle;
-	/*
-				/
-			   /
-			  / turrentAngle
-			 /______________
-	*/
-
 	// TODO: decrease dependency
 	PlayerController* mController;
 	::mw::CameraActor* mCamera;
+	uint32_t mLastFireInputNum{};
 };
-
-
 }
