@@ -21,7 +21,7 @@ enum class ResponseType
 {
 	Ignore = 0,
 	Overlap = 1,
-	Collision = 1 << 1,
+	Collision = (1 << 1) | 1,
 };
 
 inline ResponseType operator & (ResponseType a, ResponseType b)
