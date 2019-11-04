@@ -42,6 +42,7 @@ constexpr uint32 PROTOCOL_ID = 0x11223344u;
 constexpr uint32 PROTOCOL_VERSION = 0x01000001u;
 constexpr uint16 PROTOCOL_PORT = 32100ui16;
 constexpr uint8 PROTOCOL_SEND_PER_SEC = 30ui8;
+constexpr uint32 PROTOCOL_CLIENT_AHEAD_FRAME = 30u;
 
 enum packet_type
 {
@@ -346,12 +347,17 @@ struct message_client_to_server : network_message_header
 
 struct bullet_data
 {
+	bool operator==(const bullet_data& rhs) const;
+	bool operator!=(const bullet_data& rhs) const;
+
 	vector2 position;
 	uint8 id = 0;
 };
 
-struct server_to_client_data
+struct PlayerState
 {
+	bool operator==(const PlayerState& rhs) const;
+
 	bool alive = true;
 	bool connected = true;
 	vector2 position = { 0,0 };
@@ -379,7 +385,7 @@ struct message_server_to_client : network_message_header
 	uint8 receiver_id = 0;
 	uint32 input_number = 0;
 	uint8 client_count = 0;
-	server_to_client_data client_data[4];
+	PlayerState client_data[4];
 	float timestamp = .0f; //time::now().as_milliseconds();
 	float round_time = .0f; //time remaining
 	GAME_STATE game_state = GAME_STATE::WAITING_FOR_PLAYER;
@@ -402,7 +408,7 @@ struct message_server_to_client : network_message_header
 		//serialize client array
 		for (int i = 0; i < client_count; i++)
 		{
-			server_to_client_data& currentData = client_data[i];
+			PlayerState& currentData = client_data[i];
 
 			uint8 bit_field = currentData.alive & 1;
 			bit_field |= (currentData.connected << 1);

@@ -22,12 +22,12 @@ try : mWorld()
 	mRoundTimerText.setString("90");
 	mRoundTimerText.setCharacterSize(60);
 	mRoundTimerText.setPosition(Context::getInstance().window->getSize().x / 2.f, 50.f);
-	::mw::helper::Graphics::centreOrigin(mRoundTimerText);	
-	
+	::mw::helper::Graphics::centreOrigin(mRoundTimerText);
+
 	mCooldownText.setFont(*Context::getInstance().fontManager->get(Font::Sansation));
 	mCooldownText.setString("1000");
 	mCooldownText.setCharacterSize(14);
-	mCooldownText.setPosition(Context::getInstance().window->getSize().x / 2.f, Context::getInstance().window->getSize().y/2.f - 50.f);
+	mCooldownText.setPosition(Context::getInstance().window->getSize().x / 2.f, Context::getInstance().window->getSize().y / 2.f - 50.f);
 	::mw::helper::Graphics::centreOrigin(mCooldownText);
 
 	mScoreBoard.setPosition(Context::getInstance().window->getSize().x - 100.f, 50.f);
@@ -59,6 +59,30 @@ void GameState::processReceivedMessages()
 			if (!msgS2C) break;
 
 			checkNewRemote(msgS2C);
+
+			const auto& dataArr = msgS2C->client_data;
+			for (int i = 0; i < msgS2C->client_count; ++i)
+			{
+				const auto& data = dataArr[i];
+				// validate prediction immediately
+				if (data.client_id == msgS2C->receiver_id)
+				{
+					validateInputPrediction(data, msgS2C->input_number);
+
+					auto found = mPredictedStates.find(msgS2C->input_number);
+					if(found != mPredictedStates.end())
+					mPredictedStates.erase(mPredictedStates.begin(), found);
+				}
+				// we do not update remotes immediately after receiving the message
+				else
+				{
+					mRemoteStates[msgS2C->input_number] = data;
+				}
+			}
+
+			// we do not update immediately after receiving the message
+			// update when the frame num is ahead of the input_num of the message enough
+			// to make sure the update rate is stable
 			updateState(msgS2C);
 		}
 		break;
@@ -67,6 +91,67 @@ void GameState::processReceivedMessages()
 		}
 	}
 	networkManager.clearReceivedMessages();
+
+#if 0
+	auto it = receivedMessages.begin();
+	while (it != receivedMessages.end())
+	{
+		::tankett::network_message_header* message = it->get();
+		::tankett::network_message_type type = (::tankett::network_message_type)message->type_;
+		switch (type)
+		{
+		case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
+		{
+			::tankett::message_server_to_client* msgS2C = (::tankett::message_server_to_client*)message;
+			if (!msgS2C) break;
+
+
+			// we do not update immediately after receiving the message
+			// update when the frame num is ahead of the input_num of the message enough
+			// to make sure the update rate is stable
+			if (mFrameNum - msgS2C->input_number > ::tankett::PROTOCOL_CLIENT_AHEAD_FRAME)
+			{
+				// interpolation
+				checkNewRemote(msgS2C);
+				updateState(msgS2C);
+				it = receivedMessages.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+		break;
+		default:
+			++it;
+			break;
+		}
+	}
+
+
+	for (auto& message : receivedMessages)
+	{
+		::tankett::network_message_type type = (::tankett::network_message_type)message->type_;
+		switch (type)
+		{
+		case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
+		{
+			::tankett::message_server_to_client* msgS2C = (::tankett::message_server_to_client*)message.get();
+			if (!msgS2C) break;
+
+			// we do not update immediately after receiving the message
+			// update when the frame num is ahead of the input_num of the message enough
+			// to make sure the update rate is stable
+			checkNewRemote(msgS2C);
+			updateState(msgS2C);
+		}
+		break;
+		default:
+			break;
+		}
+	}
+	networkManager.clearReceivedMessages();
+#endif
 }
 
 void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
@@ -95,14 +180,12 @@ void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 				{
 					controller->setNetRole(::mw::NetRole::AutonomousProxy);
 					mLocalController = controller.get();
-					controller->spawnTank_client(mWorld.getTankManager(), pos);
 				}
 				else
 				{
 					controller->setNetRole(::mw::NetRole::SimulatedProxy);
-					controller->spawnTank_client(mWorld.getTankManager(), pos);
 				}
-
+				controller->spawnTank_client(mWorld.getTankManager(), pos);
 				mPlayerControllers.push_back(::std::move(controller));
 			}
 		}
@@ -112,7 +195,7 @@ void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 float destroyedLocalBulletAngle = 0;
 void GameState::updateState(::tankett::message_server_to_client* msgS2C)
 {
-	int remainingTime = (int) msgS2C->round_time;
+	int remainingTime = (int)msgS2C->round_time;
 	mRoundTimerText.setString(::std::to_string(remainingTime));
 
 	auto dataArr = msgS2C->client_data;
@@ -122,63 +205,12 @@ void GameState::updateState(::tankett::message_server_to_client* msgS2C)
 		auto& data = dataArr[i];
 		for (auto& controller : mPlayerControllers)
 		{
-			if (controller->getID() == data.client_id)
+			if (controller->getID() == data.client_id && controller.get() != mLocalController)
 			{
 				controller->setPing(data.ping);
 				controller->setScore(data.eliminations);
-				// sync the bullets
-				// bullets exist both on server and local: transform
-				// bullets exist only on local: destroy
-				// bullets exist only on server: spawn
-				uint8_t bulletCount = data.bullet_count;
-				auto& bullets = data.bullets;
-				auto& existingBullets = controller->getBullets();
-				::std::map<uint8_t, ::std::pair<::tankett::Bullet*, ::tankett::bullet_data*>> bulletMap{};
-				for (int bulletIndex = 0; bulletIndex < bulletCount; ++bulletIndex)
-				{
-					bulletMap[bullets[bulletIndex].id].second = &bullets[bulletIndex];
-				}
-				for (auto& existingBullet : existingBullets)
-				{
-					bulletMap[existingBullet->getID()].first = existingBullet;
-				}
-				for (auto& it : bulletMap)
-				{
-					auto& bulletPair = it.second;
-
-					if (bulletPair.first && bulletPair.second)
-					{
-						bulletPair.first->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
-					}
-					else if (bulletPair.first && !bulletPair.second)
-					{
-						// TODO: destroyedLcalBulletAngle is a HACK
-						// It helps to spawn the local controller's bullet at its original angle
-						if (controller.get() == mLocalController)
-						{
-							destroyedLocalBulletAngle = bulletPair.first->getRotation();
-						}
-						::mw::Actor::destroy(bulletPair.first);
-					}
-					else if (!bulletPair.first && bulletPair.second)
-					{
-						auto tank = controller->getPossessedTank();
-						if(tank)
-						{
-							::tankett::Bullet* newBullet;
-							if (controller.get() == mLocalController)
-							{
-								newBullet = tank->spawnBullet(destroyedLocalBulletAngle);
-							}
-							else
-							{
-								newBullet = tank->spawnBullet(tank->getTurretAngle());
-							}
-							newBullet->setID(bulletPair.second->id);
-							newBullet->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
-						}
-					}
-				}
+				
+				syncBulletState(data, *controller.get());
 
 				// sync tank state
 				auto tank = controller->getPossessedTank();
@@ -188,28 +220,93 @@ void GameState::updateState(::tankett::message_server_to_client* msgS2C)
 					float aimAngle = data.angle;
 					controller->setTankState(pos, aimAngle);
 				}
-				else if(tank)
+				else if (tank)
 				{
 					Actor::destroy(tank);
-				}
-
-				// input prediction
-				if (controller.get() == mLocalController)
-				{
-					for (uint32_t inputIndex = msgS2C->input_number + 1; inputIndex <= mFrameNum; ++inputIndex)
-					{
-						// break in case client is too behind the server
-						if(mFrameNum - inputIndex > 10) break;
-
-						auto& input = controller->getInputBuffer()[inputIndex];
-						float deltaSeconds = 1.f / 60.f;
-						controller->updateTank(input.up, input.down, input.left, input.right, input.fire, input.angle, deltaSeconds, inputIndex);
-					}
 				}
 			}
 		}
 	}
 
+}
+
+void GameState::validateInputPrediction(const::tankett::PlayerState& state, uint32_t inputNum)
+{
+	if (!mLocalController)
+		return;
+
+	if (mPredictedStates[inputNum] == state)
+		return;
+
+	syncBulletState(state, *mLocalController);
+
+	auto tank = mLocalController->getPossessedTank();
+	if (state.alive)
+	{
+		::sf::Vector2f pos = ::sf::Vector2f(state.position.x_, state.position.y_);
+		float aimAngle = state.angle;
+		mLocalController->setTankState(pos, aimAngle);
+	}
+	else if (tank)
+	{
+		Actor::destroy(tank);
+		::mw::SceneGraph* sceneGraph = (::mw::SceneGraph*) mLocalController->getPossessedTank()->getSceneGraph();
+		sceneGraph->enforceDestruction(*sceneGraph);
+	}
+
+	for (uint32_t inputIndex = inputNum + 1; inputIndex <= mFrameNum; ++inputIndex)
+	{
+		// break in case client is too behind the server
+		if (mFrameNum - inputIndex > 10) break;
+
+		auto& input = mLocalController->getInputBuffer()[inputIndex];
+		float deltaSeconds = 1.f / 60.f;
+		mLocalController->updateTank(input.up, input.down, input.left, input.right, input.fire, input.angle, deltaSeconds, inputIndex);
+		mPredictedStates[inputIndex] = mLocalController->getTankState();
+	}
+}
+
+void GameState::syncBulletState(const tankett::PlayerState& state, ::tankett::PlayerController& controller)
+{
+	// sync the bullets
+	// bullets exist both on server and local: transform
+	// bullets exist only on local: destroy
+	// bullets exist only on server: spawn
+	uint8_t bulletCount = state.bullet_count;
+	const auto& bullets = state.bullets;
+	auto& existingBullets = controller.getBullets();
+	::std::map<uint8_t, ::std::pair<::tankett::Bullet*, const ::tankett::bullet_data*>> bulletMap{};
+	for (int bulletIndex = 0; bulletIndex < bulletCount; ++bulletIndex)
+	{
+		bulletMap[bullets[bulletIndex].id].second = &bullets[bulletIndex];
+	}
+	for (auto& existingBullet : existingBullets)
+	{
+		bulletMap[existingBullet->getID()].first = existingBullet;
+	}
+	for (auto& it : bulletMap)
+	{
+		auto& bulletPair = it.second;
+
+		if (bulletPair.first && bulletPair.second)
+		{
+			bulletPair.first->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
+		}
+		else if (bulletPair.first && !bulletPair.second)
+		{
+			::mw::Actor::destroy(bulletPair.first);
+		}
+		else if (!bulletPair.first && bulletPair.second)
+		{
+			auto* tank = controller.getPossessedTank();
+			if (tank)
+			{
+				::tankett::Bullet* newBullet = tank->spawnBullet(tank->getTurretAngle());
+				newBullet->setID(bulletPair.second->id);
+				newBullet->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
+			}
+		}
+	}
 }
 
 constexpr uint32_t redundantInputNum = 10;
@@ -223,7 +320,7 @@ void GameState::packInput()
 	auto& inputBuffer = mLocalController->getInputBuffer();
 
 	// pack in redundant input if Queue is empty
-	if (networkManager.getSendMessageQueue().empty())
+	if (networkManager.getSendMessageQueue().size() < redundantInputNum)
 	{
 		uint32_t inputBegin = mFrameNum - redundantInputNum;
 		if (inputBuffer.find(inputBegin) != inputBuffer.end())
@@ -236,7 +333,7 @@ void GameState::packInput()
 		}
 	}
 
-	if(networkManager.getSendMessageQueue().size() < 60)
+	if (networkManager.getSendMessageQueue().size() < 60)
 	{
 		auto& inputValue = inputBuffer[mFrameNum];
 		pushInputMessage(inputValue, mFrameNum);
@@ -258,18 +355,47 @@ bool GameState::update(float deltaSeconds)
 	processReceivedMessages();
 
 	++mFrameNum;
-	
+
+	handleInput();
+
+	mWorld.update(deltaSeconds);
+
+	if (mLocalController)
+	{
+		mPredictedStates[mFrameNum] = mLocalController->getTankState();
+	}
+
+	updateCooldownText();
+
+	packInput();
+
+	updateScoreboard();
+
+	return true;
+}
+
+void GameState::handleInput()
+{
 	if (Context::getInstance().isWindowFocused)
 	{
 		// set the view to the world camera view to get relative mouse pos for player controller 
 		Context::getInstance().window->setView(*Context::getInstance().camera);
-		for (auto& playerController : mPlayerControllers)
-		{
-			playerController->handleRealtimeInput(mFrameNum);
-		}
+		if (mLocalController)
+			mLocalController->handleRealtimeInput(mFrameNum);
 	}
-	mWorld.update(deltaSeconds);
+}
 
+void GameState::updateScoreboard()
+{
+	// update scoreboard
+	for (auto& playerController : mPlayerControllers)
+	{
+		mScoreBoard.setScoreBoard(playerController->getID(), playerController->getScore(), playerController->getPing());
+	}
+}
+
+void GameState::updateCooldownText()
+{
 	if (mLocalController && mLocalController->getPossessedTank())
 	{
 		auto inversedCooldown = 1000 - mLocalController->getPossessedTank()->getCooldown();
@@ -283,16 +409,6 @@ bool GameState::update(float deltaSeconds)
 			mCooldownText.setFillColor(::sf::Color::Red);
 		}
 	}
-
-	packInput();
-
-	// update scoreboard
-	for (auto& playerController : mPlayerControllers)
-	{
-		mScoreBoard.setScoreBoard(playerController->getID(), playerController->getScore(), playerController->getPing());
-	}
-
-	return true;
 }
 
 void GameState::draw()

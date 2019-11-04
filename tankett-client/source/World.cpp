@@ -130,9 +130,6 @@ void World::buildScene()
 
 void World::update(float deltaSeconds)
 {
-	while (!mCommandQueue.isEmpty())
-		mSceneGraph.onCommand(mCommandQueue.pop(), deltaSeconds);
-
 	mSceneGraph.update(deltaSeconds);
 	mSceneGraph.checkSceneCollision();
 	mSceneGraph.enforceDestruction(mSceneGraph);

@@ -52,15 +52,17 @@ void PlayerController::handleRealtimeInput(uint32_t frameNum)
 	{
 		right = true;
 	}
+	mPossessedTank->addDirection((float)(-(int)left + (int)right), (float)(-(int)up + (int)down));
+
+	float aimAngle = mPossessedTank->mousePosToAngle(getMousePosition());
+	mPossessedTank->aimAt(aimAngle);
+
 	if (::mw::Input::inputCollectionPressed(mInputBinding[Action::Fire]))
 	{
 		mPossessedTank->fire(frameNum);
 		fire = true;
 	}
-	mPossessedTank->addDirection((float)(-(int)left + (int)right), (float)(-(int)up + (int)down));
 
-	float aimAngle = mPossessedTank->mousePosToAngle(getMousePosition());
-	mPossessedTank->aimAt(aimAngle);
 
 	mInputBuffer[frameNum].up = up;
 	mInputBuffer[frameNum].down = down;
@@ -123,16 +125,11 @@ void PlayerController::updateTank(bool up, bool down, bool left, bool right, boo
 	mPossessedTank->aimAt(aimAngle);
 	if (fire)
 		mPossessedTank->fire(inputNum);
-	mPossessedTank->update(deltaSeconds);
-	auto& bullets = getBullets();
-	for (auto& bullet : bullets)
-	{
-		bullet->update(deltaSeconds);
-	}
 
 	::mw::SceneGraph* sceneGraph = (::mw::SceneGraph*) mPossessedTank->getSceneGraph();
 	if (sceneGraph)
 	{
+		sceneGraph->update(deltaSeconds);
 		sceneGraph->checkSceneCollision();
 		sceneGraph->enforceDestruction(*sceneGraph);
 	}
@@ -143,6 +140,35 @@ void PlayerController::setTankState(::sf::Vector2f pos, float aimAngle)
 	if (!mPossessedTank) return;
 	mPossessedTank->setPosition(pos);
 	mPossessedTank->aimAt(aimAngle);
+}
+
+::tankett::PlayerState PlayerController::getTankState() const
+{
+	PlayerState state;
+	state.client_id = mID;
+	if (!mPossessedTank)
+	{
+		state.alive = false;
+	}
+	else
+	{
+		state.alive = true;
+		state.angle = mPossessedTank->getTurretAngle();
+		state.position = ::alpha::vector2(mPossessedTank->getPosition().x, mPossessedTank->getPosition().y);
+	}
+
+	state.eliminations = mScore;
+	state.bullet_count = (uint8_t) mBullets.size();
+	for(int i = 0; i < mBullets.size(); ++i)
+	{
+		for (const auto& bullet : mBullets)
+		{
+			state.bullets[i].id = bullet->getID();
+			state.bullets[i].position = ::alpha::vector2(bullet->getPosition().x, bullet->getPosition().y);
+		}
+	}
+
+	return state;
 }
 
 void PlayerController::bindInputs()

@@ -93,7 +93,7 @@ void TanketteWarClient::run()
 		{
 			timeSinceLastUpdate -= updateInterval;
 			handleInputs();
-			update(updateInterval.asSeconds());
+			update(1.f/60.f);
 
 			if (mStateStack.isEmpty())
 				mWindow.close();

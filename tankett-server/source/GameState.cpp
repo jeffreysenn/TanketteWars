@@ -98,7 +98,7 @@ void GameState::packMessages()
 	if (mControllers.size() == 0) return;
 
 	auto& clients = mNetworkManager.getClients();
-	server_to_client_data dataArr[4];
+	PlayerState dataArr[4];
 	for (auto& client : clients)
 	{
 		uint8_t id = client.second.id;

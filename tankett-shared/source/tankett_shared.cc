@@ -158,6 +158,59 @@ ip_address getLocalAddr()
 
 	return addressess[0];
 }
+
+bool PlayerState::operator==(const PlayerState& rhs) const
+{
+	if (alive)
+	{
+		if (!(
+			alive == rhs.alive
+			&& ::std::abs(position.x_ - rhs.position.x_) < 0.01f
+			&& ::std::abs(position.y_ - rhs.position.y_) < 0.01f
+			&& bullet_count == rhs.bullet_count
+			))
+			return false;
+	}
+	else
+	{
+		if (!(
+			alive == rhs.alive
+			&& bullet_count == rhs.bullet_count
+			))
+			return false;
+	}
+
+	for (int i = 0; i < bullet_count; ++i)
+	{
+		bool foundSameID = false;
+		for (int j = 0; j < bullet_count; ++j)
+		{
+			if(bullets[i].id == rhs.bullets[j].id)
+			{
+				if (bullets[i] != rhs.bullets[j])
+				{
+					return false;
+				}
+				foundSameID = true;
+			}
+		}
+		if (!foundSameID) 
+			return false;
+	}
+
+	return true;
+}
+
+bool bullet_data::operator==(const bullet_data& rhs) const
+{
+	return ::std::abs(position.x_ - rhs.position.x_) < 0.01f
+		&& ::std::abs(position.y_ - rhs.position.y_) < 0.01f;
+}
+
+bool bullet_data::operator!=(const bullet_data& rhs) const
+{
+	return !(*this == rhs);
+}
 } // !alpha
 
 

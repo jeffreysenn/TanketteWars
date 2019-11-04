@@ -4,6 +4,7 @@
 #include "Commands/CommandCategory.h"
 #include "Input/Input.h"
 #include "Network/NetRole.h"
+#include "tankett_shared.h"
 
 #include <map>
 #include <vector>
@@ -51,11 +52,11 @@ public:
 	void spawnTank_server(TankManager* tankManager);
 	void spawnTank_client(TankManager* tankManager, ::sf::Vector2f pos);
 
-	
 	::std::map<uint32_t, TankInput>& getInputBuffer() { return mInputBuffer; }
 
 	void updateTank(bool up, bool down, bool left, bool right, bool fire, float aimAngle, float deltaSeconds, uint32_t inputNum);
 	void setTankState(::sf::Vector2f pos, float aimAngle);
+	::tankett::PlayerState getTankState() const;
 
 	void setNetRole(::mw::NetRole netRole) { mNetRole = netRole; }
 	::mw::NetRole getNetRole() const { return mNetRole; }
@@ -66,6 +67,7 @@ public:
 	void setScore(uint8_t score) { mScore = score; }
 	void addScore(uint8_t ds) { mScore += ds; }
 	uint8_t getScore() const { return mScore; }
+
 
 private:
 	enum class Action
