@@ -123,13 +123,18 @@ void PlayerController::updateTank(bool up, bool down, bool left, bool right, boo
 	if (!mPossessedTank) return;
 	mPossessedTank->addDirection((float)(-(int)left + (int)right), (float)(-(int)up + (int)down));
 	mPossessedTank->aimAt(aimAngle);
+	mPossessedTank->update(deltaSeconds);
 	if (fire)
 		mPossessedTank->fire(inputNum);
+
+	for (auto& bullet : mBullets)
+	{
+		bullet->update(deltaSeconds);
+	}
 
 	::mw::SceneGraph* sceneGraph = (::mw::SceneGraph*) mPossessedTank->getSceneGraph();
 	if (sceneGraph)
 	{
-		sceneGraph->update(deltaSeconds);
 		sceneGraph->checkSceneCollision();
 		sceneGraph->enforceDestruction(*sceneGraph);
 	}

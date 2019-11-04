@@ -91,67 +91,6 @@ void GameState::processReceivedMessages()
 		}
 	}
 	networkManager.clearReceivedMessages();
-
-#if 0
-	auto it = receivedMessages.begin();
-	while (it != receivedMessages.end())
-	{
-		::tankett::network_message_header* message = it->get();
-		::tankett::network_message_type type = (::tankett::network_message_type)message->type_;
-		switch (type)
-		{
-		case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
-		{
-			::tankett::message_server_to_client* msgS2C = (::tankett::message_server_to_client*)message;
-			if (!msgS2C) break;
-
-
-			// we do not update immediately after receiving the message
-			// update when the frame num is ahead of the input_num of the message enough
-			// to make sure the update rate is stable
-			if (mFrameNum - msgS2C->input_number > ::tankett::PROTOCOL_CLIENT_AHEAD_FRAME)
-			{
-				// interpolation
-				checkNewRemote(msgS2C);
-				updateState(msgS2C);
-				it = receivedMessages.erase(it);
-			}
-			else
-			{
-				++it;
-			}
-		}
-		break;
-		default:
-			++it;
-			break;
-		}
-	}
-
-
-	for (auto& message : receivedMessages)
-	{
-		::tankett::network_message_type type = (::tankett::network_message_type)message->type_;
-		switch (type)
-		{
-		case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
-		{
-			::tankett::message_server_to_client* msgS2C = (::tankett::message_server_to_client*)message.get();
-			if (!msgS2C) break;
-
-			// we do not update immediately after receiving the message
-			// update when the frame num is ahead of the input_num of the message enough
-			// to make sure the update rate is stable
-			checkNewRemote(msgS2C);
-			updateState(msgS2C);
-		}
-		break;
-		default:
-			break;
-		}
-	}
-	networkManager.clearReceivedMessages();
-#endif
 }
 
 void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
