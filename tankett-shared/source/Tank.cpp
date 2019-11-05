@@ -71,6 +71,7 @@ void Tank::aimAt(const ::sf::Vector2f pos)
 		return;
 
 	auto angleRads = ::std::atan2(dir.y, dir.x);
+
 	mTurretAngle = ::mw::helper::Vector::rad2deg(angleRads);
 
 	mBarrelSprite.setRotation(mTurretAngle - 90.f);
@@ -175,7 +176,18 @@ void Tank::updateSelf(float deltaSeconds)
 		auto angleDegs = ::mw::helper::Vector::rad2deg(angleRads) - 90;
 		getSprite()->setRotation((float)angleDegs);
 	}
-	setVelocity(direction * mSpeed);
+
+	switch (getNetRole())
+	{
+	case mw::NetRole::Authority:
+	case mw::NetRole::AutonomousProxy:
+		setVelocity(direction * mSpeed);
+		break;
+	case mw::NetRole::SimulatedProxy:
+	case mw::NetRole::None:
+	default:
+		break;
+	}
 	Pawn::updateSelf(deltaSeconds);
 
 	mDirection = ::sf::Vector2f();

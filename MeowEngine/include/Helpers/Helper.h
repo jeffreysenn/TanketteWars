@@ -34,6 +34,8 @@ inline float deg2rad(float deg)
 
 inline float rad2deg(float rad)
 {
+	if (rad < 0)
+		rad = 2 * PI + rad;
 	return rad * 180 / PI;
 }
 

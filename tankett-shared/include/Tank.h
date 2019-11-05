@@ -25,6 +25,8 @@ public:
 
 	void addDirection(const ::sf::Vector2f& dd) { mDirection += dd; }
 	void addDirection(float ddx, float ddy) { mDirection += ::sf::Vector2f(ddx, ddy); }
+	void setDirection(const ::sf::Vector2f& direction) { mDirection = direction; }
+	void setDirection(float dx, float dy){ mDirection = ::sf::Vector2f(dx, dy); }
 	void aimAt(const ::sf::Vector2f pos);
 	void aimAt(float angle);
 	void fire(uint32_t inputNum = 0);

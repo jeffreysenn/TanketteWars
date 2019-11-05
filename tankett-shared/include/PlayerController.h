@@ -58,6 +58,11 @@ public:
 	void setTankState(::sf::Vector2f pos, float aimAngle);
 	::tankett::PlayerState getTankState() const;
 
+	void syncPlayerState(const tankett::PlayerState& state);
+	void syncBulletState(const tankett::PlayerState& state);
+	void syncTankState(const tankett::PlayerState& state);
+	void lerpPlayerStateTo(const ::tankett::PlayerState state, float t);
+
 	void setNetRole(::mw::NetRole netRole) { mNetRole = netRole; }
 	::mw::NetRole getNetRole() const { return mNetRole; }
 
@@ -67,7 +72,6 @@ public:
 	void setScore(uint8_t score) { mScore = score; }
 	void addScore(uint8_t ds) { mScore += ds; }
 	uint8_t getScore() const { return mScore; }
-
 
 private:
 	enum class Action

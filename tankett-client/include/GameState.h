@@ -23,6 +23,8 @@ public:
 	~GameState();
 
 	virtual bool update(float deltaSeconds) override;
+	void lerpRemoteStates();
+	void pushPredictedState();
 	void handleInput();
 	void updateScoreboard();
 	void updateCooldownText();
@@ -32,9 +34,8 @@ public:
 private:
 	void processReceivedMessages();
 	void checkNewRemote(::tankett::message_server_to_client* msgS2C);
-	void updateState(::tankett::message_server_to_client* msgS2C);
+	void updateGameState(::tankett::message_server_to_client* msgS2C);
 	void validateInputPrediction(const ::tankett::PlayerState& state, uint32_t inputNum);
-	void syncBulletState(const tankett::PlayerState& state, ::tankett::PlayerController& controller);
 	void packInput();
 	void pushInputMessage(::tankett::PlayerController::TankInput& inputValue, uint32_t inputNum);
 
@@ -43,12 +44,17 @@ private:
 	::std::vector<::std::unique_ptr<::tankett::PlayerController>> mPlayerControllers;
 	::tankett::PlayerController* mLocalController{};
 	::std::map<uint32_t, ::tankett::PlayerState> mPredictedStates;
-	::std::map<uint32_t, ::tankett::PlayerState> mRemoteStates;
+	::std::map<uint32_t, ::std::vector<::tankett::PlayerState>> mRemoteStates;
+	uint32_t mRemoteStateNum{};
+	float mRemoteLerpT{};
+
 	::mw::Renderer mRenderer;
 	::mw::Input::InputCollection mPauseInputs{
 		{ Input::Type::Keyboard, ::sf::Keyboard::Escape },
 		{ Input::Type::Keyboard, ::sf::Keyboard::BackSpace } };
 	uint32_t mFrameNum;
+
+	// UI
 	::sf::Text mRoundTimerText;
 	::sf::Text mCooldownText;
 	ScoreBoard mScoreBoard;

@@ -73,11 +73,10 @@ void PlayerController::handleRealtimeInput(uint32_t frameNum)
 
 
 	// discard the old buffers
-	auto it = mInputBuffer.find(frameNum - cleanBufferThreshold);
+	auto it = mInputBuffer.find(frameNum - bufferSize);
 	if (it != mInputBuffer.end())
 	{
-		auto eraseTill = mInputBuffer.find(frameNum - bufferSize);
-		mInputBuffer.erase(mInputBuffer.begin(), eraseTill);
+		mInputBuffer.erase(mInputBuffer.begin(), it);
 	}
 }
 
@@ -174,6 +173,98 @@ void PlayerController::setTankState(::sf::Vector2f pos, float aimAngle)
 	}
 
 	return state;
+}
+
+void PlayerController::syncPlayerState(const tankett::PlayerState& state)
+{
+	syncBulletState(state);
+	syncTankState(state);
+}
+
+void PlayerController::syncBulletState(const tankett::PlayerState& state)
+{
+	// sync the bullets
+	// bullets exist both on server and local: transform
+	// bullets exist only on local: destroy
+	// bullets exist only on server: spawn
+	uint8_t bulletCount = state.bullet_count;
+	const auto& bullets = state.bullets;
+	auto& existingBullets = getBullets();
+	::std::map<uint8_t, ::std::pair<::tankett::Bullet*, const ::tankett::bullet_data*>> bulletMap{};
+	for (int bulletIndex = 0; bulletIndex < bulletCount; ++bulletIndex)
+	{
+		bulletMap[bullets[bulletIndex].id].second = &bullets[bulletIndex];
+	}
+	for (auto& existingBullet : existingBullets)
+	{
+		bulletMap[existingBullet->getID()].first = existingBullet;
+	}
+	for (auto& it : bulletMap)
+	{
+		auto& bulletPair = it.second;
+
+		if (bulletPair.first && bulletPair.second)
+		{
+			bulletPair.first->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
+		}
+		else if (bulletPair.first && !bulletPair.second)
+		{
+			::mw::Actor::destroy(bulletPair.first);
+		}
+		else if (!bulletPair.first && bulletPair.second)
+		{
+			if (mPossessedTank)
+			{
+				::tankett::Bullet* newBullet = mPossessedTank->spawnBullet(mPossessedTank->getTurretAngle());
+				newBullet->setID(bulletPair.second->id);
+				newBullet->setPosition(bulletPair.second->position.x_, bulletPair.second->position.y_);
+			}
+		}
+	}
+}
+
+void PlayerController::syncTankState(const tankett::PlayerState& state)
+{
+	if (state.alive)
+	{
+		::sf::Vector2f pos = ::sf::Vector2f(state.position.x_, state.position.y_);
+		float aimAngle = state.angle;
+		setTankState(pos, aimAngle);
+	}
+	else if (mPossessedTank)
+	{
+		mPossessedTank->destroy(mPossessedTank);
+		::mw::SceneGraph* sceneGraph = (::mw::SceneGraph*) mPossessedTank->getSceneGraph();
+		sceneGraph->enforceDestruction(*sceneGraph);
+	}
+}
+
+void PlayerController::lerpPlayerStateTo(const ::tankett::PlayerState state, float t)
+{
+	::tankett::PlayerState oldState = getTankState();
+	::tankett::PlayerState newState;
+
+	newState.alive = state.alive;
+	// find the smaller angle between the two states
+	float angleBetween1 = newState.angle - oldState.angle;
+	float angleBetween2 = 360.f - angleBetween1;
+	newState.angle = oldState.angle + (state.angle - oldState.angle) * t;
+	newState.position.x_ = oldState.position.x_ + (state.position.x_ - oldState.position.x_) * t;
+	newState.position.y_ = oldState.position.y_ + (state.position.y_ - oldState.position.y_) * t;
+	newState.bullet_count = state.bullet_count;
+	for (int i = 0; i < newState.bullet_count; ++i)
+	{
+		newState.bullets[i].id = state.bullets[i].id;
+		newState.bullets[i].position.x_ = state.bullets[i].position.x_ + (state.bullets[i].position.x_ - oldState.bullets[i].position.x_) * t;
+		newState.bullets[i].position.y_ = state.bullets[i].position.y_ + (state.bullets[i].position.y_ - oldState.bullets[i].position.y_) * t;
+	}
+
+	syncPlayerState(newState);
+	if (mPossessedTank)
+	{
+		::sf::Vector2f direction(newState.position.x_ - oldState.position.x_, newState.position.y_ - oldState.position.y_);
+		mPossessedTank->setDirection(direction); 
+	}
 }
 
 void PlayerController::bindInputs()
