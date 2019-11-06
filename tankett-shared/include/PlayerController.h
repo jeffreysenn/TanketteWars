@@ -61,7 +61,7 @@ public:
 	void syncPlayerState(const tankett::PlayerState& state);
 	void syncBulletState(const tankett::PlayerState& state);
 	void syncTankState(const tankett::PlayerState& state);
-	void lerpPlayerStateTo(const ::tankett::PlayerState state, float t);
+	void lerpPlayerState(const ::tankett::PlayerState& begin, const::tankett::PlayerState& end, float t);
 
 	void setNetRole(::mw::NetRole netRole) { mNetRole = netRole; }
 	::mw::NetRole getNetRole() const { return mNetRole; }

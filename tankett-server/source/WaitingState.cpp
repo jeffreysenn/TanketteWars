@@ -15,7 +15,7 @@ void WaitingState::processMessages()
 	NetworkManager& networkManager = *Context::getInstance().networkManager;
 	auto& clients = networkManager.getClients();
 
-	if (clients.size() < 1)
+	if (clients.size() < 2)
 	{
 		for (auto& client : clients)
 		{

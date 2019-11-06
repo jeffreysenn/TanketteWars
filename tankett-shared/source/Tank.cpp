@@ -117,7 +117,7 @@ int Tank::getCooldown() const
 	return (remaining < 0) ? 0 : (cooldown < remaining) ? cooldown : remaining;
 }
 
-constexpr int bulletSpeed = 8;
+constexpr int BULLET_SPEED = 8;
 Bullet* Tank::spawnBullet(float angle)
 {
 	::std::unique_ptr<Bullet> bullet;
@@ -130,10 +130,22 @@ Bullet* Tank::spawnBullet(float angle)
 	bullet->setNetRole(getNetRole());
 	bullet->setPosition(getWorldPosition());
 	bullet->setRotation(angle);
-	auto dir = ::mw::helper::Vector::deg2vec(angle);
-	::sf::Vector2f relativeVel(dir.x * unit::unit2pix(bulletSpeed),
-							   dir.y * unit::unit2pix(bulletSpeed));
-	bullet->setVelocity(getWorldVelocity() + relativeVel);
+	switch (getNetRole())
+	{
+	case mw::NetRole::AutonomousProxy:
+	case mw::NetRole::Authority:
+	{
+		auto dir = ::mw::helper::Vector::deg2vec(angle);
+		::sf::Vector2f relativeVel(dir.x * unit::unit2pix(BULLET_SPEED),
+								   dir.y * unit::unit2pix(BULLET_SPEED));
+		bullet->setVelocity(getWorldVelocity() + relativeVel);
+		break;
+	}
+	case mw::NetRole::None:
+	case mw::NetRole::SimulatedProxy:
+	default:
+		break;
+	}
 	getSceneGraph()->attachChild(::std::move(bullet));
 
 	return ptr;

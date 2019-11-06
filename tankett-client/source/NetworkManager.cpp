@@ -144,6 +144,7 @@ void NetworkManager::receive()
 				if (messageS2C->input_number > mServerInputSequence || mServerInputSequence == 0)
 				{
 					mServerInputSequence = messageS2C->input_number;
+					messageS2C->receiveTime = ::alpha::time::now().as_milliseconds();
 					mReceivedMessages.push_back(std::move(messageS2C));
 				}
 			} break;

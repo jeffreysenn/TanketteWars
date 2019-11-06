@@ -77,7 +77,7 @@ void GameState::processReceivedMessages()
 				// push the state to a buffer and interpolate them later
 				else
 				{
-					mRemoteStates[msgS2C->input_number].push_back(data);
+					mRemoteStates[msgS2C->receiveTime].push_back(data);
 				}
 			}
 
@@ -174,7 +174,7 @@ void GameState::validateInputPrediction(const::tankett::PlayerState& state, uint
 }
 
 constexpr uint32_t redundantInputNum = 10;
-constexpr uint32_t maxInputNum = 60;
+constexpr uint32_t maxMsgNum = 60;
 void GameState::packInput()
 {
 	if (!mLocalController)
@@ -197,7 +197,7 @@ void GameState::packInput()
 		}
 	}
 
-	if (networkManager.getSendMessageQueue().size() < 60)
+	if (networkManager.getSendMessageQueue().size() < maxMsgNum)
 	{
 		auto& inputValue = inputBuffer[mFrameNum];
 		pushInputMessage(inputValue, mFrameNum);
@@ -236,38 +236,59 @@ bool GameState::update(float deltaSeconds)
 	return true;
 }
 
+constexpr float REMOTE_STATE_BUFFER_TIME_MILLISECONDS = 1000.f;
 void GameState::lerpRemoteStates()
 {
-	auto remoteStates = mRemoteStates.find(mFrameNum - ::tankett::PROTOCOL_CLIENT_AHEAD_FRAME);
-	if (remoteStates != mRemoteStates.end())
+	float lerpTime = ::alpha::time::now().as_milliseconds() - ::tankett::PROTOCOL_INTERPOLATION_DELAY_MILLISECONDS;
+
+	auto endStates = mRemoteStates.upper_bound(lerpTime);
+	if (endStates == mRemoteStates.end() || endStates == mRemoteStates.begin())
+		return;
+	auto beginStates = endStates;
+	--beginStates;
+
+#ifdef DO_NOT_KNOW_UPPER_BOUND_FUNCTION
+	float beforeTime = -1.f;
+	float afterTime = ::std::numeric_limits<float>::max();
+	const ::std::vector<::tankett::PlayerState>* lerpEndState = nullptr;
+	for (const auto& remoteStates : mRemoteStates)
 	{
-		mRemoteStateNum = remoteStates->first;
-		mRemoteLerpT = .5f;
+		float stateTime = remoteStates.first;
+		if (stateTime > beforeTime && stateTime <= lerpTime)
+		{
+			beforeTime = remoteStates.first;
+		}
+		else if (stateTime < afterTime)
+		{
+			afterTime = stateTime;
+		}
 	}
-	else
-	{
-		mRemoteLerpT = 1.f;
-	}
+
+	auto beginStates = mRemoteStates.find(beforeTime);
+	auto endStates = mRemoteStates.find(afterTime);
+#endif // DO_NOT_KNOW_UPPER_BOUND_FUNCTION
 
 	for (auto& controller : mPlayerControllers)
 	{
 		if (controller.get() == mLocalController)
 			continue;
 
-		for (const auto& state : mRemoteStates[mRemoteStateNum])
+		for (const auto& beginState : beginStates->second)
 		{
-			if (state.client_id == controller->getID())
+			for (const auto& endState : endStates->second)
 			{
-				controller->lerpPlayerStateTo(state, mRemoteLerpT);
+				if (beginState.client_id == controller->getID() && endState.client_id == controller->getID())
+				{
+					controller->lerpPlayerState(beginState, endState, (lerpTime - beginStates->first)/(endStates->first - beginStates->first));
+				}
 			}
 		}
 	}
 
-	if (mRemoteLerpT == 1.f)
+	auto eraseTillIt = mRemoteStates.upper_bound(::alpha::time::now().as_milliseconds() - REMOTE_STATE_BUFFER_TIME_MILLISECONDS);
+	if (eraseTillIt != mRemoteStates.begin())
 	{
-		auto it = mRemoteStates.find(mRemoteStateNum);
-		if(it != mRemoteStates.end())
-			mRemoteStates.erase(mRemoteStates.begin(), it);
+		mRemoteStates.erase(mRemoteStates.begin(), --eraseTillIt);
 	}
 }
 

@@ -43,6 +43,7 @@ constexpr uint32 PROTOCOL_VERSION = 0x01000001u;
 constexpr uint16 PROTOCOL_PORT = 32100ui16;
 constexpr uint8 PROTOCOL_SEND_PER_SEC = 30ui8;
 constexpr uint32 PROTOCOL_CLIENT_AHEAD_FRAME = 30u;
+constexpr float PROTOCOL_INTERPOLATION_DELAY_MILLISECONDS = 100.f;
 
 enum packet_type
 {
@@ -386,9 +387,13 @@ struct message_server_to_client : network_message_header
 	uint32 input_number = 0;
 	uint8 client_count = 0;
 	PlayerState client_data[4];
-	float timestamp = .0f; //time::now().as_milliseconds();
+	float sendTime = .0f; //time::now().as_milliseconds();
 	float round_time = .0f; //time remaining
 	GAME_STATE game_state = GAME_STATE::WAITING_FOR_PLAYER;
+
+	// for remote interpolation only
+	// will not be serialized or sent
+	float receiveTime{};
 
 	template<typename S>
 	bool serialize(S& stream)
@@ -439,7 +444,7 @@ struct message_server_to_client : network_message_header
 			}
 		}
 
-		result &= stream.serialize(timestamp);
+		result &= stream.serialize(sendTime);
 		result &= stream.serialize(round_time);
 
 		uint8 s = (uint8)game_state;

@@ -44,14 +44,12 @@ private:
 	::std::vector<::std::unique_ptr<::tankett::PlayerController>> mPlayerControllers;
 	::tankett::PlayerController* mLocalController{};
 	::std::map<uint32_t, ::tankett::PlayerState> mPredictedStates;
-	::std::map<uint32_t, ::std::vector<::tankett::PlayerState>> mRemoteStates;
+	::std::map<float, ::std::vector<::tankett::PlayerState>> mRemoteStates;
 	uint32_t mRemoteStateNum{};
 	float mRemoteLerpT{};
 
 	::mw::Renderer mRenderer;
-	::mw::Input::InputCollection mPauseInputs{
-		{ Input::Type::Keyboard, ::sf::Keyboard::Escape },
-		{ Input::Type::Keyboard, ::sf::Keyboard::BackSpace } };
+	::mw::Input::InputCollection mPauseInputs{ { Input::Type::Keyboard, ::sf::Keyboard::Escape } };
 	uint32_t mFrameNum;
 
 	// UI

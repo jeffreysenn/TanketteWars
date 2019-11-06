@@ -29,7 +29,6 @@ void PlayerController::handleEvent(const ::sf::Event& event, uint32_t frameNum)
 }
 
 constexpr size_t bufferSize = 120;
-constexpr size_t cleanBufferThreshold = 600;
 void PlayerController::handleRealtimeInput(uint32_t frameNum)
 {
 	if (!(mListenToInput && mPossessedTank))
@@ -239,30 +238,49 @@ void PlayerController::syncTankState(const tankett::PlayerState& state)
 	}
 }
 
-void PlayerController::lerpPlayerStateTo(const ::tankett::PlayerState state, float t)
+void PlayerController::lerpPlayerState(const ::tankett::PlayerState& begin, const::tankett::PlayerState& end, float t)
 {
-	::tankett::PlayerState oldState = getTankState();
-	::tankett::PlayerState newState;
+	::tankett::PlayerState currentState;
 
-	newState.alive = state.alive;
-	// find the smaller angle between the two states
-	float angleBetween1 = newState.angle - oldState.angle;
-	float angleBetween2 = 360.f - angleBetween1;
-	newState.angle = oldState.angle + (state.angle - oldState.angle) * t;
-	newState.position.x_ = oldState.position.x_ + (state.position.x_ - oldState.position.x_) * t;
-	newState.position.y_ = oldState.position.y_ + (state.position.y_ - oldState.position.y_) * t;
-	newState.bullet_count = state.bullet_count;
-	for (int i = 0; i < newState.bullet_count; ++i)
+	currentState.alive = end.alive;
+	float deltaAngle = end.angle - begin.angle;
+	currentState.angle = begin.angle + deltaAngle * t;
+	currentState.position.x_ = begin.position.x_ + (end.position.x_ - begin.position.x_) * t;
+	currentState.position.y_ = begin.position.y_ + (end.position.y_ - begin.position.y_) * t;
+	currentState.bullet_count = end.bullet_count;
+
+	// lerp the existing bullets
+	// use end state's bullet states for new bullets
+	// exclude bullets which do not exist in the end state
+	for (int endBulletIndex = 0; endBulletIndex < end.bullet_count; ++endBulletIndex)
 	{
-		newState.bullets[i].id = state.bullets[i].id;
-		newState.bullets[i].position.x_ = state.bullets[i].position.x_ + (state.bullets[i].position.x_ - oldState.bullets[i].position.x_) * t;
-		newState.bullets[i].position.y_ = state.bullets[i].position.y_ + (state.bullets[i].position.y_ - oldState.bullets[i].position.y_) * t;
+		currentState.bullets[endBulletIndex].id = end.bullets[endBulletIndex].id;
+
+		int foundBeginBulletIndex = -1;
+		for (int beginBulletIndex = 0; beginBulletIndex < begin.bullet_count; ++beginBulletIndex)
+		{
+			if (end.bullets[endBulletIndex].id == begin.bullets[beginBulletIndex].id)
+			{
+				foundBeginBulletIndex = beginBulletIndex;
+			}
+		}
+
+		// lerp
+		if (foundBeginBulletIndex != -1)
+		{
+			currentState.bullets[endBulletIndex].position.x_ = end.bullets[endBulletIndex].position.x_ + (end.bullets[endBulletIndex].position.x_ - begin.bullets[foundBeginBulletIndex].position.x_) * t;
+			currentState.bullets[endBulletIndex].position.y_ = end.bullets[endBulletIndex].position.y_ + (end.bullets[endBulletIndex].position.y_ - begin.bullets[foundBeginBulletIndex].position.y_) * t;
+		}
+		else
+		{
+			currentState.bullets[endBulletIndex].position = end.bullets[endBulletIndex].position;
+		}
 	}
 
-	syncPlayerState(newState);
+	syncPlayerState(currentState);
 	if (mPossessedTank)
 	{
-		::sf::Vector2f direction(newState.position.x_ - oldState.position.x_, newState.position.y_ - oldState.position.y_);
+		::sf::Vector2f direction(currentState.position.x_ - begin.position.x_, currentState.position.y_ - begin.position.y_);
 		mPossessedTank->setDirection(direction); 
 	}
 }
