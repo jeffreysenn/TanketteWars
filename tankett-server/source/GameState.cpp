@@ -7,6 +7,7 @@
 #include "Tank.h"
 #include "Bullet.h"
 #include "tankett_debug.h"
+#include "EliminationHeatMap.h"
 
 #include "EndState.h"
 
@@ -44,11 +45,19 @@ void GameState::checkRespawn()
 	for (auto& client : clients)
 	{
 		uint8_t id = client.second.id;
+
 		auto& controller = mControllers[id];
+
 		if (!controller.getPossessedTank())
 		{
 			if (mRespawnMap[id] == false)
 			{
+				auto killPos = controller.getKillPos();
+				int x = (int)::tankett::unit::pix2unit(killPos.x);
+				int y = (int)::tankett::unit::pix2unit(killPos.y);
+				EliminationHeatMap* heatMap = Context::getInstance().heatMapManager->get(EliminationHeatMap::ID::DefaultMap);
+				heatMap->addKillAtTile(x, y);
+
 				mRespawnMap[id] = true;
 				mRespawnClocks[id].restart();
 			}
@@ -151,36 +160,37 @@ void GameState::packMessages()
 	if (mControllers.size() == 0) return;
 
 	auto& clients = mNetworkManager.getClients();
-	PlayerState dataArr[4];
+	PlayerState stateArr[4];
+	int stateIndex = 0;
 	for (auto& client : clients)
 	{
 		uint8_t id = client.second.id;
-		auto& data = dataArr[id];
-		data.client_id = id;
-		data.ping = client.second.ping;
-		data.eliminations = mControllers[id].getScore();
+		auto& state = stateArr[stateIndex++];
+		state.client_id = id;
+		state.ping = client.second.ping;
+		state.eliminations = mControllers[id].getScore();
 		const auto tank = mControllers[id].getPossessedTank();
 		if (tank)
 		{
-			data.alive = true;
-			data.angle = tank->getTurretAngle();
+			state.alive = true;
+			state.angle = tank->getTurretAngle();
 			const auto& pos = tank->getPosition();
-			data.position = alpha::vector2(pos.x, pos.y);
+			state.position = alpha::vector2(pos.x, pos.y);
 		}
 		else
 		{
-			data.alive = false;
+			state.alive = false;
 		}
 
 		const auto& bullets = mControllers[id].getBullets();
-		data.bullet_count = (uint8_t)bullets.size();
+		state.bullet_count = (uint8_t)bullets.size();
 		for (int i = 0; i < bullets.size(); ++i)
 		{
 			bullet_data bulletData;
 			bulletData.id = bullets[i]->getID();
 			const auto bulletPos = bullets[i]->getPosition();
 			bulletData.position = ::alpha::vector2(bulletPos.x, bulletPos.y);
-			data.bullets[i] = bulletData;
+			state.bullets[i] = bulletData;
 		}
 	}
 
@@ -194,7 +204,7 @@ void GameState::packMessages()
 
 		message->game_state = GAME_STATE::ROUND_RUNNING;
 		message->client_count = (uint8_t)clients.size();
-		memcpy(message->client_data, dataArr, sizeof(dataArr));
+		memcpy(message->client_data, stateArr, sizeof(stateArr));
 
 		mNetworkManager.pushMessage(client.first, message);
 	}

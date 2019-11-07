@@ -79,6 +79,9 @@ public:
 	void addScore(uint8_t ds) { mScore += ds; }
 	uint8_t getScore() const { return mScore; }
 
+	::sf::Vector2f getKillPos() const { return mKillPos; }
+	void setKillPos(const ::sf::Vector2f& killPos) { mKillPos = killPos; }
+
 private:
 	enum class Action
 	{
@@ -106,5 +109,6 @@ private:
 	uint32_t mPing;
 	uint8_t mScore;
 	mw::SceneGraph* mSceneGraph;
+	::sf::Vector2f mKillPos;
 };
 }

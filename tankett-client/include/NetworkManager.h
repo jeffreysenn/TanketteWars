@@ -28,6 +28,7 @@ public:
 
 	void setState(const ConnectionState& state) { mState = state; }
 	ConnectionState getState() { return mState; }
+	void resetNetworkManager();
 
 	std::vector<std::unique_ptr<::tankett::network_message_header>>& getReceivedMessages() { return mReceivedMessages; }
 	std::vector<std::unique_ptr<::tankett::network_message_header>>& getSendMessageQueue() { return mSendMessageQueue; }

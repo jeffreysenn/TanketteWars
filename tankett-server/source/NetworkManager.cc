@@ -95,7 +95,13 @@ void NetworkManager::receive()
 				break;
 
 			Client client;
-			client.id = (uint8)mClients.size();
+			uint8 id = 0;
+			for (auto& existingClient : mClients)
+			{
+				if (id == existingClient.second.id)
+					++id;
+			}
+			client.id = id;
 			client.serverKey = challenge.serverKey;
 			client.clientKey = challenge.clientKey;
 			client.xorinator = crypt::xorinator(client.serverKey, client.clientKey);
@@ -325,7 +331,7 @@ void NetworkManager::resetClientsLatestReceivedInputSequence()
 	}
 }
 
-constexpr float NO_REC_KICK_TIME = 3.f;
+constexpr float NO_REC_KICK_TIME = 2.f;
 void NetworkManager::checkClinetConnection()
 {
 	for (auto it = mClients.begin(); it != mClients.end();)

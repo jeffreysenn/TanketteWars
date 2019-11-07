@@ -1,6 +1,6 @@
 #pragma once
 #include "MenuTemplate.h"
-
+#include <SFML/System/Clock.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 namespace client
 {
@@ -32,6 +32,9 @@ private:
 
 private:
 	::sf::RectangleShape mBackgroundShape;
+	bool mDisconnecting;
+	::sf::Clock mDisconnectClock;
+	::sf::Text mDisconnectingText;
 };
 
 

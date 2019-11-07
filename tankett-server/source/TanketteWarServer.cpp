@@ -21,6 +21,7 @@ TanketteWarServer::TanketteWarServer()
 	Context& context = Context::getInstance();
 	context.networkManager = &mNetworkManager;
 	context.stack = &mStateStack;
+	context.heatMapManager = &mHeatMapManager;
 
 }
 
@@ -28,6 +29,8 @@ void TanketteWarServer::init()
 {
 	registerStates();
 	mStateStack.pushState(GAME_STATE::WAITING_FOR_PLAYER);
+
+	mHeatMapManager.load(EliminationHeatMap::ID::DefaultMap, "../HeatMaps/EliminationHeatMap.txt");
 }
 
 void TanketteWarServer::registerStates()

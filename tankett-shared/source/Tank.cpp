@@ -57,7 +57,10 @@ Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture,
 Tank::~Tank()
 {
 	if (mController)
+	{
 		mController->unpossess();
+		mController->setKillPos(getPosition());
+	}
 
 	if (mCamera)
 		mCamera->detach();

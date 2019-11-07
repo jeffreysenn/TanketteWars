@@ -1,9 +1,5 @@
 #pragma once
-
-namespace tankett
-{
-class Map;
-}
+#include "EliminationHeatMap.h"
 
 namespace server
 {
@@ -27,6 +23,7 @@ public:
 public:
 	class ServerStateStack* stack{};
 	class NetworkManager* networkManager{};
+	HeatMapManager* heatMapManager{};
 };
 
 }

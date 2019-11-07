@@ -74,6 +74,6 @@ void ConnectState::handleConfirmInput()
 {
 	ClientStateStack& stack = *Context::getInstance().stack;
 	stack.popState();
+	mNetworkManager.resetNetworkManager();
 }
-
 }

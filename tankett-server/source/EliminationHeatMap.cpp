@@ -15,7 +15,7 @@ bool server::EliminationHeatMap::loadFromFile(const::std::string& filename)
 	{
 		::std::istringstream iss(line);
 		int x, y;
-		uint32_t elim;
+		int elim;
 		iss >> x;
 		iss >> y;
 		iss >> elim;
@@ -28,14 +28,21 @@ bool server::EliminationHeatMap::loadFromFile(const::std::string& filename)
 
 void server::EliminationHeatMap::addKillAtTile(int col, int row)
 {
-	mHeatMap[{col, row}]++;
 	::std::remove(mFileName.c_str());
+
+	auto found = mHeatMap.find({ col, row });
+	if (found == mHeatMap.end())
+	{
+		mHeatMap[{col, row}] = 0;
+	}
+
+	++mHeatMap[{col, row}];
 
 	::std::ofstream ofs;
 	ofs.open(mFileName, std::ofstream::out);
 	for (const auto& pair : mHeatMap)
 	{
-		ofs << "(" << pair.first.x << ", " << pair.first.y << "): "
+		ofs << pair.first.x << " " << pair.first.y << " "
 			<< pair.second << ::std::endl;
 	}
 	ofs.close();
@@ -43,5 +50,5 @@ void server::EliminationHeatMap::addKillAtTile(int col, int row)
 
 bool server::EliminationHeatMap::Tile::operator<(const Tile& rhs) const
 {
-	return x < rhs.x || y < rhs.y;
+	return x < rhs.x;
 }

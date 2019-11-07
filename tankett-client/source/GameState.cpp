@@ -162,27 +162,24 @@ void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 
 void GameState::checkQuitRemote(::tankett::message_server_to_client* msgS2C)
 {
-	if (msgS2C->client_count < mPlayerControllers.size())
+	auto& dataArr = msgS2C->client_data;
+	for (auto it = mPlayerControllers.begin(); it != mPlayerControllers.end();)
 	{
-		auto& dataArr = msgS2C->client_data;
-		for (auto it = mPlayerControllers.begin(); it != mPlayerControllers.end();)
+		bool found = false;
+		for (const auto& state : dataArr)
 		{
-			bool found = false;
-			for (const auto& state : dataArr)
+			if (state.client_id == it->get()->getID()) 
 			{
-				if (state.client_id == (*it)->getID()) 
-				{
-					found = true;
-				}
+				found = true;
 			}
-			if (!found)
-			{
-				it = mPlayerControllers.erase(it);
-			}
-			else
-			{
-				++it;
-			}
+		}
+		if (!found)
+		{
+			it = mPlayerControllers.erase(it);
+		}
+		else
+		{
+			++it;
 		}
 	}
 }

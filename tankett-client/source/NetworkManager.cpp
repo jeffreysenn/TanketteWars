@@ -162,6 +162,16 @@ void NetworkManager::receive()
 
 }
 
+void NetworkManager::resetNetworkManager()
+{
+	mState = ConnectionState::None;
+	mClientKey = ::mw::helper::Number::getRandom<uint64>();
+	mServerKey = 0u;
+	mClientSequence = 0u;
+	mServerSequence = 0u;
+	mServerAddr = ip_address();
+}
+
 void NetworkManager::pushMessage(::std::unique_ptr<::tankett::network_message_header> message)
 {
 	mSendMessageQueue.push_back(::std::move(message));

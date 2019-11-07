@@ -28,7 +28,7 @@ public:
 	void addKillAtTile(int col, int row);
 
 private:
-	::std::map<Tile, uint32_t> mHeatMap;
+	::std::map<Tile, int> mHeatMap;
 	::std::string mFileName;
 };
 
