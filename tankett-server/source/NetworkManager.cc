@@ -78,6 +78,10 @@ void NetworkManager::receive()
 
 	case tankett::PACKET_TYPE_CHALLENGE_RESPONSE:
 	{
+		// TODO: send connection deny
+		if (mClients.size() >= 4)
+			break;
+
 		protocol_challenge_response challenge_response;
 		if (!challenge_response.serialize(reader))
 		{

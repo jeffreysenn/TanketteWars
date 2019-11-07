@@ -16,10 +16,12 @@ bool server::EliminationHeatMap::loadFromFile(const::std::string& filename)
 		::std::istringstream iss(line);
 		int x, y;
 		int elim;
-		iss >> x;
-		iss >> y;
-		iss >> elim;
-		mHeatMap[Tile{ x, y }] = elim;
+		if (iss >> x
+			&& iss >> y
+			&& iss >> elim)
+		{
+			mHeatMap[Tile{ x, y }] = elim;
+		}
 	}
 
 	file.close();
