@@ -64,6 +64,9 @@ public:
 	void clearAllClientsReceivedMessages();
 
 private:
+	void checkClinetConnection();
+
+private:
 	ip_address mlocal;
 	udp_socket mSocket;
 

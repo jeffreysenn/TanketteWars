@@ -42,7 +42,6 @@ constexpr uint32 PROTOCOL_ID = 0x11223344u;
 constexpr uint32 PROTOCOL_VERSION = 0x01000001u;
 constexpr uint16 PROTOCOL_PORT = 32100ui16;
 constexpr uint8 PROTOCOL_SEND_PER_SEC = 30ui8;
-constexpr uint32 PROTOCOL_CLIENT_AHEAD_FRAME = 30u;
 constexpr float PROTOCOL_INTERPOLATION_DELAY_MILLISECONDS = 100.f;
 
 enum packet_type

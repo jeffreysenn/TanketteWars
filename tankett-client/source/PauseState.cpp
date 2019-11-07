@@ -32,7 +32,7 @@ void PauseState::handleConfirmInput()
 	case PauseOption::Resume:
 		stack.popState();
 		break;
-	case PauseOption::GoToMenu:
+	case PauseOption::Disconnect:
 		stack.clearStates();
 		stack.pushState(StateID::Menu);
 		break;

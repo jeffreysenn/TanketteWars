@@ -39,6 +39,8 @@ void NetworkManager::shut()
 
 void NetworkManager::receive()
 {
+	checkClinetConnection();
+
 	uint8 base[2048];
 	byte_stream receive_stream(sizeof(base), base);
 	ip_address outAddr;
@@ -55,6 +57,9 @@ void NetworkManager::receive()
 		protocol_connection_request request;
 		if (request.serialize(reader))
 		{
+			if (mClients.size() >= 4)
+				break;
+
 			if (!(request.protocol_ == PROTOCOL_ID &&
 				request.version_ == PROTOCOL_VERSION))
 				break;
@@ -309,6 +314,22 @@ void NetworkManager::clearAllClientsReceivedMessages()
 	for (auto& client : mClients)
 	{
 		client.second.clear_received_messages();
+	}
+}
+
+constexpr float NO_REC_KICK_TIME = 3.f;
+void NetworkManager::checkClinetConnection()
+{
+	for (auto it = mClients.begin(); it != mClients.end();)
+	{
+		if ((::alpha::time::now() - it->second.latestReceiveTime).as_seconds() > NO_REC_KICK_TIME)
+		{
+			it = mClients.erase(it);
+		}
+		else
+		{
+			++it;
+		}
 	}
 }
 

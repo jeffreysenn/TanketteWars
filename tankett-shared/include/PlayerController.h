@@ -32,6 +32,7 @@ public:
 
 public:
 	PlayerController(uint8_t id = 0, bool listenToInput = false, ::sf::RenderWindow* window = nullptr, ::mw::NetRole netRole = ::mw::NetRole::Authority);
+	~PlayerController();
 
 	void handleEvent(const ::sf::Event& event, uint32_t frameNum);
 	void handleRealtimeInput(uint32_t frameNum);

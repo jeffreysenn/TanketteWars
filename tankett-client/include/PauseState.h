@@ -8,14 +8,14 @@ namespace client
 enum class PauseOption
 {
 	Resume,
-	GoToMenu,
+	Disconnect,
 	COUNT,
 };
 
 static const char* PauseOptionNames[]
 {
 	"Resume",
-	"Main Menu",
+	"Disconnect",
 };
 
 

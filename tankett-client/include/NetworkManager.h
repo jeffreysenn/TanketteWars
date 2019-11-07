@@ -50,8 +50,5 @@ private:
 	crypt::xorinator mXorinator;
 	uint32_t mClientSequence;
 	uint32_t mServerSequence;
-	uint32_t mServerInputSequence;
 };
-
-
 }

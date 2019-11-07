@@ -66,6 +66,8 @@ void NetworkManager::send()
 
 void NetworkManager::receive()
 {
+
+
 	uint8 receiveArr[2048];
 	byte_stream receiveStream(sizeof(receiveArr), receiveArr);
 	ip_address outAddr;
@@ -141,12 +143,12 @@ void NetworkManager::receive()
 				{
 					// error
 				}
-				if (messageS2C->input_number > mServerInputSequence || mServerInputSequence == 0)
-				{
-					mServerInputSequence = messageS2C->input_number;
-					messageS2C->receiveTime = ::alpha::time::now().as_milliseconds();
-					mReceivedMessages.push_back(std::move(messageS2C));
-				}
+
+				//static float lastRecTime;
+				messageS2C->receiveTime = ::alpha::time::now().as_milliseconds();
+				//::tankett::debugf("ITV: %f", messageS2C->receiveTime - lastRecTime);
+				//lastRecTime = messageS2C->receiveTime;
+				mReceivedMessages.push_back(std::move(messageS2C));
 			} break;
 			default:
 				shouldRead = false;
@@ -213,7 +215,7 @@ void NetworkManager::processMessages()
 	if (messages_evaluated != messages_packed)
 	{
 		::tankett::debugf("[err] sequence: %u - messages_evaluated != messages_packed",
-			   current_sequence_number);
+						  current_sequence_number);
 	}
 
 	// note: finalize packet by setting the payload length
@@ -230,7 +232,5 @@ void NetworkManager::processMessages()
 		//       - messages sent will be delete because of unique_ptr
 		mSendMessageQueue.erase(mSendMessageQueue.begin(), mSendMessageQueue.begin() + messages_packed);
 	}
-
 }
-
 }

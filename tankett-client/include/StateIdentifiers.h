@@ -13,6 +13,7 @@ enum class StateID
 	Credit,
 	Setting,
 	Connect,
+	End,
 	WIP,
 };
 }

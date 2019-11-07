@@ -10,6 +10,7 @@
 #include "tankett_debug.h"
 #include "Actors/CameraActor.h"
 #include "Context.h"
+#include "EndState.h"
 #include <Helpers/Helper.h>
 
 namespace client
@@ -43,6 +44,28 @@ GameState::~GameState()
 {
 }
 
+bool GameState::update(float deltaSeconds)
+{
+	processReceivedMessages();
+
+	++mFrameNum;
+
+	handleInput();
+
+	mWorld.update(deltaSeconds);
+
+	pushPredictedState();
+
+	lerpRemoteStates();
+
+	updateCooldownText();
+	updateScoreboard();
+
+	packInput();
+
+	return true;
+}
+
 void GameState::processReceivedMessages()
 {
 	auto& networkManager = *Context::getInstance().networkManager;
@@ -56,18 +79,28 @@ void GameState::processReceivedMessages()
 		case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
 		{
 			::tankett::message_server_to_client* msgS2C = (::tankett::message_server_to_client*)message.get();
-			if (!msgS2C) break;
+
+			// update the game state: round time, ping, score immediately
+			updateGameState(msgS2C);
+
+			if (msgS2C->input_number <= mLatestServerInputNum && mLatestServerInputNum != 0)
+				break;
+
+			mLatestServerInputNum = msgS2C->input_number;
 
 			checkNewRemote(msgS2C);
+			checkQuitRemote(msgS2C);
 
-			const auto& dataArr = msgS2C->client_data;
+			checkSpawn(msgS2C);
+
+			const auto& stateArr = msgS2C->client_data;
 			for (int i = 0; i < msgS2C->client_count; ++i)
 			{
-				const auto& data = dataArr[i];
+				const auto& state = stateArr[i];
 				// validate prediction immediately
-				if (data.client_id == msgS2C->receiver_id)
+				if (state.client_id == msgS2C->receiver_id)
 				{
-					validateInputPrediction(data, msgS2C->input_number);
+					validateInputPrediction(state, msgS2C->input_number);
 
 					auto found = mPredictedStates.find(msgS2C->input_number);
 					if(found != mPredictedStates.end())
@@ -77,12 +110,9 @@ void GameState::processReceivedMessages()
 				// push the state to a buffer and interpolate them later
 				else
 				{
-					mRemoteStates[msgS2C->receiveTime].push_back(data);
+					mRemoteStates[msgS2C->receiveTime].push_back(state);
 				}
 			}
-
-			// update the game state: round time, ping, score immediately
-			updateGameState(msgS2C);
 		}
 		break;
 		default:
@@ -94,7 +124,7 @@ void GameState::processReceivedMessages()
 
 void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 {
-	auto dataArr = msgS2C->client_data;
+	auto& dataArr = msgS2C->client_data;
 	// if new players are connected
 	if (mPlayerControllers.size() < msgS2C->client_count)
 	{
@@ -111,10 +141,10 @@ void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 			}
 			if (!controllerExist)
 			{
-				bool listenToInput = msgS2C->receiver_id == dataArr[i].client_id;
-				auto controller = ::std::make_unique<::tankett::PlayerController>(dataArr[i].client_id, listenToInput, Context::getInstance().window);
+				bool isLocal = msgS2C->receiver_id == dataArr[i].client_id;
+				auto controller = ::std::make_unique<::tankett::PlayerController>(dataArr[i].client_id, isLocal, Context::getInstance().window);
 				auto pos = ::sf::Vector2f(dataArr[i].position.x_, dataArr[i].position.y_);
-				if (listenToInput)
+				if (isLocal)
 				{
 					controller->setNetRole(::mw::NetRole::AutonomousProxy);
 					mLocalController = controller.get();
@@ -130,10 +160,65 @@ void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 	}
 }
 
+void GameState::checkQuitRemote(::tankett::message_server_to_client* msgS2C)
+{
+	if (msgS2C->client_count < mPlayerControllers.size())
+	{
+		auto& dataArr = msgS2C->client_data;
+		for (auto it = mPlayerControllers.begin(); it != mPlayerControllers.end();)
+		{
+			bool found = false;
+			for (const auto& state : dataArr)
+			{
+				if (state.client_id == (*it)->getID()) 
+				{
+					found = true;
+				}
+			}
+			if (!found)
+			{
+				it = mPlayerControllers.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
+}
+
+void GameState::checkSpawn(::tankett::message_server_to_client* msgS2C)
+{
+	const auto& stateArr = msgS2C->client_data;
+	for (int i = 0; i < msgS2C->client_count; ++i)
+	{
+		auto& state = stateArr[i];
+		for (auto& controller : mPlayerControllers)
+		{
+			if (controller->getID() == state.client_id)
+			{
+				if (state.alive && !controller->getPossessedTank())
+				{
+					controller->spawnTank_client(mWorld.getTankManager(), ::sf::Vector2f(state.position.x_, state.position.y_));
+				}
+			}
+		}
+	}
+}
+
 void GameState::updateGameState(::tankett::message_server_to_client* msgS2C)
 {
+	if (msgS2C->game_state == ::tankett::GAME_STATE::ROUND_END)
+	{
+		auto& stack = *Context::getInstance().stack;
+		stack.clearStates();
+		stack.pushState(StateID::End);
+		EndState::setScoreBoard(mScoreBoard);
+	}
+
 	int remainingTime = (int)msgS2C->round_time;
 	mRoundTimerText.setString(::std::to_string(remainingTime));
+
 
 	auto dataArr = msgS2C->client_data;
 	// update state
@@ -212,28 +297,6 @@ void GameState::pushInputMessage(::tankett::PlayerController::TankInput& inputVa
 	inputMessage->turret_angle = inputValue.angle;
 	auto& networkManager = *Context::getInstance().networkManager;
 	networkManager.pushMessage(::std::move(inputMessage));
-}
-
-bool GameState::update(float deltaSeconds)
-{
-	processReceivedMessages();
-
-	++mFrameNum;
-
-	handleInput();
-
-	mWorld.update(deltaSeconds);
-
-	pushPredictedState();
-	
-	lerpRemoteStates();
-
-	updateCooldownText();
-	updateScoreboard();
-
-	packInput();
-
-	return true;
 }
 
 constexpr float REMOTE_STATE_BUFFER_TIME_MILLISECONDS = 1000.f;

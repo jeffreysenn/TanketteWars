@@ -34,6 +34,8 @@ public:
 private:
 	void processReceivedMessages();
 	void checkNewRemote(::tankett::message_server_to_client* msgS2C);
+	void checkQuitRemote(::tankett::message_server_to_client* msgS2C);
+	void checkSpawn(::tankett::message_server_to_client* msgS2C);
 	void updateGameState(::tankett::message_server_to_client* msgS2C);
 	void validateInputPrediction(const ::tankett::PlayerState& state, uint32_t inputNum);
 	void packInput();
@@ -45,8 +47,7 @@ private:
 	::tankett::PlayerController* mLocalController{};
 	::std::map<uint32_t, ::tankett::PlayerState> mPredictedStates;
 	::std::map<float, ::std::vector<::tankett::PlayerState>> mRemoteStates;
-	uint32_t mRemoteStateNum{};
-	float mRemoteLerpT{};
+	uint32_t mLatestServerInputNum{};
 
 	::mw::Renderer mRenderer;
 	::mw::Input::InputCollection mPauseInputs{ { Input::Type::Keyboard, ::sf::Keyboard::Escape } };

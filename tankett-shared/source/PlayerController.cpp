@@ -24,6 +24,19 @@ PlayerController::PlayerController(uint8_t id, bool listenToInput, ::sf::RenderW
 	}
 }
 
+PlayerController::~PlayerController()
+{
+	for (Bullet* bullet : mBullets)
+	{
+		bullet->resetOwner();
+	}
+
+	if (mPossessedTank)
+	{
+		mPossessedTank->destroy(mPossessedTank);
+	}
+}
+
 void PlayerController::handleEvent(const ::sf::Event& event, uint32_t frameNum)
 {
 }
@@ -224,7 +237,7 @@ void PlayerController::syncBulletState(const tankett::PlayerState& state)
 
 void PlayerController::syncTankState(const tankett::PlayerState& state)
 {
-	if (state.alive)
+	if (state.alive && mPossessedTank)
 	{
 		::sf::Vector2f pos = ::sf::Vector2f(state.position.x_, state.position.y_);
 		float aimAngle = state.angle;
@@ -243,12 +256,22 @@ void PlayerController::lerpPlayerState(const ::tankett::PlayerState& begin, cons
 	::tankett::PlayerState currentState;
 
 	currentState.alive = end.alive;
-	float deltaAngle = end.angle - begin.angle;
-	currentState.angle = begin.angle + deltaAngle * t;
-	currentState.position.x_ = begin.position.x_ + (end.position.x_ - begin.position.x_) * t;
-	currentState.position.y_ = begin.position.y_ + (end.position.y_ - begin.position.y_) * t;
-	currentState.bullet_count = end.bullet_count;
 
+	if (!begin.alive && end.alive)
+	{
+		currentState.angle = end.angle;
+		currentState.position = end.position;
+	}
+	else if(begin.alive && end.alive)
+	{
+		float deltaAngle = end.angle - begin.angle;
+		deltaAngle = abs(deltaAngle) < abs(deltaAngle - 360) ? deltaAngle : deltaAngle - 360;
+		currentState.angle = begin.angle + deltaAngle * t;
+		currentState.position.x_ = begin.position.x_ + (end.position.x_ - begin.position.x_) * t;
+		currentState.position.y_ = begin.position.y_ + (end.position.y_ - begin.position.y_) * t;
+	}
+
+	currentState.bullet_count = end.bullet_count;
 	// lerp the existing bullets
 	// use end state's bullet states for new bullets
 	// exclude bullets which do not exist in the end state

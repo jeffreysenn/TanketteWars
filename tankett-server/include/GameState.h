@@ -16,16 +16,20 @@ public:
 	GameState();
 
 	void processMessages() override;
+	void checkRespawn();
 	void packMessages() override;
 
 private:
 	void checkJoin();
+	void checkQuit();
 	void applyInput();
 	void checkTime();
 
 private:
 	World mWorld;
 	::std::map<uint8_t, ::tankett::PlayerController> mControllers;
+	::std::map<uint8_t, bool> mRespawnMap;
+	::std::map<uint8_t, ::sf::Clock> mRespawnClocks;
 	NetworkManager& mNetworkManager;
 	::sf::Clock mRoundClock;
 };

@@ -7,6 +7,7 @@
 #include "CreditState.h"
 #include "SettingState.h"
 #include "ConnectState.h"
+#include "EndState.h"
 #include "Context.h"
 
 #include <SFML/Window/Event.hpp>
@@ -114,6 +115,7 @@ void TanketteWarClient::registerStates()
 	mStateStack.registerState<CreditState>(StateID::Credit);
 	mStateStack.registerState<SettingState>(StateID::Setting);
 	mStateStack.registerState<ConnectState>(StateID::Connect);
+	mStateStack.registerState<EndState>(StateID::End);
 }
 
 void TanketteWarClient::handleInputs()

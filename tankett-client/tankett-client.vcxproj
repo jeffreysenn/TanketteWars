@@ -91,6 +91,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\EndState.cpp" />
     <ClCompile Include="source\NetworkManager.cpp" />
     <ClCompile Include="source\ScoreBoard.cpp" />
     <ClCompile Include="source\StateBase.cpp" />
@@ -107,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Context.h" />
+    <ClInclude Include="include\EndState.h" />
     <ClInclude Include="include\ScoreBoard.h" />
     <ClInclude Include="include\StateBase.h" />
     <ClInclude Include="include\ClientStateStack.h" />

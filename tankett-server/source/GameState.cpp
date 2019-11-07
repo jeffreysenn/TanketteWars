@@ -7,6 +7,9 @@
 #include "Tank.h"
 #include "Bullet.h"
 #include "tankett_debug.h"
+
+#include "EndState.h"
+
 #include <vector>
 
 namespace server
@@ -23,11 +26,38 @@ GameState::GameState()
 void GameState::processMessages()
 {
 	checkJoin();
+	checkQuit();
+
+	checkRespawn();
+
 	if (!mNetworkManager.allClientReceivedMessagesEmpty())
 	{
 		applyInput();
 	}
 	checkTime();
+}
+
+void GameState::checkRespawn()
+{
+	auto& clients = mNetworkManager.getClients();
+	for (auto& client : clients)
+	{
+		uint8_t id = client.second.id;
+		auto& controller = mControllers[id];
+		if (!controller.getPossessedTank())
+		{
+			if (mRespawnMap[id] == false)
+			{
+				mRespawnMap[id] = true;
+				mRespawnClocks[id].restart();
+			}
+			if (mRespawnClocks[id].getElapsedTime().asMilliseconds() >= 3000)
+			{
+				mRespawnMap[id] = false;
+				controller.spawnTank_server(mWorld.getTankManager());
+			}
+		}
+	}
 }
 
 void GameState::checkJoin()
@@ -45,6 +75,28 @@ void GameState::checkJoin()
 			::tankett::PlayerController controller(client.second.id);
 			mControllers.insert(::std::make_pair(id, controller));
 			mControllers[id].spawnTank_server(mWorld.getTankManager());
+		}
+	}
+}
+
+void GameState::checkQuit()
+{
+	auto& clients = mNetworkManager.getClients();
+	for (auto it = mControllers.begin(); it != mControllers.end();)
+	{
+		bool found = false;
+		for (const auto& client : clients)
+		{
+			if (client.second.id == it->second.getID())
+				found = true;
+		}
+		if (!found)
+		{
+			it = mControllers.erase(it);
+		}
+		else
+		{
+			++it;
 		}
 	}
 }
@@ -80,7 +132,7 @@ void GameState::applyInput()
 				bool right = msgC2S->get_input(message_client_to_server::RIGHT);
 				bool fire = msgC2S->get_input(message_client_to_server::SHOOT);
 				float aimAngle = msgC2S->turret_angle;
-				float deltaSeconds = 1.f / 60.f;
+				float deltaSeconds = 1.f / PROTOCOL_SEND_PER_SEC / (inputCount * 1.f);
 				controller.updateTank(up, down, left, right, fire, aimAngle, deltaSeconds, msgC2S->input_number);
 			} break;
 			default:
@@ -133,9 +185,9 @@ void GameState::packMessages()
 
 	for (auto& client : clients)
 	{
-		if(!client.second.sendMessageQueue.empty()) continue;
 		message_server_to_client* message = new message_server_to_client;
 		message->receiver_id = client.second.id;
+		message->sendTime = ::alpha::time::now().as_milliseconds();
 		message->round_time = ROUND_LENGTH - mRoundClock.getElapsedTime().asSeconds();
 		message->input_number = client.second.latestReceivedInputSequence;
 
