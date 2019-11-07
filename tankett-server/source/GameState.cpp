@@ -21,6 +21,7 @@ GameState::GameState()
 	: mNetworkManager(*Context::getInstance().networkManager)
 	, mRoundClock()
 {
+	mNetworkManager.resetClientsLatestReceivedInputSequence();
 }
 
 void GameState::processMessages()
@@ -72,7 +73,7 @@ void GameState::checkJoin()
 		{
 			::mw::CommandCategory commandCategory =
 				(::mw::CommandCategory)((uint32_t)::mw::CommandCategory::Tank0 << client.second.id);
-			::tankett::PlayerController controller(client.second.id);
+			::tankett::PlayerController controller(&mWorld.getSceneGraph(), client.second.id);
 			mControllers.insert(::std::make_pair(id, controller));
 			mControllers[id].spawnTank_server(mWorld.getTankManager());
 		}

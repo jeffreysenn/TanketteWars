@@ -43,6 +43,7 @@ public:
 
 	CommandQueue& getCommandQueue() { return mCommandQueue; }
 	::tankett::TankManager* getTankManager() { return mTankManager; }
+	SceneGraph& getSceneGraph() { return mSceneGraph; }
 
 private:
 	void loadResources();

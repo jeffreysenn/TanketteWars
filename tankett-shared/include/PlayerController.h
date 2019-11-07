@@ -15,6 +15,11 @@ class Event;
 class RenderWindow;
 }
 
+namespace mw
+{
+class SceneGraph;
+}
+
 namespace tankett
 {
 class Tank;
@@ -31,7 +36,7 @@ public:
 	};
 
 public:
-	PlayerController(uint8_t id = 0, bool listenToInput = false, ::sf::RenderWindow* window = nullptr, ::mw::NetRole netRole = ::mw::NetRole::Authority);
+	PlayerController(::mw::SceneGraph* sceneGraph = nullptr, uint8_t id = 0, bool listenToInput = false, ::sf::RenderWindow* window = nullptr, ::mw::NetRole netRole = ::mw::NetRole::Authority);
 	~PlayerController();
 
 	void handleEvent(const ::sf::Event& event, uint32_t frameNum);
@@ -100,5 +105,6 @@ private:
 	::mw::NetRole mNetRole;
 	uint32_t mPing;
 	uint8_t mScore;
+	mw::SceneGraph* mSceneGraph;
 };
 }

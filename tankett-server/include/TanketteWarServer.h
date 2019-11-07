@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "NetworkManager.h"
 #include "ServerStateStack.h"
+#include "EliminationHeatMap.h"
 #include "Context.h"
 
 using namespace tankett;
@@ -23,6 +24,7 @@ private:
 private:
 	NetworkManager mNetworkManager;
 	ServerStateStack mStateStack;
+	HeatMapManager mHeatMapManager;
 };
 
 }

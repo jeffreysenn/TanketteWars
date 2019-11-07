@@ -63,6 +63,8 @@ public:
 
 	void clearAllClientsReceivedMessages();
 
+	void resetClientsLatestReceivedInputSequence();
+
 private:
 	void checkClinetConnection();
 

@@ -142,7 +142,7 @@ void GameState::checkNewRemote(::tankett::message_server_to_client* msgS2C)
 			if (!controllerExist)
 			{
 				bool isLocal = msgS2C->receiver_id == dataArr[i].client_id;
-				auto controller = ::std::make_unique<::tankett::PlayerController>(dataArr[i].client_id, isLocal, Context::getInstance().window);
+				auto controller = ::std::make_unique<::tankett::PlayerController>(&mWorld.getSceneGraph(), dataArr[i].client_id, isLocal, Context::getInstance().window);
 				auto pos = ::sf::Vector2f(dataArr[i].position.x_, dataArr[i].position.y_);
 				if (isLocal)
 				{

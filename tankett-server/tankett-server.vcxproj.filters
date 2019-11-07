@@ -42,6 +42,9 @@
     <ClCompile Include="source\NetworkManager.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\EliminationHeatMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\TanketteWarServer.h">
@@ -69,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\NetworkManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\EliminationHeatMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -27,6 +27,7 @@ public:
 
 	CommandQueue& getCommandQueue() { return mCommandQueue; }
 	::tankett::TankManager* getTankManager() { return mTankManager; }
+	::mw::SceneGraph& getSceneGraph() { return mSceneGraph; }
 
 private:
 	void load();

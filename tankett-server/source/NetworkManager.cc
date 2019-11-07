@@ -317,6 +317,14 @@ void NetworkManager::clearAllClientsReceivedMessages()
 	}
 }
 
+void NetworkManager::resetClientsLatestReceivedInputSequence()
+{
+	for (auto& client : mClients)
+	{
+		client.second.latestReceivedInputSequence = 0;
+	}
+}
+
 constexpr float NO_REC_KICK_TIME = 3.f;
 void NetworkManager::checkClinetConnection()
 {

@@ -8,7 +8,7 @@
 
 namespace tankett
 {
-PlayerController::PlayerController(uint8_t id, bool listenToInput, ::sf::RenderWindow* window, ::mw::NetRole netRole)
+PlayerController::PlayerController(::mw::SceneGraph* sceneGraph, uint8_t id, bool listenToInput, ::sf::RenderWindow* window, ::mw::NetRole netRole)
 	: mWindow(window)
 	, mListenToInput(listenToInput)
 	, mPossessedTank(nullptr)
@@ -17,6 +17,7 @@ PlayerController::PlayerController(uint8_t id, bool listenToInput, ::sf::RenderW
 	, mBullets{}
 	, mPing(~0u)
 	, mScore(0u)
+	, mSceneGraph(sceneGraph)
 {
 	if (mListenToInput)
 	{
@@ -131,23 +132,25 @@ void PlayerController::spawnTank_client(TankManager* tankManager, ::sf::Vector2f
 
 void PlayerController::updateTank(bool up, bool down, bool left, bool right, bool fire, float aimAngle, float deltaSeconds, uint32_t inputNum)
 {
-	if (!mPossessedTank) return;
-	mPossessedTank->addDirection((float)(-(int)left + (int)right), (float)(-(int)up + (int)down));
-	mPossessedTank->aimAt(aimAngle);
-	if (fire)
-		mPossessedTank->fire(inputNum);
+	if (mPossessedTank) 
+	{
+		mPossessedTank->addDirection((float)(-(int)left + (int)right), (float)(-(int)up + (int)down));
+		mPossessedTank->aimAt(aimAngle);
+		if (fire)
+			mPossessedTank->fire(inputNum);
 
-	mPossessedTank->update(deltaSeconds);
+		mPossessedTank->update(deltaSeconds);
+	}
+
 	for (auto& bullet : mBullets)
 	{
 		bullet->update(deltaSeconds);
 	}
 
-	::mw::SceneGraph* sceneGraph = (::mw::SceneGraph*) mPossessedTank->getSceneGraph();
-	if (sceneGraph)
+	if (mSceneGraph)
 	{
-		sceneGraph->checkSceneCollision();
-		sceneGraph->enforceDestruction(*sceneGraph);
+		mSceneGraph->checkSceneCollision();
+		mSceneGraph->enforceDestruction(*mSceneGraph);
 	}
 }
 

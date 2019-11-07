@@ -21,6 +21,7 @@ TanketteWarServer::TanketteWarServer()
 	Context& context = Context::getInstance();
 	context.networkManager = &mNetworkManager;
 	context.stack = &mStateStack;
+
 }
 
 void TanketteWarServer::init()

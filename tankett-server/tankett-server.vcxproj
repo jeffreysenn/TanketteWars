@@ -91,6 +91,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\EliminationHeatMap.cpp" />
     <ClCompile Include="source\EndState.cpp" />
     <ClCompile Include="source\GameState.cpp" />
     <ClCompile Include="source\NetworkManager.cc" />
@@ -101,6 +102,7 @@
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\EliminationHeatMap.h" />
     <ClInclude Include="include\EndState.h" />
     <ClInclude Include="include\GameState.h" />
     <ClInclude Include="include\Context.h" />
