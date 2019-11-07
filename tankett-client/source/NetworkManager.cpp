@@ -66,8 +66,6 @@ void NetworkManager::send()
 
 void NetworkManager::receive()
 {
-
-
 	uint8 receiveArr[2048];
 	byte_stream receiveStream(sizeof(receiveArr), receiveArr);
 	ip_address outAddr;
@@ -97,7 +95,7 @@ void NetworkManager::receive()
 		break;
 	case tankett::PACKET_TYPE_PAYLOAD:
 	{
-		if (mState != ConnectionState::Connected)
+		if (mState == ConnectionState::Challenging)
 		{
 			::tankett::debugf("[nfo] connected to server");
 			::tankett::debugf("[nfo] IP: %s, SK: %#08x, CK: %#08x", outAddr.as_string(), mServerKey, mClientKey);

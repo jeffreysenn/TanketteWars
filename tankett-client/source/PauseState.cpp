@@ -1,6 +1,7 @@
 #include "PauseState.h"
 #include "Context.h"
 #include "ClientStateStack.h"
+#include "NetworkManager.h"
 namespace client
 {
 
@@ -35,6 +36,7 @@ void PauseState::handleConfirmInput()
 	case PauseOption::Disconnect:
 		stack.clearStates();
 		stack.pushState(StateID::Menu);
+		Context::getInstance().networkManager->setState(NetworkManager::ConnectionState::None);
 		break;
 	default:
 		break;
