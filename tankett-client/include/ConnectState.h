@@ -1,9 +1,11 @@
 #pragma once
 #include "MenuTemplate.h"
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <map>
 
 namespace client
 {
+class NetworkManager;
 
 namespace Connect
 {
@@ -31,8 +33,10 @@ public:
 private:
 	void handleConfirmInput() override;
 
+private:
 	::sf::RectangleShape mBackgroundShape;
 	::sf::Text mConnectText;
-	class NetworkManager& mNetworkManager;
+	NetworkManager& mNetworkManager;
+
 };
 }

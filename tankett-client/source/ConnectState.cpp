@@ -26,8 +26,6 @@ ConnectState::ConnectState()
 bool ConnectState::update(float deltaSeconds)
 {
 	NetworkManager::ConnectionState netState = mNetworkManager.getState();
-	if (netState == NetworkManager::ConnectionState::None)
-		mNetworkManager.setState(NetworkManager::ConnectionState::Discovering);
 
 	if (netState == NetworkManager::ConnectionState::Connected)
 	{
@@ -67,6 +65,7 @@ void ConnectState::draw()
 
 	getRenderWindow().draw(mBackgroundShape);
 	getRenderWindow().draw(mConnectText);
+
 	MenuTemplate<Connect::Option>::draw();
 }
 

@@ -7,6 +7,7 @@
 #include "CreditState.h"
 #include "SettingState.h"
 #include "ConnectState.h"
+#include "ChoosingServerState.h"
 #include "EndState.h"
 #include "Context.h"
 
@@ -116,6 +117,7 @@ void TanketteWarClient::registerStates()
 	mStateStack.registerState<SettingState>(StateID::Setting);
 	mStateStack.registerState<ConnectState>(StateID::Connect);
 	mStateStack.registerState<EndState>(StateID::End);
+	mStateStack.registerState<ChoosingServerState>(StateID::ChoosingServer);
 }
 
 void TanketteWarClient::handleInputs()

@@ -2,6 +2,7 @@
 #include "tankett_shared.h"
 
 #include <vector>
+#include <map>
 #include <memory>
 
 using namespace alpha;
@@ -36,6 +37,9 @@ public:
 	void pushMessage(::std::unique_ptr<::tankett::network_message_header> message);
 
 	void clearReceivedMessages();
+
+	const std::map<ip_address, ::tankett::protocol_connection_challenge>& getChallenges() const { return mChallenges; }
+	void acceptChallenge(const ip_address& addr);
 private:
 	void processMessages();
 
@@ -51,5 +55,6 @@ private:
 	crypt::xorinator mXorinator;
 	uint32_t mClientSequence;
 	uint32_t mServerSequence;
+	std::map<ip_address, ::tankett::protocol_connection_challenge> mChallenges;
 };
 }

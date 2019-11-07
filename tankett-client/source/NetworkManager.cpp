@@ -1,5 +1,4 @@
 #include "NetworkManager.h"
-#include "..\include\NetworkManager.h"
 #include "tankett_debug.h"
 #include "Helpers/Helper.h"
 namespace client
@@ -83,11 +82,14 @@ void NetworkManager::receive()
 	{
 		if (mState != ConnectionState::Discovering) break;
 		::tankett::protocol_connection_challenge connectionChallenge;
-		connectionChallenge.serialize(reader);
-		mServerAddr = outAddr;
-		mServerKey = connectionChallenge.server_key_;
-		mXorinator = crypt::xorinator(mServerKey, mClientKey);
-		mState = ConnectionState::Challenging;
+		if (!connectionChallenge.serialize(reader))
+		{
+			// error
+			break;
+		}
+
+		mChallenges[outAddr] = connectionChallenge;
+
 	} break;
 	case tankett::PACKET_TYPE_CHALLENGE_RESPONSE:
 		break;
@@ -165,11 +167,11 @@ void NetworkManager::receive()
 void NetworkManager::resetNetworkManager()
 {
 	mState = ConnectionState::None;
-	mClientKey = ::mw::helper::Number::getRandom<uint64>();
 	mServerKey = 0u;
 	mClientSequence = 0u;
 	mServerSequence = 0u;
 	mServerAddr = ip_address();
+	mChallenges.clear();
 }
 
 void NetworkManager::pushMessage(::std::unique_ptr<::tankett::network_message_header> message)
@@ -180,6 +182,20 @@ void NetworkManager::pushMessage(::std::unique_ptr<::tankett::network_message_he
 void NetworkManager::clearReceivedMessages()
 {
 	mReceivedMessages.clear();
+}
+
+void NetworkManager::acceptChallenge(const ip_address& addr)
+{
+	auto found = mChallenges.find(addr);
+	if (found == mChallenges.end())
+		return;
+
+	mServerAddr = found->first;
+	mServerKey = found->second.server_key_;
+	mXorinator = crypt::xorinator(mServerKey, mClientKey);
+
+	mChallenges.clear();
+	mState = ConnectionState::Challenging;
 }
 
 void NetworkManager::processMessages()

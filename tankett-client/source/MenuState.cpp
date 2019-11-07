@@ -23,7 +23,7 @@ void MenuState::handleConfirmInput()
 	switch (getCurrentOption())
 	{
 	case Menu::Option::Connect:
-		stack.pushState(StateID::Connect);
+		stack.pushState(StateID::ChoosingServer);
 		break;
 	case Menu::Option::Settings:
 		stack.pushState(StateID::Setting);

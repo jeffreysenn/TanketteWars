@@ -14,6 +14,7 @@ enum class StateID
 	Setting,
 	Connect,
 	End,
+	ChoosingServer,
 	WIP,
 };
 }
