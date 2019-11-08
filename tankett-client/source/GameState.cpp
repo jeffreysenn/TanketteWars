@@ -81,16 +81,18 @@ void GameState::processReceivedMessages()
 		{
 			::tankett::message_server_to_client* msgS2C = (::tankett::message_server_to_client*)message.get();
 
-			auto& clientData = *msgS2C->client_data;
-			clientData.position.x_ = ::tankett::unit::unit2pix(clientData.position.x_);
-			clientData.position.y_ = ::tankett::unit::unit2pix(clientData.position.y_);
-			for (int i = 0; i < clientData.bullet_count; ++i)
+			auto& clientData = msgS2C->client_data;
+			for (int i = 0; i < msgS2C->client_count; ++i)
 			{
-				auto& bullet = clientData.bullets[i];
-				bullet.position.x_ = ::tankett::unit::unit2pix(bullet.position.x_);
-				bullet.position.y_ = ::tankett::unit::unit2pix(bullet.position.y_);
+				clientData[i].position.x_ = ::tankett::unit::unit2pix(clientData[i].position.x_);
+				clientData[i].position.y_ = ::tankett::unit::unit2pix(clientData[i].position.y_);
+				for (int j = 0; j < clientData[i].bullet_count; ++j)
+				{
+					auto& bullet = clientData[i].bullets[j];
+					bullet.position.x_ = ::tankett::unit::unit2pix(bullet.position.x_);
+					bullet.position.y_ = ::tankett::unit::unit2pix(bullet.position.y_);
+				}
 			}
-
 			// update the game state: round time, ping, score immediately
 			updateGameState(msgS2C);
 
