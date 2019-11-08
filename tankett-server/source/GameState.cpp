@@ -8,7 +8,7 @@
 #include "Bullet.h"
 #include "tankett_debug.h"
 #include "EliminationHeatMap.h"
-
+#include "Unit.h"
 #include "EndState.h"
 
 #include <vector>
@@ -175,7 +175,7 @@ void GameState::packMessages()
 			state.alive = true;
 			state.angle = tank->getTurretAngle();
 			const auto& pos = tank->getPosition();
-			state.position = alpha::vector2(pos.x, pos.y);
+			state.position = alpha::vector2(::tankett::unit::pix2unit(pos.x), ::tankett::unit::pix2unit(pos.y));
 		}
 		else
 		{
@@ -189,7 +189,7 @@ void GameState::packMessages()
 			bullet_data bulletData;
 			bulletData.id = bullets[i]->getID();
 			const auto bulletPos = bullets[i]->getPosition();
-			bulletData.position = ::alpha::vector2(bulletPos.x, bulletPos.y);
+			bulletData.position = ::alpha::vector2(::tankett::unit::pix2unit(bulletPos.x), ::tankett::unit::pix2unit(bulletPos.y));
 			state.bullets[i] = bulletData;
 		}
 	}

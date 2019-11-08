@@ -12,6 +12,7 @@
 #include "Context.h"
 #include "EndState.h"
 #include <Helpers/Helper.h>
+#include "Unit.h"
 
 namespace client
 {
@@ -79,6 +80,16 @@ void GameState::processReceivedMessages()
 		case tankett::NETWORK_MESSAGE_SERVER_TO_CLIENT:
 		{
 			::tankett::message_server_to_client* msgS2C = (::tankett::message_server_to_client*)message.get();
+
+			auto& clientData = *msgS2C->client_data;
+			clientData.position.x_ = ::tankett::unit::unit2pix(clientData.position.x_);
+			clientData.position.y_ = ::tankett::unit::unit2pix(clientData.position.y_);
+			for (int i = 0; i < clientData.bullet_count; ++i)
+			{
+				auto& bullet = clientData.bullets[i];
+				bullet.position.x_ = ::tankett::unit::unit2pix(bullet.position.x_);
+				bullet.position.y_ = ::tankett::unit::unit2pix(bullet.position.y_);
+			}
 
 			// update the game state: round time, ping, score immediately
 			updateGameState(msgS2C);
@@ -265,7 +276,7 @@ void GameState::packInput()
 	auto& networkManager = *Context::getInstance().networkManager;
 	auto& inputBuffer = mLocalController->getInputBuffer();
 
-	// pack in redundant input if Queue is empty
+	// pack in redundant input
 	if (networkManager.getSendMessageQueue().size() < redundantInputNum)
 	{
 		uint32_t inputBegin = mFrameNum - redundantInputNum;

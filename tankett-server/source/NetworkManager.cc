@@ -85,7 +85,7 @@ void NetworkManager::receive()
 		protocol_challenge_response challenge_response;
 		if (!challenge_response.serialize(reader))
 		{
-			//error
+			debugf("[err] could not serialize challenge response!");
 			break;
 		}
 		auto found = mChallenges.find(outAddr);
@@ -155,7 +155,7 @@ void NetworkManager::receive()
 				network_message_ping messagePing;
 				if (!messagePing.read(payload_reader))
 				{
-					// error
+					debugf("[err] could not read payload!");
 				}
 				auto& pingMap = mClients[outAddr].pingMap;
 				auto found = pingMap.find(messagePing.sequence_);
@@ -171,7 +171,7 @@ void NetworkManager::receive()
 				message_client_to_server messageC2S;
 				if (!messageC2S.read(payload_reader))
 				{
-					// error
+					debugf("[err] could not read payload!");
 				}
 				// check input sequence
 				// only push back messages that contains newer input sequence
@@ -207,7 +207,7 @@ void NetworkManager::send()
 		protocol_connection_challenge challenge_message(challenge.second.serverKey);
 		if (!sendPackage(mSocket, challenge.first, challenge_message))
 		{
-			// error
+			debugf("[err] could not send package!");
 		}
 	}
 

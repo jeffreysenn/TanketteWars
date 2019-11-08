@@ -144,6 +144,8 @@ struct protocol_connection_challenge : protocol_packet_header
 	}
 
 	uint64 server_key_;
+	//uint8 client_num_;
+	//float time_left_;
 };
 
 struct protocol_challenge_response : protocol_packet_header
@@ -407,7 +409,7 @@ struct message_server_to_client : network_message_header
 
 		result &= stream.serialize(client_count);
 
-		assert(client_count > 0 && client_count <= 4);
+		//assert(client_count > 0 && client_count <= 4);
 
 		//serialize client array
 		for (int i = 0; i < client_count; i++)

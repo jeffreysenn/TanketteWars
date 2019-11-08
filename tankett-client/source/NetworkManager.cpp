@@ -84,7 +84,7 @@ void NetworkManager::receive()
 		::tankett::protocol_connection_challenge connectionChallenge;
 		if (!connectionChallenge.serialize(reader))
 		{
-			// error
+			::tankett::debugf("[err] fail to serialize challenge!");
 			break;
 		}
 
@@ -134,7 +134,7 @@ void NetworkManager::receive()
 				std::unique_ptr<::tankett::network_message_ping> messagePing(new ::tankett::network_message_ping);
 				if (!messagePing->read(payloadReader))
 				{
-					// error
+					::tankett::debugf("[err] fail to read payload!");
 				}
 				// no need to push into received buffer
 				mSendMessageQueue.push_back(std::move(messagePing));
@@ -144,7 +144,7 @@ void NetworkManager::receive()
 				std::unique_ptr<::tankett::message_server_to_client> messageS2C(new ::tankett::message_server_to_client);
 				if (!messageS2C->read(payloadReader))
 				{
-					// error
+					::tankett::debugf("[err] fail to read payload!");
 				}
 
 				//static float lastRecTime;

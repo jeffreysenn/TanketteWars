@@ -3,6 +3,7 @@
 #include "tankett_shared.h"
 #include "NetworkManager.h"
 #include "ServerStateStack.h"
+#include "alpha.h"
 namespace server
 {
 
@@ -23,6 +24,7 @@ void WaitingState::processMessages()
 			{
 				message_server_to_client* msgS2C = new message_server_to_client;
 				msgS2C->game_state = GAME_STATE::WAITING_FOR_PLAYER;
+				msgS2C->sendTime = ::alpha::time::now().as_milliseconds();
 				msgS2C->client_count = (uint8)clients.size();
 				networkManager.pushMessage(client.first, msgS2C);
 			}
