@@ -5,6 +5,7 @@
 #include "PlayerController.h"
 #include "Actors/CameraActor.h"
 
+
 namespace tankett
 {
 Tank::Tank()
@@ -28,7 +29,7 @@ Tank::Tank()
 	setCollider(collider);
 }
 
-Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture, const ::sf::Texture& bulletTexture)
+Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture, const ::sf::Texture& bulletTexture, ::sf::SoundBuffer* fireSound)
 	: ::mw::Pawn(1, hullTexture, ::mw::Rendering::Default)
 	, mBarrelSprite(turretTexture)
 	, mTurretLayer(::mw::Rendering::Turret)
@@ -38,6 +39,7 @@ Tank::Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture,
 	, mLastFireTime(::sf::seconds(-100))
 	, mController(nullptr)
 	, mCamera(nullptr)
+	, mFireSound(*fireSound)
 {
 	::sf::FloatRect spriteBounds(mBarrelSprite.getLocalBounds());
 	mBarrelSprite.setOrigin(spriteBounds.width / 2, 0);
@@ -150,6 +152,11 @@ Bullet* Tank::spawnBullet(float angle)
 		break;
 	}
 	getSceneGraph()->attachChild(::std::move(bullet));
+
+	if (mFireSound.getBuffer())
+	{
+		mFireSound.play();
+	}
 
 	return ptr;
 }

@@ -2,6 +2,11 @@
 #include "Actors\Actor.h"
 #include <array>
 
+namespace sf
+{
+class SoundBuffer;
+}
+
 namespace mw
 {
 class CameraActor;
@@ -15,7 +20,7 @@ class Map;
 class TankManager : public ::mw::Actor
 {
 public:
-	TankManager(Map* map = nullptr, ::mw::CameraActor* camera = nullptr);
+	TankManager(Map* map = nullptr, ::mw::CameraActor* camera = nullptr, ::sf::SoundBuffer* fireSound = nullptr);
 
 	void setTankTextures(int tankID, int textureID, ::sf::Texture* texture);
 
@@ -26,6 +31,7 @@ public:
 private:
 	::std::array<std::array<::sf::Texture*, 3>, 4> mTankTextures;
 	Map* mMap;
+	sf::SoundBuffer* mFireSound;
 	::mw::CameraActor* mCamera;
 };
 }

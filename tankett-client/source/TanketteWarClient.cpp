@@ -56,6 +56,7 @@ try
 	context.window = &mWindow;
 	context.fontManager = &mFontManager;
 	context.textureManager = &mTextureManager;
+	context.soundManager = &mSoundManager;
 	context.mapManager = &mMapManager;
 	context.networkManager = &mNetworkManager;
 

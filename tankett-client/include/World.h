@@ -49,6 +49,7 @@ private:
 	void loadResources();
 	void loadMaps();
 	void loadTextures();
+	void loadSFX();
 
 	void buildScene();
 
@@ -59,6 +60,7 @@ private:
 	tankett::TankManager* mTankManager;
 
 	TextureManager& mTextureManager;
+	SoundManager& mSoundManager;
 	tankett::MapManager& mMapManager;
 
 	PhysicsEngine mPhysicsEngine;

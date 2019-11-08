@@ -8,9 +8,10 @@
 
 namespace tankett
 {
-TankManager::TankManager(Map* map, ::mw::CameraActor* camera)
+TankManager::TankManager(Map* map, ::mw::CameraActor* camera, ::sf::SoundBuffer* fireSound)
 	: mTankTextures{0}
 	, mMap(map)
+	, mFireSound(fireSound)
 	, mCamera(camera)
 {
 	setCommandCategory(::mw::CommandCategory::TankManager);
@@ -39,7 +40,7 @@ void TankManager::spawnTank(::sf::Vector2f position, uint8_t id,  PlayerControll
 	std::unique_ptr<Tank> tank;
 	if (tankHullTexture && tankBarrelTexture && tankBulletTexture)
 	{
-		tank = std::make_unique<Tank>(*tankHullTexture, *tankBarrelTexture, *tankBulletTexture);
+		tank = std::make_unique<Tank>(*tankHullTexture, *tankBarrelTexture, *tankBulletTexture, mFireSound);
 	}
 	else
 	{

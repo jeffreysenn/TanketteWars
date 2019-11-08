@@ -34,6 +34,8 @@ private:
 
 	TextureManager mTextureManager;
 	FontManager mFontManager;
+	SoundManager mSoundManager;
+
 	::tankett::MapManager mMapManager;
 
 	ClientStateStack mStateStack;

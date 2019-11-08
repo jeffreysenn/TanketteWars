@@ -4,6 +4,12 @@
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Audio/Sound.hpp>
+
+namespace sf
+{
+class SoundBuffer;
+}
 
 namespace mw
 {
@@ -18,7 +24,7 @@ class Tank : public ::mw::Pawn
 {
 public:
 	Tank();
-	Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture, const ::sf::Texture& bulletTexture);
+	Tank(const ::sf::Texture& hullTexture, const ::sf::Texture& turretTexture, const ::sf::Texture& bulletTexture, ::sf::SoundBuffer* fireSound);
 	~Tank();
 
 	float getSpeed() const { return mSpeed; }
@@ -60,5 +66,7 @@ private:
 	PlayerController* mController;
 	::mw::CameraActor* mCamera;
 	uint32_t mLastFireInputNum{};
+	::sf::Sound mFireSound;
+
 };
 }

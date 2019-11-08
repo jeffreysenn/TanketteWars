@@ -52,6 +52,7 @@ namespace Sound
 {
 enum ID
 {
+	TankFire,
 
 };
 }

@@ -20,6 +20,7 @@ World::World()
 	: mWindow(*Context::getInstance().window)
 	, mTextureManager(*Context::getInstance().textureManager)
 	, mMapManager(*Context::getInstance().mapManager)
+	, mSoundManager(*Context::getInstance().soundManager)
 	, mCamera(nullptr)
 	, mSceneGraph(&mPhysicsEngine)
 {
@@ -35,6 +36,7 @@ void World::loadResources()
 {
 	loadMaps();
 	loadTextures();
+	loadSFX();
 }
 
 void World::loadMaps()
@@ -64,6 +66,11 @@ void World::loadTextures()
 	mTextureManager.load(Texture::TankBlueBullet, "../Assets/PNG/Bullets/bulletBlueSilver_outline.png");
 }
 
+void World::loadSFX()
+{
+	mSoundManager.load(Sound::TankFire, "../Assets/SFX/TankFiring.wav");
+}
+
 void World::buildScene()
 {
 	/* this is the scene graph:
@@ -90,7 +97,7 @@ void World::buildScene()
 	// dynamic camera
 	const ::sf::Vector2f cameraSize(1920, 1080);
 	mCamera->setSize(cameraSize);
-	auto tankManager = std::make_unique<TankManager>(map, mCamera);
+	auto tankManager = std::make_unique<TankManager>(map, mCamera, mSoundManager.get(Sound::TankFire));
 
 #else 
 	//static camera

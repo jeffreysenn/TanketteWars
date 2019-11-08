@@ -35,6 +35,7 @@ public:
 	::sf::RenderWindow* window{};
 	::mw::TextureManager* textureManager{};
 	::mw::FontManager* fontManager{};
+	::mw::SoundManager* soundManager{};
 	::tankett::MapManager* mapManager{};
 	class NetworkManager* networkManager{};
 	bool isWindowFocused = true;
