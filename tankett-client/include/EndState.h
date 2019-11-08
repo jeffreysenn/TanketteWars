@@ -1,7 +1,9 @@
 #pragma once
 #include "StateBase.h"
 #include "ScoreBoard.h"
+#include "Input/InputCollections.h"
 #include <SFML/Graphics/Text.hpp>
+
 
 namespace client
 {
@@ -19,8 +21,8 @@ public:
 	static ScoreBoard& getScoreBoard();
 
 private:
+	::mw::Input::InputCollection mPauseInputs{ { ::mw::Input::Type::Keyboard, ::sf::Keyboard::Escape } };
 	::sf::Text mTimerText;
 };
-
 
 }

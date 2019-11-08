@@ -97,6 +97,9 @@ void NetworkManager::receive()
 		break;
 	case tankett::PACKET_TYPE_PAYLOAD:
 	{
+		if(outAddr != mServerAddr)
+			break;
+
 		if (mState == ConnectionState::Challenging)
 		{
 			::tankett::debugf("[nfo] connected to server");
@@ -172,6 +175,7 @@ void NetworkManager::resetNetworkManager()
 	mServerSequence = 0u;
 	mServerAddr = ip_address();
 	mChallenges.clear();
+	mReceivedMessages.clear();
 }
 
 void NetworkManager::pushMessage(::std::unique_ptr<::tankett::network_message_header> message)

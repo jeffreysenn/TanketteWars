@@ -74,6 +74,9 @@ void EndState::draw()
 
 bool EndState::handleEvent(const::sf::Event& event)
 {
+	if (Input::eventInputCollectionPressed(event, mPauseInputs))
+		Context::getInstance().stack->pushState(StateID::Pause);
+
 	return false;
 }
 

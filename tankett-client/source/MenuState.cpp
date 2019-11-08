@@ -6,13 +6,14 @@ namespace client
 MenuState::MenuState()
 	: MenuTemplate(Menu::OptionNames, static_cast<int>(Menu::Option::COUNT))
 {
-	setupBackgroundSprite();
+	mBackgroundShape.setFillColor(::sf::Color(0, 0, 0, 255));
+	mBackgroundShape.setSize(::sf::Vector2f(getRenderWindow().getSize()));
 }
 
 void MenuState::draw()
 {
 	getRenderWindow().setView(getRenderWindow().getDefaultView());
-	getRenderWindow().draw(mBackgroundSprite);
+	getRenderWindow().draw(mBackgroundShape);
 	drawOptions();
 }
 
@@ -37,15 +38,5 @@ void MenuState::handleConfirmInput()
 	default:
 		break;
 	}
-}
-
-void MenuState::setupBackgroundSprite()
-{
-	auto& backgroungTexture = *Context::getInstance().textureManager->get(Texture::Back);
-	backgroungTexture.setRepeated(true);
-	mBackgroundSprite.setTexture(backgroungTexture);
-	::sf::IntRect rect(0, 0, getRenderWindow().getSize().x, getRenderWindow().getSize().y);
-	// TODO: make scale adaptable to different resolutions
-	mBackgroundSprite.setScale(4, 4);
 }
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "MenuTemplate.h"
 
-#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 namespace client
 {
 
@@ -35,10 +35,8 @@ public:
 private:
 	void handleConfirmInput() override;
 
-	void setupBackgroundSprite();
-
 private:
-	::sf::Sprite mBackgroundSprite;
+	::sf::RectangleShape mBackgroundShape;
 };
 
 

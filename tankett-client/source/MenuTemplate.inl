@@ -47,7 +47,7 @@ void MenuTemplate<EnumClass>::updateOptions()
 {
 	for (auto& pair : mOptionMap)
 	{
-		pair.second->setFillColor(::sf::Color::Black);
+		pair.second->setFillColor(::sf::Color::Blue);
 	}
 	mOptionMap[mCurrentOption]->setFillColor(::sf::Color::Green);
 }
